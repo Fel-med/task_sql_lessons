@@ -535,8 +535,27 @@
         infoCard.hidden = false;
       }
       function setQuizFeedback(message) { const feedback = mainLessonContent.querySelector(".quiz-feedback"); if (feedback) feedback.textContent = message; }
+      function shuffleArray(array) { const copy = [...array]; for (let i = copy.length - 1; i > 0; i -= 1) { const j = Math.floor(Math.random() * (i + 1)); [copy[i], copy[j]] = [copy[j], copy[i]]; } return copy; }
+      function normalizeQuizOptionText(text) { return text.replace(/^[A-D]\.\s*/, ""); }
+      function shuffleQuizOptions() {
+        const quizBox = mainLessonContent.querySelector(".quiz-box");
+        if (!quizBox || quizBox.dataset.shuffled === "true") return;
+        const options = Array.from(quizBox.querySelectorAll(".quiz-option"));
+        const optionData = options.map((option) => ({ text: normalizeQuizOptionText(option.textContent), correct: option.dataset.correct === "true" }));
+        shuffleArray(optionData).forEach((data, index) => {
+          const option = options[index];
+          option.textContent = `${String.fromCharCode(65 + index)}. ${data.text}`;
+          option.classList.remove("correct", "wrong");
+          option.disabled = false;
+          if (data.correct) option.dataset.correct = "true";
+          else delete option.dataset.correct;
+          quizBox.appendChild(option);
+        });
+        quizBox.dataset.shuffled = "true";
+      }
       function bindQuizOptions() {
         if (rooms[currentRoomIndex].type !== "quiz") return;
+        shuffleQuizOptions();
         const quizPassed = buildingProgress().quizPassed;
         const options = mainLessonContent.querySelectorAll(".quiz-option");
         options.forEach((option) => {
