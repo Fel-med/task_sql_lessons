@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SQL City</title>
-    <link rel="icon" type="image/png" href="res/badge.png">
-    <link rel="shortcut icon" type="image/png" href="res/badge.png">
+    <link rel="icon" type="image/webp" href="res/badge.webp">
+    <link rel="shortcut icon" type="image/webp" href="res/badge.webp">
     <style>
       :root {
         --cream: #fff4c2;
@@ -717,18 +717,18 @@
       <section class="game-screen" aria-labelledby="page-title">
         <div class="city-scene" id="cityScene">
           <!-- City layers stay stacked exactly on the same fullscreen canvas. -->
-          <img src="res/city_elements/bg.png" class="city-layer layer-bg" alt="" />
-          <img src="res/city_elements/red2.png" class="city-layer layer-red2" alt="" />
-          <img src="res/city_elements/red1.png" class="city-layer layer-red1" alt="" />
-          <img src="res/city_elements/yellow.png" class="city-layer layer-yellow" alt="" />
-          <img src="res/city_elements/green.png" class="city-layer layer-green" alt="" />
+          <img src="res/city_elements/bg.webp" class="city-layer layer-bg" alt="" />
+          <img src="res/city_elements/red2.webp" class="city-layer layer-red2" alt="" />
+          <img src="res/city_elements/red1.webp" class="city-layer layer-red1" alt="" />
+          <img src="res/city_elements/yellow.webp" class="city-layer layer-yellow" alt="" />
+          <img src="res/city_elements/green.webp" class="city-layer layer-green" alt="" />
 
           <div class="traffic-layer" id="trafficLayer" aria-hidden="true"></div>
 
-          <img src="res/city_elements/lock.png" class="building-lock lock-dataVault" data-lock="dataVault" alt="Locked" hidden />
-          <img src="res/city_elements/lock.png" class="building-lock lock-tableDepartment" data-lock="tableDepartment" alt="Locked" hidden />
-          <img src="res/city_elements/lock.png" class="building-lock lock-keyBridgeHall" data-lock="keyBridgeHall" alt="Locked" hidden />
-          <img src="res/city_elements/lock.png" class="building-lock lock-queryLab" data-lock="queryLab" alt="Locked" hidden />
+          <img src="res/city_elements/lock.webp" class="building-lock lock-dataVault" data-lock="dataVault" alt="Locked" hidden />
+          <img src="res/city_elements/lock.webp" class="building-lock lock-tableDepartment" data-lock="tableDepartment" alt="Locked" hidden />
+          <img src="res/city_elements/lock.webp" class="building-lock lock-keyBridgeHall" data-lock="keyBridgeHall" alt="Locked" hidden />
+          <img src="res/city_elements/lock.webp" class="building-lock lock-queryLab" data-lock="queryLab" alt="Locked" hidden />
 
           <div class="building-sign sign-data-vault" data-building="dataVault">
             <span>DATA VAULT</span>
@@ -766,7 +766,7 @@
       <button class="menu-close" id="menuClose" type="button" aria-label="Close menu">X</button>
       <h2>SQL City Menu</h2>
       <div class="unlock-everything-card">
-        <img src="res/keys/magic-master-key.png" class="magic-key-img" alt="Magic master key">
+        <img src="res/keys/magic-master-key.webp" class="magic-key-img" alt="Magic master key">
         <button class="unlock-all-btn" id="unlockAllBtn" type="button">Unlock Everything</button>
         <p class="unlock-confirmation" id="unlockConfirmation" hidden>Magic Master Key used! All buildings are unlocked.</p>
         <button class="reset-all-btn" id="resetAllBtn" type="button">Reset Everything</button>
@@ -774,12 +774,12 @@
       </div>
       <h3>References</h3>
       <a class="reference-card" href="https://www.w3schools.com/sql/default.asp" target="_blank" rel="noopener noreferrer">
-        <img src="res/w3schools.png" alt="W3Schools SQL Tutorial" />
+        <img src="res/w3schools.webp" alt="W3Schools SQL Tutorial" />
         <span>W3Schools SQL Tutorial</span>
         <small>https://www.w3schools.com/sql/default.asp</small>
       </a>
       <a class="reference-card" href="https://www.geeksforgeeks.org/sql/sql-tutorial/" target="_blank" rel="noopener noreferrer">
-        <img src="res/geeksforgeeks.png" alt="GeeksforGeeks SQL Tutorial" />
+        <img src="res/geeksforgeeks.webp" alt="GeeksforGeeks SQL Tutorial" />
         <span>GeeksforGeeks SQL Tutorial</span>
         <small>https://www.geeksforgeeks.org/sql/sql-tutorial/</small>
       </a>
@@ -1074,8 +1074,8 @@
 
       const trafficLayer = document.querySelector("#trafficLayer");
       const carSources = [
-        "res/city_elements/car1.png",
-        "res/city_elements/car2.png"
+        "res/city_elements/car1.webp",
+        "res/city_elements/car2.webp"
       ];
       const lanes = ["-3%", "-4%", "-5%"];
       const maxActiveCars = 2;

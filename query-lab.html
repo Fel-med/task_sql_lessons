@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Query Lab | SQL City</title>
-    <link rel="icon" type="image/png" href="res/badge.png">
-    <link rel="shortcut icon" type="image/png" href="res/badge.png">
+    <link rel="icon" type="image/webp" href="res/badge.webp">
+    <link rel="shortcut icon" type="image/webp" href="res/badge.webp">
     <style>
       :root {
         --cream: #fff4c2;
@@ -128,7 +128,7 @@
         </article>
       </aside>
       <section class="room-stage" aria-label="Query Lab rooms">
-        <img class="room-bg" id="roomBg" src="res/rooms_background/Room_4_Query_Lab.png" alt="" />
+        <img class="room-bg" id="roomBg" src="res/rooms_background/Room_4_Query_Lab.webp" alt="" />
         <a class="return-city-btn" id="topReturn" href="index.html">Return to the City</a>
         <div class="hotspots" id="hotspots">
           <button class="info-marker marker-console" type="button" data-info="console" data-marker-id="console" aria-label="Main console info"></button>
@@ -151,7 +151,7 @@
         </article>
         <article class="reward-modal" id="rewardModal" hidden>
           <div class="reward-card">
-            <img src="res/badge.png" class="reward-key-img reward-badge-img" alt="SQL Foundations Badge">
+            <img src="res/badge.webp" class="reward-key-img reward-badge-img" alt="SQL Foundations Badge">
             <h2 id="rewardTitle">Badge Earned!</h2>
             <p id="rewardMessage">You completed SQL Foundations.</p>
             <button class="pixel-btn" id="rewardContinue" type="button">Continue</button>
@@ -176,7 +176,7 @@
       const rooms = [
         {
           title: "Welcoming Room",
-          image: "res/rooms_background/Room_4_Query_Lab.png",
+          image: "res/rooms_background/Room_4_Query_Lab.webp",
           type: "welcome",
           summary: "Welcome to the Query Lab. This building teaches SQL commands used to retrieve and prepare data.",
           points: ["SELECT chooses data", "WHERE filters data", "ORDER BY sorts data"],
@@ -199,7 +199,7 @@
         },
         {
           title: "SELECT and FROM",
-          image: "res/rooms_background/04_Query_Lab_background.png",
+          image: "res/rooms_background/04_Query_Lab_background.webp",
           type: "lesson",
           summary: "SELECT chooses columns and FROM chooses the table.",
           points: ["SELECT = columns", "FROM = table", "* = all columns"],
@@ -215,7 +215,7 @@
         },
         {
           title: "WHERE",
-          image: "res/rooms_background/04_Query_Lab_background.png",
+          image: "res/rooms_background/04_Query_Lab_background.webp",
           type: "lesson",
           summary: "WHERE filters rows using a condition.",
           points: ["Keeps matching rows", "Removes unwanted rows", "Useful before ML"],
@@ -238,7 +238,7 @@
         },
         {
           title: "DISTINCT",
-          image: "res/rooms_background/04_Query_Lab_background.png",
+          image: "res/rooms_background/04_Query_Lab_background.webp",
           type: "lesson",
           summary: "DISTINCT removes duplicate values.",
           points: ["Shows unique values", "Helps explore categories", "Useful for checking data"],
@@ -261,7 +261,7 @@
         },
         {
           title: "LIMIT",
-          image: "res/rooms_background/04_Query_Lab_background.png",
+          image: "res/rooms_background/04_Query_Lab_background.webp",
           type: "lesson",
           summary: "LIMIT controls how many rows are returned.",
           points: ["Previews data", "Avoids huge results", "Useful for quick checks"],
@@ -277,7 +277,7 @@
         },
         {
           title: "ORDER BY",
-          image: "res/rooms_background/04_Query_Lab_background.png",
+          image: "res/rooms_background/04_Query_Lab_background.webp",
           type: "lesson",
           summary: "ORDER BY sorts the result.",
           points: ["ASC = smallest to largest", "DESC = largest to smallest", "Useful for ranking"],
@@ -299,7 +299,7 @@
         },
         {
           title: "Query examples",
-          image: "res/rooms_background/04_Query_Lab_background.png",
+          image: "res/rooms_background/04_Query_Lab_background.webp",
           type: "lesson",
           summary: "A real query can combine SELECT, FROM, WHERE, ORDER BY, and LIMIT.",
           points: ["Choose columns", "Filter rows", "Sort and limit results"],
@@ -323,7 +323,7 @@ LIMIT 10;</code></pre>
         },
         {
           title: "SQL to ML pipeline",
-          image: "res/rooms_background/04_Query_Lab_background.png",
+          image: "res/rooms_background/04_Query_Lab_background.webp",
           type: "lesson",
           summary: "SQL prepares clean data before Machine Learning.",
           points: ["Query database", "Build clean table", "Send dataset to ML model"],
@@ -341,7 +341,7 @@ ORDER BY age;</code></pre>
         },
         {
           title: "Quiz Room",
-          image: "res/rooms_background/04_Query_Lab_background.png",
+          image: "res/rooms_background/04_Query_Lab_background.webp",
           type: "quiz",
           summary: "Answer correctly to unlock the final recap room and earn the SQL Foundations badge.",
           points: ["Test the main idea", "Choose the best answer", "Unlock the recap room"],
@@ -361,7 +361,7 @@ ORDER BY age;</code></pre>
         },
         {
           title: "Final recap",
-          image: "res/rooms_background/04_Query_Lab_background.png",
+          image: "res/rooms_background/04_Query_Lab_background.webp",
           type: "lesson",
           summary: "You completed the SQL foundations path.",
           points: ["Retrieve data", "Filter data", "Sort data", "Prepare data for ML"],
