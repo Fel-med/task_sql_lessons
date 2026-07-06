@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Query Lab | SQL City</title>
+    <link rel="icon" type="image/png" href="res/badge.png">
+    <link rel="shortcut icon" type="image/png" href="res/badge.png">
     <style>
       :root {
         --cream: #fff4c2;
@@ -39,41 +41,68 @@
       .pixel-btn:hover, .pixel-btn:focus-visible { background: var(--yellow); color: var(--ink); outline: none; }
       .room-stage { position: relative; width: 100%; height: 100vh; overflow: hidden; background: black; }
       .room-bg { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; image-rendering: crisp-edges; user-select: none; }
-      .room-nav { position: absolute; z-index: 30; left: 50%; bottom: 32px; display: flex; gap: 24px; transform: translateX(-50%); }
-      .return-city-btn { position: absolute; top: 28px; right: 28px; z-index: 40; padding: 12px 18px; border: 3px solid var(--cream); background: var(--ink); box-shadow: 4px 4px 0 #000; color: var(--cream); font-family: var(--font-pixel); font-weight: 900; text-decoration: none; text-transform: uppercase; }
+      .room-nav { position: absolute; z-index: 90; left: 50%; bottom: 32px; display: flex; gap: 24px; transform: translateX(-50%); }
+      .return-city-btn { position: absolute; top: 28px; right: 28px; z-index: 95; padding: 12px 18px; border: 3px solid var(--cream); background: var(--ink); box-shadow: 4px 4px 0 #000; color: var(--cream); font-family: var(--font-pixel); font-weight: 900; text-decoration: none; text-transform: uppercase; }
       .return-city-btn:hover, .return-city-btn:focus-visible { background: var(--yellow); color: var(--ink); outline: none; }
-      .info-marker { position: absolute; z-index: 25; width: 18px; height: 18px; padding: 0; border: 3px solid var(--cyan); background: rgba(95, 255, 214, 0.45); box-shadow: 0 0 8px rgba(95, 255, 214, 0.9), inset 0 0 6px rgba(255, 255, 255, 0.6); cursor: pointer; image-rendering: pixelated; }
-      .info-marker::after { content: ""; position: absolute; inset: -7px; border: 2px solid rgba(95, 255, 214, 0.25); pointer-events: none; }
-      .info-marker:hover { background: rgba(95, 255, 214, 0.85); box-shadow: 0 0 12px rgba(95, 255, 214, 1), 0 0 24px rgba(95, 255, 214, 0.75), inset 0 0 8px rgba(255, 255, 255, 0.85); transform: scale(1.15); }
+      .info-marker { position: absolute; z-index: 80; width: 22px; height: 22px; padding: 0; border: 3px solid var(--stage); background: var(--cream); box-shadow: 0 0 0 3px var(--cyan), 0 0 14px rgba(255, 244, 194, 1), 0 0 28px rgba(95, 255, 214, 0.95), inset 0 0 6px rgba(255, 215, 106, 0.9); cursor: pointer; opacity: 0.82; image-rendering: pixelated; transition: opacity 160ms ease, transform 160ms ease, box-shadow 160ms ease; animation: markerPulse 1.4s ease-in-out infinite alternate; }
+      .info-marker::after { content: ""; position: absolute; inset: -8px; border: 2px solid rgba(255, 244, 194, 0.7); box-shadow: 0 0 16px rgba(255, 244, 194, 0.75); pointer-events: none; }
+      .info-marker:hover { opacity: 1; background: var(--yellow); border-color: var(--ink); box-shadow: 0 0 0 3px var(--cyan), 0 0 18px rgba(255, 244, 194, 1), 0 0 36px rgba(95, 255, 214, 1), inset 0 0 8px rgba(255, 255, 255, 0.95); transform: scale(1.2); }
       .info-marker:focus-visible { outline: 3px solid var(--cream); outline-offset: 4px; }
-      .marker-console { left: 50%; top: 48%; }
-      .marker-filter { left: 27%; top: 44%; }
-      .marker-sort { left: 68%; top: 72%; }
-      .marker-sample { left: 33%; top: 74%; }
-      .marker-ml { left: 87%; top: 56%; }
-      .info-card { position: absolute; z-index: 40; left: 50%; bottom: 112px; width: min(86%, 560px); padding: 18px; border: 4px solid var(--cream); background: rgba(17, 24, 39, 0.94); box-shadow: 8px 8px 0 #000; color: white; transform: translateX(-50%); }
+      .info-marker.is-discovered { opacity: 1; animation: discoveredPulse 1.4s ease-in-out infinite alternate; border-color: var(--ink); background: var(--yellow); box-shadow: 0 0 0 3px var(--cyan), 0 0 18px rgba(255, 244, 194, 1), 0 0 36px rgba(95, 255, 214, 1), inset 0 0 8px rgba(255, 255, 255, 0.95); }
+      .info-marker.is-discovered::before { content: ""; position: absolute; inset: 5px; background: var(--cream); box-shadow: 0 0 8px var(--cream); }
+      @keyframes markerPulse { from { box-shadow: 0 0 0 3px rgba(95, 255, 214, 0.65), 0 0 10px rgba(255, 244, 194, 0.75); } to { box-shadow: 0 0 0 3px var(--cyan), 0 0 18px rgba(255, 244, 194, 1), 0 0 28px rgba(95, 255, 214, 0.95); } }
+      @keyframes discoveredPulse { from { filter: brightness(1); } to { filter: brightness(1.25); } }
+      .marker-filter { left: 8%; top: 56%; }
+      .marker-console { left: 47%; top: 42%; }
+      .marker-sort { left: 66%; top: 52%; }
+      .marker-sample { left: 78%; top: 60%; }
+      .marker-ml { left: 92%; top: 56%; }
+      .marker-tooltip { position: absolute; z-index: 120; max-width: 340px; padding: 12px 14px; border: 3px solid var(--cyan); background: rgba(15, 23, 42, 0.94); box-shadow: 4px 4px 0 #000, 0 0 18px rgba(95, 255, 214, 0.65); color: var(--cream); pointer-events: none; opacity: 0; transform: translateY(8px) scale(0.98); transition: opacity 160ms ease, transform 160ms ease; }
+      .marker-tooltip.is-visible { opacity: 1; transform: translateY(0) scale(1); }
+      .marker-tooltip h3 { margin: 0 0 6px; color: var(--cyan); font-size: 1rem; }
+      .marker-tooltip p { margin: 0; font-size: 0.85rem; font-weight: 900; line-height: 1.45; }
+      .info-card { position: absolute; z-index: 35; left: 50%; bottom: 112px; width: min(86%, 560px); padding: 18px; border: 4px solid var(--cream); background: rgba(17, 24, 39, 0.94); box-shadow: 8px 8px 0 #000; color: white; transform: translateX(-50%); }
       .info-card[hidden], .hotspots[hidden], .return-city-btn[hidden], .reward-modal[hidden], .pixel-btn[hidden] { display: none; }
       .info-card p { margin: 0 42px 0 0; font-size: 15px; font-weight: 900; line-height: 1.45; }
       .close-card { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border: 2px solid var(--cream); background: var(--yellow); color: var(--ink); cursor: pointer; font: 900 18px/1 var(--font-pixel); }
-      .info-card { top: 110px; right: 32px; left: auto; bottom: auto; z-index: 35; width: min(560px, 42vw); max-height: calc(100vh - 180px); overflow-y: auto; padding: 18px; border: 3px solid var(--cyan); background: rgba(15, 23, 42, 0.92); box-shadow: 4px 4px 0 #000, 0 0 18px rgba(95, 255, 214, 0.45); color: var(--cream); transform: none; }
-      .info-card h2, .info-card h3 { margin: 0 0 10px; color: var(--cyan); text-shadow: 3px 3px 0 #000; }
-      .info-card h3 { margin-top: 18px; color: var(--yellow); font-size: 16px; }
-      .info-card p, .info-card li { color: white; font-size: 15px; font-weight: 900; line-height: 1.45; }
-      .info-card p { margin: 0 0 12px; }
-      .info-card ul { margin: 0 0 14px; padding-left: 22px; }
-      .sql-code { margin: 12px 0; padding: 12px; overflow-x: auto; border: 2px solid #334155; background: #020617; color: var(--cyan); font: 900 14px/1.45 var(--font-pixel); }
-      .result-table { width: 100%; margin: 12px 0; border-collapse: collapse; background: rgba(2, 6, 23, 0.78); font-size: 0.85rem; }
-      .result-table th, .result-table td { padding: 6px; border: 2px solid #334155; color: white; text-align: left; }
+      .info-card { left: 50%; top: 46%; right: auto; bottom: auto; z-index: 35; width: min(760px, 55vw); max-height: calc(100vh - 210px); overflow: hidden; padding: 18px 20px; border: 3px solid var(--cyan); background: rgba(15, 23, 42, 0.92); box-shadow: 4px 4px 0 #000, 0 0 18px rgba(95, 255, 214, 0.45); color: var(--cream); transform: translate(-50%, -50%); font-size: clamp(0.72rem, 0.85vw, 0.95rem); line-height: 1.45; }
+      .room-stage.is-welcome-room .info-card { left: 50%; right: auto; top: 96px; bottom: auto; width: min(560px, 42vw); max-height: 240px; transform: translateX(-50%); }
+      .info-card h2, .info-card h3 { margin: 0 0 10px; color: var(--cyan); font-size: clamp(1.1rem, 1.5vw, 1.6rem); text-shadow: 3px 3px 0 #000; }
+      .info-card h3 { margin: 14px 0 8px; color: var(--yellow); font-size: clamp(0.9rem, 1.1vw, 1.1rem); }
+      .info-card p, .info-card li { color: white; font-size: inherit; font-weight: 900; line-height: 1.45; }
+      .info-card p { margin: 8px 0; }
+      .info-card ul { margin: 8px 0; padding-left: 22px; }
+      .sql-code { max-width: 100%; margin: 8px 0; padding: 10px; overflow-x: auto; border: 2px solid #334155; background: #020617; color: var(--cyan); font: 900 14px/1.45 var(--font-pixel); }
+      .result-table { width: 100%; margin: 8px 0; border-collapse: collapse; background: rgba(2, 6, 23, 0.78); font-size: 0.85rem; }
+      .result-table th, .result-table td { padding: 5px 7px; border: 2px solid #334155; color: white; text-align: left; }
       .result-table th { color: var(--yellow); }
-      .pixel-box, .flow-line { margin: 12px 0; padding: 12px; border: 2px solid var(--cream); background: rgba(2, 6, 23, 0.7); box-shadow: 4px 4px 0 #000; color: var(--cream); font-weight: 900; line-height: 1.5; }
+      .pixel-box, .flow-line { margin: 8px 0; padding: 12px; border: 2px solid var(--cream); background: rgba(2, 6, 23, 0.7); box-shadow: 4px 4px 0 #000; color: var(--cream); font-weight: 900; line-height: 1.5; }
       .flow-line { border-color: var(--cyan); color: var(--cyan); }
       .reward-note { color: var(--yellow) !important; text-shadow: 2px 2px 0 #000; }
+      .discovery-status, .discovery-hint { color: var(--cream) !important; font-weight: 900; }
+      .discovery-complete, .discovery-warning { padding: 8px 10px; border: 2px solid #74ff9f; background: rgba(15, 23, 42, 0.88); box-shadow: 0 0 14px rgba(116, 255, 159, 0.65); color: #74ff9f !important; }
+      .discovery-complete.animate-complete { animation: completePop 220ms ease; }
+      .discovery-warning { border-color: #ff7a2f; color: #ffb088 !important; box-shadow: 0 0 14px rgba(255, 122, 47, 0.55); }
+      .pixel-btn.is-disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.5); }
+      @keyframes completePop { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+      .quiz-box { margin-top: 8px; }
+      .quiz-option { display: block; width: 100%; margin: 8px 0; padding: 8px 10px; border: 3px solid var(--cream); background: var(--ink); box-shadow: 3px 3px 0 #000; color: var(--cream); cursor: pointer; font-family: inherit; font-weight: 900; text-align: left; }
+      .quiz-option:hover, .quiz-option:focus-visible { border-color: var(--cyan); color: var(--cyan); box-shadow: 3px 3px 0 #000, 0 0 12px rgba(95, 255, 214, 0.75); outline: none; }
+      .quiz-option.correct { border-color: #74ff9f; color: #74ff9f; }
+      .quiz-option.wrong { border-color: #ff7a2f; color: #ffb088; }
+      .quiz-option:disabled { cursor: default; }
+      .quiz-feedback { margin-top: 12px; color: var(--cyan); font-weight: 900; }
+      .reward-badge-img { width: clamp(100px, 14vw, 180px); image-rendering: pixelated; image-rendering: crisp-edges; filter: drop-shadow(0 0 10px rgba(255, 215, 106, 0.9)) drop-shadow(0 0 24px rgba(95, 255, 214, 0.75)); }
       .reward-modal { position: absolute; inset: 0; z-index: 60; display: grid; place-items: center; background: rgba(15, 23, 42, 0.45); }
       .reward-card { width: min(88%, 520px); padding: 22px; border: 4px solid var(--cream); background: rgba(17, 24, 39, 0.96); box-shadow: 8px 8px 0 #000, 0 0 24px rgba(95, 255, 214, 0.45); color: var(--cream); text-align: center; }
       .reward-card h2 { margin: 0 0 12px; color: var(--yellow); font-size: clamp(22px, 3vw, 34px); text-shadow: 3px 3px 0 #000; }
       .reward-card p { margin: 0 0 18px; font-size: 15px; font-weight: 900; line-height: 1.45; }
       .reward-key-img { width: clamp(90px, 12vw, 160px); height: auto; display: block; margin: 0 auto 18px; image-rendering: pixelated; image-rendering: crisp-edges; filter: drop-shadow(0 0 8px rgba(255, 215, 106, 0.85)) drop-shadow(0 0 16px rgba(95, 255, 214, 0.45)); animation: keyFloat 1.4s ease-in-out infinite alternate; }
       @keyframes keyFloat { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+      @media (max-width: 900px) {
+        .info-card, .room-stage.is-welcome-room .info-card { left: 50%; right: auto; top: auto; bottom: 90px; width: calc(100% - 32px); max-height: 42vh; overflow-y: auto; transform: translateX(-50%); }
+        .room-stage.is-welcome-room .info-card { top: 72px; bottom: auto; width: calc(100% - 32px); max-height: 220px; }
+      }
       @media (max-width: 760px) {
         .room-layout { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
         .side-panel { height: auto; max-height: 44vh; overflow: hidden; border-right: 0; border-bottom: 4px solid #000; }
@@ -81,7 +110,8 @@
         .room-stage { height: 100%; min-height: 0; }
         .room-nav { bottom: 18px; gap: 12px; }
         .pixel-btn { padding: 11px 12px; font-size: 12px; }
-        .info-card { left: 16px; right: 16px; top: auto; bottom: 86px; width: auto; max-height: 34vh; }
+        .info-card { bottom: 86px; max-height: 34vh; }
+        .room-stage.is-welcome-room .info-card { top: 72px; bottom: auto; max-height: 220px; }
       }
     </style>
   </head>
@@ -89,7 +119,7 @@
     <main class="room-layout">
       <aside class="side-panel">
         <h1>Query Lab</h1>
-        <p class="room-counter" id="roomCounter">Current Room: 0 / 8</p>
+        <p class="room-counter" id="roomCounter">Current Room: 0 / 9</p>
         <p class="path-title">Learning Path</p>
         <div class="lesson-list" id="roomList"></div>
         <article class="lesson-card" id="lessonCard">
@@ -101,11 +131,15 @@
         <img class="room-bg" id="roomBg" src="res/rooms_background/Room_4_Query_Lab.png" alt="" />
         <a class="return-city-btn" id="topReturn" href="index.html">Return to the City</a>
         <div class="hotspots" id="hotspots">
-          <button class="info-marker marker-console" type="button" data-info="console" aria-label="Main console info"></button>
-          <button class="info-marker marker-filter" type="button" data-info="filter" aria-label="Filter machine info"></button>
-          <button class="info-marker marker-sort" type="button" data-info="sort" aria-label="Sorting machine info"></button>
-          <button class="info-marker marker-sample" type="button" data-info="sample" aria-label="Sample box info"></button>
-          <button class="info-marker marker-ml" type="button" data-info="ml" aria-label="ML machine info"></button>
+          <button class="info-marker marker-console" type="button" data-info="console" data-marker-id="console" aria-label="Main console info"></button>
+          <button class="info-marker marker-filter" type="button" data-info="filter" data-marker-id="filter" aria-label="Filter machine info"></button>
+          <button class="info-marker marker-sort" type="button" data-info="sort" data-marker-id="sort" aria-label="Sorting machine info"></button>
+          <button class="info-marker marker-sample" type="button" data-info="sample" data-marker-id="limit" aria-label="Sample box info"></button>
+          <button class="info-marker marker-ml" type="button" data-info="ml" data-marker-id="ml" aria-label="ML machine info"></button>
+        </div>
+        <div class="marker-tooltip" id="markerTooltip" aria-hidden="true">
+          <h3 id="markerTooltipTitle"></h3>
+          <p id="markerTooltipText"></p>
         </div>
         <div class="room-nav">
           <button class="pixel-btn" id="prevRoom" type="button">Previous Room</button>
@@ -117,7 +151,7 @@
         </article>
         <article class="reward-modal" id="rewardModal" hidden>
           <div class="reward-card">
-            <img src="res/keys/regular-key.png" class="reward-key-img" alt="Reward key">
+            <img src="res/badge.png" class="reward-key-img reward-badge-img" alt="SQL Foundations Badge">
             <h2 id="rewardTitle">Badge Earned!</h2>
             <p id="rewardMessage">You completed SQL Foundations.</p>
             <button class="pixel-btn" id="rewardContinue" type="button">Continue</button>
@@ -128,10 +162,10 @@
     <script>
       const DEFAULT_PROGRESS = {
         buildings: {
-          dataVault: { unlocked: true, completed: false, newlyUnlocked: false, entered: false, highestRoomUnlocked: 0 },
-          tableDepartment: { unlocked: false, completed: false, newlyUnlocked: false, entered: false, highestRoomUnlocked: 0 },
-          keyBridgeHall: { unlocked: false, completed: false, newlyUnlocked: false, entered: false, highestRoomUnlocked: 0 },
-          queryLab: { unlocked: false, completed: false, newlyUnlocked: false, entered: false, highestRoomUnlocked: 0 }
+          dataVault: { unlocked: true, completed: false, newlyUnlocked: false, entered: false, quizPassed: false, highestRoomUnlocked: 0, discoveredMarkers: [] },
+          tableDepartment: { unlocked: false, completed: false, newlyUnlocked: false, entered: false, quizPassed: false, highestRoomUnlocked: 0, discoveredMarkers: [] },
+          keyBridgeHall: { unlocked: false, completed: false, newlyUnlocked: false, entered: false, quizPassed: false, highestRoomUnlocked: 0, discoveredMarkers: [] },
+          queryLab: { unlocked: false, completed: false, newlyUnlocked: false, entered: false, quizPassed: false, highestRoomUnlocked: 0, discoveredMarkers: [] }
         },
         badges: { sqlFoundations: false }
       };
@@ -194,8 +228,8 @@
             <table class="result-table">
               <thead><tr><th>name</th></tr></thead>
               <tbody>
-                <tr><td>Med</td></tr>
-                <tr><td>Lina</td></tr>
+                <tr><td>Alex</td></tr>
+                <tr><td>Maria</td></tr>
               </tbody>
             </table>
             <h3>Machine Learning connection</h3>
@@ -216,9 +250,9 @@
             <table class="result-table">
               <thead><tr><th>city</th></tr></thead>
               <tbody>
-                <tr><td>Tunis</td></tr>
-                <tr><td>Sfax</td></tr>
-                <tr><td>Amman</td></tr>
+                <tr><td>London</td></tr>
+                <tr><td>Paris</td></tr>
+                <tr><td>Berlin</td></tr>
               </tbody>
             </table>
             <h3>Machine Learning connection</h3>
@@ -274,14 +308,14 @@
             <p>We can combine SQL commands to get exactly the data we need.</p>
             <pre class="sql-code"><code>SELECT name, city
 FROM customers
-WHERE city = 'Tunis'
+WHERE city = 'London'
 ORDER BY name ASC
 LIMIT 10;</code></pre>
             <p>This query:</p>
             <ul>
               <li>chooses name and city</li>
               <li>reads from customers</li>
-              <li>keeps only customers from Tunis</li>
+              <li>keeps only customers from London</li>
               <li>sorts them by name</li>
               <li>returns only 10 rows</li>
             </ul>
@@ -306,6 +340,26 @@ ORDER BY age;</code></pre>
           `
         },
         {
+          title: "Quiz Room",
+          image: "res/rooms_background/04_Query_Lab_background.png",
+          type: "quiz",
+          summary: "Answer correctly to unlock the final recap room and earn the SQL Foundations badge.",
+          points: ["Test the main idea", "Choose the best answer", "Unlock the recap room"],
+          contentHtml: `
+            <h2>Quiz Room</h2>
+            <p>Answer correctly to unlock the recap room.</p>
+            <div class="quiz-box">
+              <h3>Question</h3>
+              <p>Which SQL query shows each city only once from the customers table?</p>
+              <button class="quiz-option" type="button" data-correct="true">A. SELECT DISTINCT city FROM customers;</button>
+              <button class="quiz-option" type="button">B. SELECT city FROM customers;</button>
+              <button class="quiz-option" type="button">C. SELECT city FROM customers ORDER BY city;</button>
+              <button class="quiz-option" type="button">D. SELECT * FROM customers LIMIT city;</button>
+            </div>
+            <p class="quiz-feedback"></p>
+          `
+        },
+        {
           title: "Final recap",
           image: "res/rooms_background/04_Query_Lab_background.png",
           type: "lesson",
@@ -327,9 +381,18 @@ ORDER BY age;</code></pre>
           `
         }
       ];
+      const welcomeMarkers = [
+        { id: "filter", title: "WHERE Filter", text: "WHERE filters rows using conditions." },
+        { id: "console", title: "Query Console", text: "This is where SQL queries are written and tested." },
+        { id: "sort", title: "ORDER BY", text: "ORDER BY sorts the result in ascending or descending order." },
+        { id: "limit", title: "LIMIT", text: "LIMIT returns only a selected number of rows." },
+        { id: "ml", title: "SQL to ML", text: "SQL prepares clean data that can later be used by a Machine Learning model." }
+      ];
       let currentRoomIndex = 0;
+      let discoveryCompleteAnimationPlayed = false;
       let progress = getProgress();
       const roomBg = document.querySelector("#roomBg");
+      const roomStage = document.querySelector(".room-stage");
       const roomCounter = document.querySelector("#roomCounter");
       const hotspots = document.querySelector("#hotspots");
       const prevRoom = document.querySelector("#prevRoom");
@@ -345,6 +408,9 @@ ORDER BY age;</code></pre>
       const rewardTitle = document.querySelector("#rewardTitle");
       const rewardMessage = document.querySelector("#rewardMessage");
       const rewardContinue = document.querySelector("#rewardContinue");
+      const markerTooltip = document.querySelector("#markerTooltip");
+      const markerTooltipTitle = document.querySelector("#markerTooltipTitle");
+      const markerTooltipText = document.querySelector("#markerTooltipText");
       function createDefaultProgress() { return JSON.parse(JSON.stringify(DEFAULT_PROGRESS)); }
       function getProgress() {
         const progress = createDefaultProgress();
@@ -361,8 +427,107 @@ ORDER BY age;</code></pre>
       function completeBuilding(buildingId) { const building = progress.buildings[buildingId]; if (!building || building.completed) return false; building.completed = true; return true; }
       function markBuildingEntered(buildingId) { const building = progress.buildings[buildingId]; if (!building) return; building.entered = true; building.newlyUnlocked = false; saveProgress(progress); }
       function buildingProgress() { return progress.buildings[BUILDING_ID]; }
+      function markerIds() { return welcomeMarkers.map((marker) => marker.id); }
+      function discoveredMarkers() { const building = buildingProgress(); if (!Array.isArray(building.discoveredMarkers)) building.discoveredMarkers = []; return building.discoveredMarkers; }
+      function discoveryCount() { const validMarkerIds = markerIds(); return discoveredMarkers().filter((id) => validMarkerIds.includes(id)).length; }
+      function allWelcomeMarkersDiscovered() { const discovered = discoveredMarkers(); return welcomeMarkers.every((marker) => discovered.includes(marker.id)); }
+      function getWelcomeMarker(markerId) { return welcomeMarkers.find((marker) => marker.id === markerId); }
+      function welcomeHeading() { const wrapper = document.createElement("div"); wrapper.innerHTML = rooms[0].contentHtml; return wrapper.querySelector("h2")?.textContent || rooms[0].title; }
+      function renderWelcomeContent(message = "", animateComplete = false) {
+        const complete = allWelcomeMarkersDiscovered();
+        const shouldAnimate = complete && animateComplete && !discoveryCompleteAnimationPlayed;
+        const statusClass = complete ? `discovery-complete${shouldAnimate ? " animate-complete" : ""}` : "discovery-status";
+        const statusText = complete ? "All objects discovered! You can enter the next room." : `Objects discovered: ${discoveryCount()} / ${welcomeMarkers.length}`;
+        const warning = message ? `<p class="discovery-warning">${message}</p>` : "";
+        return `<h2>${welcomeHeading()}</h2><p>Explore every glowing object marker before starting the lesson path.</p><p class="${statusClass}">${statusText}</p>${complete ? "" : `<p class="discovery-hint">Hover over each marker to discover it.</p>`}${warning}`;
+      }
+      function renderWelcomeSidebarSummary() {
+        const complete = allWelcomeMarkersDiscovered();
+        lessonTitle.textContent = rooms[0].title;
+        lessonText.innerHTML = `<p>${rooms[0].summary}</p><ul><li>Objects discovered: ${discoveryCount()} / ${welcomeMarkers.length}</li><li>${complete ? "Next Room unlocked." : "Discover all objects to unlock Room 1."}</li></ul>`;
+      }
+      function showDiscoveryMessage(message) { renderMainContent(renderWelcomeContent(message)); }
+      function updateMarkerStates() {
+        const discovered = discoveredMarkers();
+        document.querySelectorAll(".info-marker").forEach((markerElement) => {
+          const markerData = getWelcomeMarker(markerElement.dataset.markerId);
+          const isDiscovered = discovered.includes(markerElement.dataset.markerId);
+          markerElement.classList.toggle("is-discovered", isDiscovered);
+          if (markerData) markerElement.setAttribute("aria-label", `${markerData.title} ${isDiscovered ? "discovered" : "not discovered"}`);
+        });
+      }
+      function unlockFirstLessonIfReady() {
+        if (!allWelcomeMarkersDiscovered()) return false;
+        const building = buildingProgress();
+        const unlockedNow = building.highestRoomUnlocked < 1;
+        building.highestRoomUnlocked = Math.max(building.highestRoomUnlocked, 1);
+        saveProgress(progress);
+        return unlockedNow;
+      }
+      function normalizeWelcomeDiscovery() {
+        const building = buildingProgress();
+        if (!Array.isArray(building.discoveredMarkers)) building.discoveredMarkers = [];
+        if (building.highestRoomUnlocked > 0 && building.discoveredMarkers.length === 0) {
+          building.discoveredMarkers = markerIds();
+          saveProgress(progress);
+        }
+      }
+      function markWelcomeMarkerDiscovered(markerId) {
+        const markerData = getWelcomeMarker(markerId);
+        if (!markerData) return;
+        const wasComplete = allWelcomeMarkersDiscovered();
+        const discovered = discoveredMarkers();
+        if (!discovered.includes(markerId)) {
+          discovered.push(markerId);
+          saveProgress(progress);
+        }
+        const isComplete = allWelcomeMarkersDiscovered();
+        if (isComplete) unlockFirstLessonIfReady();
+        updateMarkerStates();
+        if (currentRoomIndex === 0) {
+          const shouldAnimateComplete = isComplete && !wasComplete && !discoveryCompleteAnimationPlayed;
+          renderWelcomeSidebarSummary();
+          renderMainContent(renderWelcomeContent("", shouldAnimateComplete));
+          if (shouldAnimateComplete) discoveryCompleteAnimationPlayed = true;
+          renderRoomList();
+          updateNextButtonState();
+        }
+      }
+      function showMarkerTooltip(markerElement, markerData) {
+        markerTooltipTitle.textContent = markerData.title;
+        markerTooltipText.textContent = markerData.text;
+        markerTooltip.classList.add("is-visible");
+        markerTooltip.setAttribute("aria-hidden", "false");
+        const stageRect = roomStage.getBoundingClientRect();
+        const markerRect = markerElement.getBoundingClientRect();
+        const tooltipRect = markerTooltip.getBoundingClientRect();
+        let left = markerRect.left - stageRect.left + markerRect.width / 2 - tooltipRect.width / 2;
+        let top = markerRect.top - stageRect.top - tooltipRect.height - 14;
+        if (top < 10) top = markerRect.bottom - stageRect.top + 14;
+        left = Math.max(10, Math.min(left, stageRect.width - tooltipRect.width - 10));
+        top = Math.max(10, Math.min(top, stageRect.height - tooltipRect.height - 10));
+        markerTooltip.style.left = `${left}px`;
+        markerTooltip.style.top = `${top}px`;
+      }
+      function hideMarkerTooltip() { markerTooltip.classList.remove("is-visible"); markerTooltip.setAttribute("aria-hidden", "true"); }
+      function handleMarkerEnter(markerElement) {
+        if (currentRoomIndex !== 0) return;
+        const markerData = getWelcomeMarker(markerElement.dataset.markerId);
+        if (!markerData) return;
+        markWelcomeMarkerDiscovered(markerData.id);
+        showMarkerTooltip(markerElement, markerData);
+      }
+      function updateNextButtonState() {
+        const locked = currentRoomIndex === 0 && !allWelcomeMarkersDiscovered();
+        nextRoom.classList.toggle("is-disabled", locked);
+        nextRoom.setAttribute("aria-disabled", locked ? "true" : "false");
+      }
       function updateCounter() { roomCounter.textContent = `Current Room: ${currentRoomIndex} / ${rooms.length - 1}`; }
       function formatRoomTitle(room, index) { return index === 0 ? "0. Welcoming Room" : `${String(index).padStart(2, "0")}. ${room.title}`; }
+      function isRecapRoom(index) { return index === rooms.length - 1; }
+      function isQuizLocked() { return !buildingProgress().quizPassed; }
+      function roomLockedMessage(index) { if (index === 1 && !allWelcomeMarkersDiscovered()) return "Discover all welcome-room objects first."; return isRecapRoom(index) && isQuizLocked() ? "Complete the quiz first to unlock the recap room." : "Explore previous rooms first to unlock this room."; }
+      function canEnterRoom(index) { if (index === 1 && !allWelcomeMarkersDiscovered()) return false; if (isRecapRoom(index) && isQuizLocked()) return false; return index <= buildingProgress().highestRoomUnlocked; }
       function renderRoomList() {
         roomList.innerHTML = "";
         rooms.forEach((room, index) => {
@@ -370,14 +535,15 @@ ORDER BY age;</code></pre>
           tab.type = "button";
           tab.className = "room-tab";
           tab.textContent = formatRoomTitle(room, index);
-          const isUnlocked = index <= buildingProgress().highestRoomUnlocked;
+          const isUnlocked = canEnterRoom(index);
           if (!isUnlocked) tab.classList.add("locked");
           if (index === currentRoomIndex) tab.classList.add("active");
           tab.addEventListener("click", () => {
             if (!isUnlocked) {
+              const message = roomLockedMessage(index);
               lessonTitle.textContent = "Room locked";
-              lessonText.innerHTML = "<p>Explore previous rooms first to unlock this room.</p>";
-              mainLessonContent.innerHTML = "<h2>Room locked</h2><p>Explore previous rooms first to unlock this room.</p>";
+              lessonText.innerHTML = `<p>${message}</p>`;
+              mainLessonContent.innerHTML = `<h2>Room locked</h2><p>${message}</p>`;
               return;
             }
             currentRoomIndex = index;
@@ -394,28 +560,92 @@ ORDER BY age;</code></pre>
         mainLessonContent.innerHTML = contentHtml;
         infoCard.hidden = false;
       }
+      function setQuizFeedback(message) { const feedback = mainLessonContent.querySelector(".quiz-feedback"); if (feedback) feedback.textContent = message; }
+      function bindQuizOptions() {
+        if (rooms[currentRoomIndex].type !== "quiz") return;
+        const quizPassed = buildingProgress().quizPassed;
+        const options = mainLessonContent.querySelectorAll(".quiz-option");
+        options.forEach((option) => {
+          const isCorrect = option.dataset.correct === "true";
+          option.classList.toggle("correct", quizPassed && isCorrect);
+          option.disabled = quizPassed;
+          option.addEventListener("click", () => handleQuizAnswer(option));
+        });
+        if (quizPassed) setQuizFeedback("Correct! DISTINCT removes duplicate values from the result.");
+        else setQuizFeedback("Answer the quiz correctly to continue.");
+      }
+      function handleQuizAnswer(option) {
+        if (option.disabled) return;
+        const options = mainLessonContent.querySelectorAll(".quiz-option");
+        options.forEach((item) => item.classList.remove("wrong"));
+        if (option.dataset.correct !== "true") { option.classList.add("wrong"); setQuizFeedback("Not yet. Look for the SQL keyword that removes duplicates."); return; }
+        const building = buildingProgress();
+        building.quizPassed = true;
+        building.highestRoomUnlocked = Math.max(building.highestRoomUnlocked, currentRoomIndex + 1);
+        saveProgress(progress);
+        option.classList.add("correct");
+        options.forEach((item) => { item.disabled = true; });
+        setQuizFeedback("Correct! DISTINCT removes duplicate values from the result.");
+        nextRoom.hidden = false;
+        renderRoomList();
+      }
+      function renderMarkerSummary(contentHtml) {
+        const markerDoc = document.createElement("div");
+        markerDoc.innerHTML = contentHtml;
+        const markerTitle = markerDoc.querySelector("h2")?.textContent || "Room marker";
+        const markerSummary = markerDoc.querySelector("p")?.textContent || "Explore this object for a quick lesson hint.";
+        lessonTitle.textContent = markerTitle;
+        lessonText.innerHTML = `<p>${markerSummary}</p>`;
+      }
       function renderRoom() {
         const room = rooms[currentRoomIndex];
         const isFinalRoom = currentRoomIndex === rooms.length - 1;
+        roomStage.classList.toggle("is-welcome-room", currentRoomIndex === 0);
         roomBg.src = room.image;
         updateCounter();
         hotspots.hidden = currentRoomIndex !== 0;
         prevRoom.hidden = currentRoomIndex === 0;
-        nextRoom.hidden = isFinalRoom;
+        nextRoom.hidden = isFinalRoom || (room.type === "quiz" && !buildingProgress().quizPassed);
         topReturn.hidden = isFinalRoom;
         finalReturn.hidden = !isFinalRoom;
-        renderSidebarSummary(room);
-        renderMainContent(room.contentHtml);
+        hideMarkerTooltip();
+        if (currentRoomIndex === 0) {
+          renderWelcomeSidebarSummary();
+          renderMainContent(renderWelcomeContent());
+        } else {
+          renderSidebarSummary(room);
+          renderMainContent(room.contentHtml);
+        }
+        bindQuizOptions();
+        updateMarkerStates();
+        updateNextButtonState();
         renderRoomList();
         completeIfFinalRoom();
       }
       prevRoom.addEventListener("click", () => { if (currentRoomIndex > 0) currentRoomIndex -= 1; renderRoom(); });
-      nextRoom.addEventListener("click", () => { if (currentRoomIndex < rooms.length - 1) { currentRoomIndex += 1; if (currentRoomIndex > buildingProgress().highestRoomUnlocked) { buildingProgress().highestRoomUnlocked = currentRoomIndex; saveProgress(progress); } } renderRoom(); });
-      document.querySelectorAll(".info-marker").forEach((spot) => { spot.addEventListener("click", () => { const markerContent = rooms[0].markers?.[spot.dataset.info]; if (markerContent) renderMainContent(markerContent); }); });
+      nextRoom.addEventListener("click", () => {
+        const room = rooms[currentRoomIndex];
+        if (currentRoomIndex === 0 && !allWelcomeMarkersDiscovered()) {
+          showDiscoveryMessage("Discover all objects first.");
+          updateNextButtonState();
+          renderRoomList();
+          return;
+        }
+        if (room.type === "quiz" && !buildingProgress().quizPassed) { setQuizFeedback("Answer the quiz correctly to continue."); return; }
+        if (currentRoomIndex < rooms.length - 1) { currentRoomIndex += 1; if (currentRoomIndex > buildingProgress().highestRoomUnlocked) { buildingProgress().highestRoomUnlocked = currentRoomIndex; saveProgress(progress); } }
+        renderRoom();
+      });
+      document.querySelectorAll(".info-marker").forEach((spot) => {
+        spot.addEventListener("mouseenter", () => handleMarkerEnter(spot));
+        spot.addEventListener("focus", () => handleMarkerEnter(spot));
+        spot.addEventListener("click", (event) => { event.preventDefault(); handleMarkerEnter(spot); });
+        spot.addEventListener("mouseleave", () => { hideMarkerTooltip(); if (currentRoomIndex === 0) renderWelcomeSidebarSummary(); });
+        spot.addEventListener("blur", () => { hideMarkerTooltip(); if (currentRoomIndex === 0) renderWelcomeSidebarSummary(); });
+      });
       function showReward() { rewardTitle.textContent = REWARD_TITLE; rewardMessage.textContent = REWARD_MESSAGE; rewardModal.hidden = false; }
       function completeIfFinalRoom() { if (currentRoomIndex !== rooms.length - 1) return; const building = buildingProgress(); if (building.completed) return; building.highestRoomUnlocked = Math.max(building.highestRoomUnlocked, currentRoomIndex); if (completeBuilding(BUILDING_ID)) { progress.badges.sqlFoundations = true; saveProgress(progress); showReward(); } }
       rewardContinue.addEventListener("click", () => { rewardModal.hidden = true; });
-      if (!buildingProgress().unlocked) { window.location.href = "index.html"; } else { markBuildingEntered(BUILDING_ID); renderRoom(); }
+      if (!buildingProgress().unlocked) { window.location.href = "index.html"; } else { markBuildingEntered(BUILDING_ID); normalizeWelcomeDiscovery(); renderRoom(); }
     </script>
   </body>
 </html>

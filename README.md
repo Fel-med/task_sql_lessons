@@ -1,21 +1,35 @@
 # SQL City — SQL for Machine Learning Foundations
 
-SQL City is a pixel-art educational web project that teaches the first phase of the **SQL for Machine Learning** track through a small game-like city.  
-Instead of a normal tutorial page, the learner enters buildings, explores rooms, unlocks lessons, collects keys, and learns SQL step by step.
+**SQL City** is a pixel-art educational web project that teaches SQL fundamentals through a small game-style city.  
+Learners enter buildings, discover objects, complete lessons, pass quizzes, collect keys, and finish the first phase of the **SQL for Machine Learning** learning path.
+
+The project is built with plain **HTML**, **CSS**, and **JavaScript**.  
+It has no backend, no framework dependency, and can be hosted as a static website.
+
+---
+
+## Live Demo
+
+Play the project here:
+
+```text
+https://Fel-med.github.io/task_sql_lessons/
+```
 
 ---
 
 ## Project Goal
 
-The goal of this project is to explain the foundational concepts of relational databases and basic SQL queries in a simple, visual, and interactive way.
+The goal of SQL City is to explain relational database concepts and beginner SQL queries in a visual, interactive, and beginner-friendly way.
 
-This project covers:
+The project covers:
 
-- What a database is
+- What databases are
 - Tables, rows, and columns
 - Primary keys and foreign keys
-- Why SQL is important in Machine Learning workflows
-- Basic SQL data retrieval:
+- How relational tables connect
+- Why SQL is useful before preparing data for machine learning workflows
+- Core SQL commands:
   - `SELECT`
   - `FROM`
   - `WHERE`
@@ -25,21 +39,70 @@ This project covers:
 
 ---
 
-## Concept
+## Assignment Requirement Coverage
 
-The website is designed as a small pixel-art city called **SQL City**.
+This project satisfies the SQL Foundations phase requirements by including:
 
-Each building represents one learning class:
-
-| Building | Topic |
+| Requirement | Covered In |
 |---|---|
-| Data Vault | Databases, SQL basics, and SQL before Machine Learning |
-| Table Department | Tables, rows, columns, and dataset structure |
-| Key Bridge Hall | Primary keys, foreign keys, and table relationships |
-| Query Lab | SQL queries and SQL-to-ML pipeline |
+| What is a database? | Data Vault |
+| What are tables, rows, and columns? | Table Department |
+| Primary key vs foreign key | Key Bridge Hall |
+| Why SQL is important in ML workflows | Data Vault and Query Lab |
+| Basic SQL queries | Query Lab |
+| Visual educational content | City map, buildings, rooms, markers, tables, diagrams |
+| Code examples | Lesson cards and query examples |
+| Structured HTML content | Building pages, lesson cards, sidebar summaries |
+| References section | Homepage menu and README |
 
-The learner starts with only the first building unlocked.  
-After completing a building, they receive a key that unlocks the next building.
+---
+
+## Game Concept
+
+The homepage is a pixel-art city map called **SQL City**.
+
+Each building represents one learning area:
+
+| Building | Main Topic | Reward |
+|---|---|---|
+| **Data Vault** | Databases, SQL basics, and SQL before ML | Table Department Key |
+| **Table Department** | Tables, rows, columns, and dataset structure | Key Bridge Hall Key |
+| **Key Bridge Hall** | Primary keys, foreign keys, and relationships | Query Lab Key |
+| **Query Lab** | SQL queries and SQL-to-ML pipeline | SQL Foundations Badge |
+
+The learner starts with only **Data Vault** unlocked.  
+Completing each building unlocks the next one.
+
+---
+
+## Current Features
+
+- Pixel-art city homepage
+- Fullscreen game-style layout
+- Layered city assets
+- Clickable building hotspots
+- Building hover glow
+- Locked building states
+- Pixel-art lock indicators
+- LED-style building labels
+- Animated random traffic on the homepage road
+- Key reward system
+- Magic key option to unlock everything
+- Reset Everything option
+- Burger menu with references
+- Four separate building pages
+- Room-by-room navigation
+- Left sidebar learning path
+- Active lesson glow
+- Sidebar summary screen
+- Welcome-room object markers
+- Marker discovery requirement before entering Room 1
+- Hover/focus tooltips for marker explanations
+- Quiz room before each recap
+- Recap room locked until the quiz is answered correctly
+- Final SQL Foundations badge after Query Lab
+- Progress saved in browser `localStorage`
+- Static deployment support through GitHub Pages
 
 ---
 
@@ -47,15 +110,24 @@ After completing a building, they receive a key that unlocks the next building.
 
 ### 1. Data Vault
 
-This building introduces the basic idea of databases and SQL.
+Introduces databases, SQL, and why organized data matters.
 
-Lessons:
+Rooms:
 
-1. What is a database?
-2. What is SQL?
-3. Why organize data?
-4. Databases before Machine Learning
-5. Data Vault Recap
+0. Welcoming Room  
+1. What is a database?  
+2. What is SQL?  
+3. Why organize data?  
+4. Databases before Machine Learning  
+5. Quiz Room  
+6. Data Vault Recap  
+
+Welcome markers:
+
+- Organized Data
+- Database Storage
+- SQL Language
+- SQL for ML
 
 Reward: **Table Department Key**
 
@@ -63,16 +135,25 @@ Reward: **Table Department Key**
 
 ### 2. Table Department
 
-This building explains how data is structured in relational databases.
+Explains how relational data is structured in tables.
 
-Lessons:
+Rooms:
 
-1. What is a table?
-2. What is a row?
-3. What is a column?
-4. Example: students table
-5. Rows and columns in ML datasets
-6. Table Department Recap
+0. Welcoming Room  
+1. What is a table?  
+2. What is a row?  
+3. What is a column?  
+4. Example: students table  
+5. Rows and columns in ML datasets  
+6. Quiz Room  
+7. Table Department Recap  
+
+Welcome markers:
+
+- Table Grid
+- Row
+- Column
+- Dataset Example
 
 Reward: **Key Bridge Hall Key**
 
@@ -80,16 +161,25 @@ Reward: **Key Bridge Hall Key**
 
 ### 3. Key Bridge Hall
 
-This building explains how tables connect using keys.
+Explains how tables connect using primary keys and foreign keys.
 
-Lessons:
+Rooms:
 
-1. What is a primary key?
-2. Why IDs must be unique?
-3. What is a foreign key?
-4. How tables connect
-5. Example: students and enrollments
-6. Key Bridge Recap
+0. Welcoming Room  
+1. What is a primary key?  
+2. Why IDs must be unique  
+3. What is a foreign key?  
+4. How tables connect  
+5. Example: students and enrollments  
+6. Quiz Room  
+7. Key Bridge Recap  
+
+Welcome markers:
+
+- Primary Key Board
+- Primary Key
+- Bridge Connection
+- Foreign Key Board
 
 Reward: **Query Lab Key**
 
@@ -97,18 +187,28 @@ Reward: **Query Lab Key**
 
 ### 4. Query Lab
 
-This building teaches practical SQL queries used to retrieve and prepare data.
+Teaches practical SQL commands used to retrieve, filter, sort, and prepare data.
 
-Lessons:
+Rooms:
 
-1. SELECT and FROM
-2. WHERE
-3. DISTINCT
-4. LIMIT
-5. ORDER BY
-6. Query examples
-7. SQL to ML pipeline
-8. Final recap
+0. Welcoming Room  
+1. SELECT and FROM  
+2. WHERE  
+3. DISTINCT  
+4. LIMIT  
+5. ORDER BY  
+6. Query examples  
+7. SQL to ML pipeline  
+8. Quiz Room  
+9. Final recap  
+
+Welcome markers:
+
+- WHERE Filter
+- Query Console
+- ORDER BY
+- LIMIT
+- SQL to ML
 
 Reward: **SQL Foundations Badge**
 
@@ -116,7 +216,7 @@ Reward: **SQL Foundations Badge**
 
 ## SQL Examples Included
 
-The project includes simple SQL examples such as:
+The lessons include beginner-friendly SQL examples such as:
 
 ```sql
 SELECT * FROM students;
@@ -134,41 +234,68 @@ SELECT DISTINCT city FROM customers;
 SELECT * FROM orders ORDER BY price DESC;
 ```
 
-Additional examples show how SQL can be used to prepare clean datasets before Machine Learning.
+The sample data uses internationally familiar example names and cities, such as:
+
+- Alex
+- Emma
+- John
+- Maria
+- London
+- Paris
+- Berlin
 
 ---
 
-## Main Features
+## How the Progress System Works
 
-- Pixel-art city homepage
-- Fullscreen game-style layout
-- Clickable buildings
-- Building lock/unlock system
-- Key reward system
-- Unlock-all option using a magic key
-- Animated cars on the city road
-- LED-style building labels
-- Interactive room markers
-- Room-by-room learning path
-- Left sidebar room summary
-- Main lesson card for explanations
-- Local progress saved using `localStorage`
-- References menu with learning sources
+SQL City saves progress in the browser using `localStorage`.
+
+Storage key:
+
+```js
+sqlCityProgress
+```
+
+Saved progress includes:
+
+- Which buildings are unlocked
+- Which buildings are completed
+- Whether a building is newly unlocked
+- Whether a building has been entered
+- Highest unlocked room per building
+- Quiz completion per building
+- Discovered welcome-room markers per building
+- Whether Unlock Everything was used
+- Final SQL Foundations badge state
+
+To manually reset progress, open browser DevTools and run:
+
+```js
+localStorage.removeItem("sqlCityProgress");
+location.reload();
+```
+
+The homepage also includes a **Reset Everything** option.
 
 ---
 
 ## Project Structure
 
 ```text
-task_sql_lessons/
+task_html/
 │
 ├── index.html
 ├── data-vault.html
 ├── table-department.html
 ├── key-bridge-hall.html
 ├── query-lab.html
+├── README.md
 │
 └── res/
+    ├── badge.png
+    ├── w3schools.png
+    ├── geeksforgeeks.png
+    │
     ├── city_elements/
     │   ├── bg.png
     │   ├── red2.png
@@ -179,22 +306,19 @@ task_sql_lessons/
     │   ├── car2.png
     │   └── lock.png
     │
-    ├── rooms_background/
-    │   ├── Room_1_Data_Vault.png
-    │   ├── Room_2_Table_Department.png
-    │   ├── Room_3_Key_Bridge_Hall.png
-    │   ├── Room_4_Query_Lab.png
-    │   ├── 03_Data_Vault_background.png
-    │   ├── 02_Table_Department_background.png
-    │   ├── 01_Key_Bridge_Hall_background.png
-    │   └── 04_Query_Lab_background.png
-    │
     ├── keys/
     │   ├── regular-key.png
     │   └── magic-master-key.png
     │
-    ├── w3schools.png
-    └── geeksforgeeks.png
+    └── rooms_background/
+        ├── Room_1_Data_Vault.png
+        ├── Room_2_Table_Department.png
+        ├── Room_3_Key_Bridge_Hall.png
+        ├── Room_4_Query_Lab.png
+        ├── 03_Data_Vault_background.png
+        ├── 02_Table_Department_background.png
+        ├── 01_Key_Bridge_Hall_background.png
+        └── 04_Query_Lab_background.png
 ```
 
 ---
@@ -203,13 +327,17 @@ task_sql_lessons/
 
 Because this is a static website, no backend is required.
 
-### Option 1: Open directly
+### Option 1: Open Directly
 
-Open `index.html` in your browser.
+Open this file in a browser:
 
-### Option 2: Use a local server
+```text
+index.html
+```
 
-Using Python:
+### Option 2: Run a Local Server
+
+From the project folder, run:
 
 ```bash
 python -m http.server 8000
@@ -223,30 +351,9 @@ http://localhost:8000
 
 ---
 
-## How Progress Works
-
-The project uses browser `localStorage` to save learning progress.
-
-Saved data includes:
-
-- Which buildings are unlocked
-- Which buildings are completed
-- Which building was newly unlocked
-- Highest unlocked room inside each building
-- Final SQL Foundations badge state
-
-To reset progress manually, open browser DevTools and run:
-
-```js
-localStorage.removeItem("sqlCityProgress");
-location.reload();
-```
-
----
-
 ## GitHub Pages Deployment
 
-This project can be hosted using GitHub Pages.
+This project can be hosted with GitHub Pages.
 
 Recommended settings:
 
@@ -256,7 +363,7 @@ Branch: main
 Folder: / root
 ```
 
-The live link will look like:
+Example live URL:
 
 ```text
 https://Fel-med.github.io/task_sql_lessons/
@@ -269,25 +376,23 @@ https://Fel-med.github.io/task_sql_lessons/
 - HTML
 - CSS
 - JavaScript
-- LocalStorage
-- Pixel-art image assets
-
-No framework and no backend are required.
+- Browser `localStorage`
+- Pixel-art PNG assets
+- GitHub Pages for deployment
 
 ---
 
-## Educational Purpose
+## Design Style
 
-This project was created for the first phase of the **SQL for Machine Learning** track.
+The project uses a retro educational game style:
 
-It helps learners understand that before using data in Machine Learning, they need to know:
-
-- where data is stored
-- how data is structured
-- how tables connect
-- how SQL retrieves and prepares useful data
-
-The final goal is to understand how SQL supports the creation of clean datasets for ML pipelines.
+- 16-bit pixel-art visuals
+- Dark UI panels
+- Cyan glow effects
+- Cream pixel borders
+- Building unlock progression
+- Game-like rewards
+- Room exploration through object markers
 
 ---
 

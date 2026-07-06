@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SQL City</title>
+    <link rel="icon" type="image/png" href="res/badge.png">
+    <link rel="shortcut icon" type="image/png" href="res/badge.png">
     <style>
       :root {
         --cream: #fff4c2;
@@ -61,11 +63,11 @@
       }
 
       .layer-red2 {
-        z-index: 2;
+        z-index: 3;
       }
 
       .layer-red1 {
-        z-index: 3;
+        z-index: 2;
       }
 
       .layer-yellow {
@@ -791,6 +793,8 @@
             completed: false,
             newlyUnlocked: false,
             entered: false,
+            quizPassed: false,
+            discoveredMarkers: [],
             highestRoomUnlocked: 0
           },
           tableDepartment: {
@@ -798,6 +802,8 @@
             completed: false,
             newlyUnlocked: false,
             entered: false,
+            quizPassed: false,
+            discoveredMarkers: [],
             highestRoomUnlocked: 0
           },
           keyBridgeHall: {
@@ -805,6 +811,8 @@
             completed: false,
             newlyUnlocked: false,
             entered: false,
+            quizPassed: false,
+            discoveredMarkers: [],
             highestRoomUnlocked: 0
           },
           queryLab: {
@@ -812,6 +820,8 @@
             completed: false,
             newlyUnlocked: false,
             entered: false,
+            quizPassed: false,
+            discoveredMarkers: [],
             highestRoomUnlocked: 0
           }
         },
@@ -1017,10 +1027,16 @@
 
       function unlockEverything() {
         const roomLastIndexes = {
-          dataVault: 5,
-          tableDepartment: 6,
-          keyBridgeHall: 6,
-          queryLab: 8
+          dataVault: 6,
+          tableDepartment: 7,
+          keyBridgeHall: 7,
+          queryLab: 9
+        };
+        const markerIds = {
+          dataVault: ["shelf", "server", "computer", "board"],
+          tableDepartment: ["board", "row", "column", "dataset"],
+          keyBridgeHall: ["primaryBoard", "goldenKey", "bridge", "foreignBoard"],
+          queryLab: ["filter", "console", "sort", "limit", "ml"]
         };
 
         Object.entries(roomLastIndexes).forEach(([buildingId, lastIndex]) => {
@@ -1028,6 +1044,8 @@
           building.unlocked = true;
           building.entered = true;
           building.newlyUnlocked = false;
+          building.quizPassed = true;
+          building.discoveredMarkers = [...markerIds[buildingId]];
           building.highestRoomUnlocked = lastIndex;
         });
 
