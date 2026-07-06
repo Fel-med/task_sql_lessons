@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Key Bridge Hall | SQL City</title>
+    <style>
+      :root {
+        --cream: #fff4c2;
+        --ink: #111827;
+        --stage: #0f172a;
+        --cyan: #5fffd6;
+        --yellow: #ffd76a;
+        --font-pixel: "Courier New", Courier, monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+      body { background: var(--stage); color: white; font-family: var(--font-pixel); }
+      .room-layout { width: 100vw; height: 100vh; display: grid; grid-template-columns: 260px 1fr; overflow: hidden; background: var(--stage); }
+      .side-panel { height: 100vh; padding: 18px; overflow: hidden; border-right: 4px solid #000; background: var(--ink); color: white; }
+      .side-panel h1 { margin: 0 0 14px; color: var(--cream); font-size: 28px; line-height: 1; text-shadow: 3px 3px 0 #000; }
+      .room-counter, .path-title { margin: 0 0 14px; font-size: 14px; font-weight: 900; line-height: 1.4; }
+      .room-counter { color: var(--cyan); }
+      .path-title { margin-top: 18px; color: var(--cream); text-transform: uppercase; }
+      .lesson-list { display: grid; gap: 6px; }
+      .room-tab, .pixel-btn { border: 3px solid rgba(255, 244, 194, 0.72); background: #172033; box-shadow: 4px 4px 0 #000; color: white; font-family: var(--font-pixel); font-weight: 900; }
+      .room-tab { width: 100%; min-height: 34px; padding: 8px; cursor: pointer; text-align: left; font-size: 12px; line-height: 1.2; }
+      .room-tab:not(.locked):hover, .room-tab:not(.locked):focus-visible { border-color: var(--cyan); box-shadow: 0 0 12px rgba(95, 255, 214, 0.55), 4px 4px 0 #000; outline: none; }
+      .room-tab.locked { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.6); }
+      .room-tab.active { color: var(--cyan); border-color: var(--cyan); background: rgba(95, 255, 214, 0.12); box-shadow: 0 0 12px rgba(95, 255, 214, 0.65), inset 0 0 12px rgba(95, 255, 214, 0.12); }
+      .room-tab.active::before { content: "> "; }
+      .room-tab.locked::before { content: "LOCK "; }
+      .lesson-card { margin-top: 12px; padding: 10px; border: 3px solid var(--cyan); background: #0b1220; box-shadow: 4px 4px 0 #000; }
+      .lesson-card h2 { margin: 0 0 8px; color: var(--cyan); font-size: 15px; }
+      .lesson-card p { margin: 0; color: var(--cream); font-size: 13px; font-weight: 900; line-height: 1.45; }
+      .room-summary p { margin: 0 0 8px; color: var(--cream); font-size: 13px; font-weight: 900; line-height: 1.45; }
+      .room-summary ul { margin: 0; padding-left: 18px; color: white; font-size: 12px; font-weight: 900; line-height: 1.45; }
+      .pixel-btn { display: inline-flex; align-items: center; justify-content: center; padding: 14px 22px; cursor: pointer; font-size: 14px; line-height: 1; text-decoration: none; text-transform: uppercase; }
+      .pixel-btn:hover, .pixel-btn:focus-visible { background: var(--yellow); color: var(--ink); outline: none; }
+      .room-stage { position: relative; width: 100%; height: 100vh; overflow: hidden; background: black; }
+      .room-bg { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; image-rendering: crisp-edges; user-select: none; }
+      .room-nav { position: absolute; z-index: 90; left: 50%; bottom: 32px; display: flex; gap: 24px; transform: translateX(-50%); }
+      .return-city-btn { position: absolute; top: 28px; right: 28px; z-index: 95; padding: 12px 18px; border: 3px solid var(--cream); background: var(--ink); box-shadow: 4px 4px 0 #000; color: var(--cream); font-family: var(--font-pixel); font-weight: 900; text-decoration: none; text-transform: uppercase; }
+      .return-city-btn:hover, .return-city-btn:focus-visible { background: var(--yellow); color: var(--ink); outline: none; }
+      .info-marker { position: absolute; z-index: 80; width: 20px; height: 20px; padding: 0; border: 3px solid var(--cyan); background: rgba(255, 244, 194, 0.85); box-shadow: 0 0 0 2px var(--stage), 0 0 12px rgba(95, 255, 214, 1), 0 0 24px rgba(95, 255, 214, 0.8), inset 0 0 6px rgba(95, 255, 214, 0.7); cursor: pointer; image-rendering: pixelated; }
+      .info-marker::after { content: ""; position: absolute; inset: -7px; border: 2px solid rgba(255, 244, 194, 0.45); box-shadow: 0 0 10px rgba(95, 255, 214, 0.65); pointer-events: none; }
+      .info-marker:hover { background: var(--cyan); border-color: var(--cream); box-shadow: 0 0 0 2px var(--stage), 0 0 18px rgba(95, 255, 214, 1), 0 0 32px rgba(255, 244, 194, 0.9), inset 0 0 8px rgba(255, 255, 255, 0.9); transform: scale(1.18); }
+      .info-marker:focus-visible { outline: 3px solid var(--cream); outline-offset: 4px; }
+      .marker-left { left: 25%; top: 36%; }
+      .marker-key { left: 49%; top: 48%; }
+      .marker-bridge { left: 61%; top: 39%; }
+      .marker-right { left: 74%; top: 36%; }
+      .info-card { position: absolute; z-index: 40; left: 50%; bottom: 112px; width: min(86%, 560px); padding: 18px; border: 4px solid var(--cream); background: rgba(17, 24, 39, 0.94); box-shadow: 8px 8px 0 #000; color: white; transform: translateX(-50%); }
+      .info-card[hidden], .hotspots[hidden], .return-city-btn[hidden], .reward-modal[hidden], .pixel-btn[hidden] { display: none; }
+      .info-card p { margin: 0 42px 0 0; font-size: 15px; font-weight: 900; line-height: 1.45; }
+      .close-card { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border: 2px solid var(--cream); background: var(--yellow); color: var(--ink); cursor: pointer; font: 900 18px/1 var(--font-pixel); }
+      .info-card { top: 50%; right: 32px; left: auto; bottom: auto; z-index: 35; width: min(680px, 44vw); max-height: calc(100vh - 180px); overflow: hidden; padding: 16px 18px; border: 3px solid var(--cyan); background: rgba(15, 23, 42, 0.92); box-shadow: 4px 4px 0 #000, 0 0 18px rgba(95, 255, 214, 0.45); color: var(--cream); transform: translateY(-50%); font-size: clamp(0.72rem, 0.85vw, 0.95rem); line-height: 1.45; }
+      .room-stage.is-welcome-room .info-card { top: auto; right: 32px; bottom: 32px; width: min(520px, 36vw); max-height: 240px; transform: none; }
+      .info-card h2, .info-card h3 { margin: 0 0 10px; color: var(--cyan); font-size: clamp(1.1rem, 1.5vw, 1.6rem); text-shadow: 3px 3px 0 #000; }
+      .info-card h3 { margin: 14px 0 8px; color: var(--yellow); font-size: clamp(0.9rem, 1.1vw, 1.1rem); }
+      .info-card p, .info-card li { color: white; font-size: inherit; font-weight: 900; line-height: 1.45; }
+      .info-card p { margin: 8px 0; }
+      .info-card ul { margin: 8px 0; padding-left: 22px; }
+      .sql-code { max-width: 100%; margin: 8px 0; padding: 10px; overflow-x: auto; border: 2px solid #334155; background: #020617; color: var(--cyan); font: 900 14px/1.45 var(--font-pixel); }
+      .result-table { width: 100%; margin: 8px 0; border-collapse: collapse; background: rgba(2, 6, 23, 0.78); font-size: 0.85rem; }
+      .result-table th, .result-table td { padding: 5px 7px; border: 2px solid #334155; color: white; text-align: left; }
+      .result-table th { color: var(--yellow); }
+      .pixel-box, .flow-line { margin: 8px 0; padding: 12px; border: 2px solid var(--cream); background: rgba(2, 6, 23, 0.7); box-shadow: 4px 4px 0 #000; color: var(--cream); font-weight: 900; line-height: 1.5; }
+      .flow-line { border-color: var(--cyan); color: var(--cyan); }
+      .reward-note { color: var(--yellow) !important; text-shadow: 2px 2px 0 #000; }
+      .bad-example td { background: rgba(255, 77, 109, 0.14); }
+      .good-example td { background: rgba(95, 255, 214, 0.12); }
+      .reward-modal { position: absolute; inset: 0; z-index: 60; display: grid; place-items: center; background: rgba(15, 23, 42, 0.45); }
+      .reward-card { width: min(88%, 520px); padding: 22px; border: 4px solid var(--cream); background: rgba(17, 24, 39, 0.96); box-shadow: 8px 8px 0 #000, 0 0 24px rgba(95, 255, 214, 0.45); color: var(--cream); text-align: center; }
+      .reward-card h2 { margin: 0 0 12px; color: var(--yellow); font-size: clamp(22px, 3vw, 34px); text-shadow: 3px 3px 0 #000; }
+      .reward-card p { margin: 0 0 18px; font-size: 15px; font-weight: 900; line-height: 1.45; }
+      .reward-key-img { width: clamp(90px, 12vw, 160px); height: auto; display: block; margin: 0 auto 18px; image-rendering: pixelated; image-rendering: crisp-edges; filter: drop-shadow(0 0 8px rgba(255, 215, 106, 0.85)) drop-shadow(0 0 16px rgba(95, 255, 214, 0.45)); animation: keyFloat 1.4s ease-in-out infinite alternate; }
+      @keyframes keyFloat { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+      @media (max-width: 900px) {
+        .info-card, .room-stage.is-welcome-room .info-card { right: 16px; left: 16px; top: auto; bottom: 90px; width: auto; max-height: 42vh; overflow-y: auto; transform: none; }
+      }
+      @media (max-width: 760px) {
+        .room-layout { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+        .side-panel { height: auto; max-height: 44vh; overflow: hidden; border-right: 0; border-bottom: 4px solid #000; }
+        .side-panel h1 { font-size: 24px; }
+        .room-stage { height: 100%; min-height: 0; }
+        .room-nav { bottom: 18px; gap: 12px; }
+        .pixel-btn { padding: 11px 12px; font-size: 12px; }
+        .info-card, .room-stage.is-welcome-room .info-card { bottom: 86px; max-height: 34vh; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="room-layout">
+      <aside class="side-panel">
+        <h1>Key Bridge Hall</h1>
+        <p class="room-counter" id="roomCounter">Current Room: 0 / 6</p>
+        <p class="path-title">Learning Path</p>
+        <div class="lesson-list" id="roomList"></div>
+        <article class="lesson-card" id="lessonCard">
+          <h2 id="lessonTitle">Welcoming Room</h2>
+          <div class="room-summary" id="lessonText"></div>
+        </article>
+      </aside>
+      <section class="room-stage" aria-label="Key Bridge Hall rooms">
+        <img class="room-bg" id="roomBg" src="res/rooms_background/Room_3_Key_Bridge_Hall.png" alt="" />
+        <a class="return-city-btn" id="topReturn" href="index.html">Return to the City</a>
+        <div class="hotspots" id="hotspots">
+          <button class="info-marker marker-key" type="button" data-info="key" aria-label="Golden key info"></button>
+          <button class="info-marker marker-bridge" type="button" data-info="bridge" aria-label="Glowing bridge or cable info"></button>
+          <button class="info-marker marker-left" type="button" data-info="left-board" aria-label="Left table board info"></button>
+          <button class="info-marker marker-right" type="button" data-info="right-board" aria-label="Right table board info"></button>
+        </div>
+        <div class="room-nav">
+          <button class="pixel-btn" id="prevRoom" type="button">Previous Room</button>
+          <button class="pixel-btn" id="nextRoom" type="button">Next Room</button>
+          <a class="pixel-btn" id="finalReturn" href="index.html" hidden>Return to the City</a>
+        </div>
+        <article class="info-card" id="infoCard" aria-live="polite">
+          <div id="mainLessonContent"></div>
+        </article>
+        <article class="reward-modal" id="rewardModal" hidden>
+          <div class="reward-card">
+            <img src="res/keys/regular-key.png" class="reward-key-img" alt="Reward key">
+            <h2 id="rewardTitle">Key Received!</h2>
+            <p id="rewardMessage">You received the Query Lab Key.</p>
+            <button class="pixel-btn" id="rewardContinue" type="button">Continue</button>
+          </div>
+        </article>
+      </section>
+    </main>
+    <script>
+      const DEFAULT_PROGRESS = {
+        buildings: {
+          dataVault: { unlocked: true, completed: false, newlyUnlocked: false, entered: false, highestRoomUnlocked: 0 },
+          tableDepartment: { unlocked: false, completed: false, newlyUnlocked: false, entered: false, highestRoomUnlocked: 0 },
+          keyBridgeHall: { unlocked: false, completed: false, newlyUnlocked: false, entered: false, highestRoomUnlocked: 0 },
+          queryLab: { unlocked: false, completed: false, newlyUnlocked: false, entered: false, highestRoomUnlocked: 0 }
+        },
+        badges: { sqlFoundations: false }
+      };
+      const BUILDING_ID = "keyBridgeHall";
+      const NEXT_BUILDING_ID = "queryLab";
+      const REWARD_TITLE = "Key Received!";
+      const REWARD_MESSAGE = "You received the Query Lab Key.";
+      const rooms = [
+        {
+          title: "Welcoming Room",
+          image: "res/rooms_background/Room_3_Key_Bridge_Hall.png",
+          type: "welcome",
+          summary: "Welcome to Key Bridge Hall. This room explains how tables connect using keys.",
+          points: ["Primary keys identify rows", "Foreign keys connect tables", "Relationships help prepare data"],
+          contentHtml: `
+            <h2>Welcome to Key Bridge Hall</h2>
+            <p>This building explains how tables connect using keys.</p>
+            <p>Keys help us identify rows and link related data.</p>
+            <ul>
+              <li>Click the cyan markers to inspect key objects.</li>
+              <li>Use Next Room to learn primary keys and foreign keys.</li>
+            </ul>
+          `,
+          markers: {
+            key: `<h2>Primary Key</h2><p>A primary key uniquely identifies one row in a table.</p>`,
+            bridge: `<h2>Foreign Key</h2><p>A foreign key connects one table to another by pointing to a primary key.</p>`,
+            "left-board": `<h2>First Table</h2><p>This table owns its unique ID. For example, students can have student_id.</p>`,
+            "right-board": `<h2>Related Table</h2><p>This table can store the ID from another table to create a relationship.</p>`
+          }
+        },
+        {
+          title: "What is a primary key?",
+          image: "res/rooms_background/01_Key_Bridge_Hall_background.png",
+          type: "lesson",
+          summary: "A primary key uniquely identifies each row in a table.",
+          points: ["Must be unique", "Should not be repeated", "Helps find one exact row"],
+          contentHtml: `
+            <h2>What is a primary key?</h2>
+            <p>A primary key is a column that uniquely identifies each row in a table.</p>
+            <p>No two rows should have the same primary key value.</p>
+            <table class="result-table">
+              <thead><tr><th>student_id</th><th>name</th><th>age</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>Med</td><td>21</td></tr>
+                <tr><td>2</td><td>Sara</td><td>19</td></tr>
+              </tbody>
+            </table>
+            <p><strong>student_id</strong> is the unique ID of each student.</p>
+          `
+        },
+        {
+          title: "Why IDs must be unique",
+          image: "res/rooms_background/01_Key_Bridge_Hall_background.png",
+          type: "lesson",
+          summary: "Unique IDs prevent confusion when identifying rows.",
+          points: ["One ID = one row", "Repeated IDs cause problems", "Unique IDs keep data reliable"],
+          contentHtml: `
+            <h2>Why IDs must be unique</h2>
+            <p>Primary keys must be unique because the database needs a safe way to find one exact row.</p>
+            <p>If two students had the same student_id, the database could be confused.</p>
+            <h3>Bad table</h3>
+            <table class="result-table">
+              <thead><tr><th>student_id</th><th>name</th></tr></thead>
+              <tbody>
+                <tr class="bad-example"><td>1</td><td>Med</td></tr>
+                <tr class="bad-example"><td>1</td><td>Sara</td></tr>
+              </tbody>
+            </table>
+            <h3>Good table</h3>
+            <table class="result-table">
+              <thead><tr><th>student_id</th><th>name</th></tr></thead>
+              <tbody>
+                <tr class="good-example"><td>1</td><td>Med</td></tr>
+                <tr class="good-example"><td>2</td><td>Sara</td></tr>
+              </tbody>
+            </table>
+          `
+        },
+        {
+          title: "What is a foreign key?",
+          image: "res/rooms_background/01_Key_Bridge_Hall_background.png",
+          type: "lesson",
+          summary: "A foreign key points to a primary key in another table.",
+          points: ["Connects tables", "Creates relationships", "Helps combine data"],
+          contentHtml: `
+            <h2>What is a foreign key?</h2>
+            <p>A foreign key is a column that points to the primary key of another table.</p>
+            <p>It creates a relationship between two tables.</p>
+            <h3>Students table</h3>
+            <table class="result-table">
+              <thead><tr><th>student_id</th><th>name</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>Med</td></tr>
+                <tr><td>2</td><td>Sara</td></tr>
+              </tbody>
+            </table>
+            <h3>Enrollments table</h3>
+            <table class="result-table">
+              <thead><tr><th>enrollment_id</th><th>student_id</th><th>course</th></tr></thead>
+              <tbody>
+                <tr><td>10</td><td>1</td><td>SQL</td></tr>
+                <tr><td>11</td><td>2</td><td>ML</td></tr>
+              </tbody>
+            </table>
+            <p>Here, <strong>enrollments.student_id</strong> connects to <strong>students.student_id</strong>.</p>
+          `
+        },
+        {
+          title: "How tables connect",
+          image: "res/rooms_background/01_Key_Bridge_Hall_background.png",
+          type: "lesson",
+          summary: "Tables connect when one table stores an ID from another table.",
+          points: ["Avoids repeated data", "Keeps data organized", "Helps join information later"],
+          contentHtml: `
+            <h2>How tables connect</h2>
+            <p>Tables connect when one table stores an ID from another table.</p>
+            <p>This avoids repeating the same information many times.</p>
+            <div class="flow-line">students.student_id -> enrollments.student_id</div>
+            <h3>Why this is useful</h3>
+            <p>We can combine information from multiple tables when preparing a dataset.</p>
+          `
+        },
+        {
+          title: "Example: students and enrollments",
+          image: "res/rooms_background/01_Key_Bridge_Hall_background.png",
+          type: "lesson",
+          summary: "students and enrollments can connect using student_id.",
+          points: ["students stores people", "enrollments stores courses", "student_id connects them"],
+          contentHtml: `
+            <h2>Example: students and enrollments</h2>
+            <p>The students table stores student information.</p>
+            <p>The enrollments table stores which course each student joined.</p>
+            <p>The student_id connects them.</p>
+            <h3>Students table</h3>
+            <table class="result-table">
+              <thead><tr><th>student_id</th><th>name</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>Med</td></tr>
+                <tr><td>2</td><td>Sara</td></tr>
+              </tbody>
+            </table>
+            <h3>Enrollments table</h3>
+            <table class="result-table">
+              <thead><tr><th>enrollment_id</th><th>student_id</th><th>course</th></tr></thead>
+              <tbody>
+                <tr><td>10</td><td>1</td><td>SQL</td></tr>
+                <tr><td>11</td><td>2</td><td>ML</td></tr>
+              </tbody>
+            </table>
+            <h3>Machine Learning connection</h3>
+            <p>When building an ML dataset, relationships help us collect all useful information about one example.</p>
+          `
+        },
+        {
+          title: "Key Bridge Recap",
+          image: "res/rooms_background/01_Key_Bridge_Hall_background.png",
+          type: "lesson",
+          summary: "You now understand primary keys, foreign keys, and table relationships.",
+          points: ["Primary keys identify rows", "Foreign keys connect tables", "Relationships combine data correctly"],
+          contentHtml: `
+            <h2>Key Bridge Recap</h2>
+            <p>You learned:</p>
+            <ul>
+              <li>A primary key uniquely identifies one row.</li>
+              <li>A foreign key connects one table to another.</li>
+              <li>Relationships help combine data correctly.</li>
+            </ul>
+            <p class="reward-note">Complete this room to receive the Query Lab Key.</p>
+          `
+        }
+      ];
+      let currentRoomIndex = 0;
+      let progress = getProgress();
+      const roomBg = document.querySelector("#roomBg");
+      const roomStage = document.querySelector(".room-stage");
+      const roomCounter = document.querySelector("#roomCounter");
+      const hotspots = document.querySelector("#hotspots");
+      const prevRoom = document.querySelector("#prevRoom");
+      const nextRoom = document.querySelector("#nextRoom");
+      const topReturn = document.querySelector("#topReturn");
+      const finalReturn = document.querySelector("#finalReturn");
+      const infoCard = document.querySelector("#infoCard");
+      const roomList = document.querySelector("#roomList");
+      const lessonTitle = document.querySelector("#lessonTitle");
+      const lessonText = document.querySelector("#lessonText");
+      const mainLessonContent = document.querySelector("#mainLessonContent");
+      const rewardModal = document.querySelector("#rewardModal");
+      const rewardTitle = document.querySelector("#rewardTitle");
+      const rewardMessage = document.querySelector("#rewardMessage");
+      const rewardContinue = document.querySelector("#rewardContinue");
+      function createDefaultProgress() { return JSON.parse(JSON.stringify(DEFAULT_PROGRESS)); }
+      function getProgress() {
+        const progress = createDefaultProgress();
+        try {
+          const saved = JSON.parse(localStorage.getItem("sqlCityProgress"));
+          if (saved && saved.buildings) Object.keys(progress.buildings).forEach((id) => { if (saved.buildings[id]) Object.assign(progress.buildings[id], saved.buildings[id]); });
+          if (saved && saved.badges) Object.assign(progress.badges, saved.badges);
+        } catch (error) { localStorage.removeItem("sqlCityProgress"); }
+        progress.buildings.dataVault.unlocked = true;
+        return progress;
+      }
+      function saveProgress(progress) { localStorage.setItem("sqlCityProgress", JSON.stringify(progress)); }
+      function unlockBuilding(buildingId) { if (!buildingId) return; const building = progress.buildings[buildingId]; if (!building) return; if (!building.unlocked) { building.unlocked = true; building.newlyUnlocked = true; } }
+      function completeBuilding(buildingId) { const building = progress.buildings[buildingId]; if (!building || building.completed) return false; building.completed = true; return true; }
+      function markBuildingEntered(buildingId) { const building = progress.buildings[buildingId]; if (!building) return; building.entered = true; building.newlyUnlocked = false; saveProgress(progress); }
+      function buildingProgress() { return progress.buildings[BUILDING_ID]; }
+      function updateCounter() { roomCounter.textContent = `Current Room: ${currentRoomIndex} / ${rooms.length - 1}`; }
+      function formatRoomTitle(room, index) { return index === 0 ? "0. Welcoming Room" : `${String(index).padStart(2, "0")}. ${room.title}`; }
+      function renderRoomList() {
+        roomList.innerHTML = "";
+        rooms.forEach((room, index) => {
+          const tab = document.createElement("button");
+          tab.type = "button";
+          tab.className = "room-tab";
+          tab.textContent = formatRoomTitle(room, index);
+          const isUnlocked = index <= buildingProgress().highestRoomUnlocked;
+          if (!isUnlocked) tab.classList.add("locked");
+          if (index === currentRoomIndex) tab.classList.add("active");
+          tab.addEventListener("click", () => {
+            if (!isUnlocked) {
+              lessonTitle.textContent = "Room locked";
+              lessonText.innerHTML = "<p>Explore previous rooms first to unlock this room.</p>";
+              mainLessonContent.innerHTML = "<h2>Room locked</h2><p>Explore previous rooms first to unlock this room.</p>";
+              return;
+            }
+            currentRoomIndex = index;
+            renderRoom();
+          });
+          roomList.appendChild(tab);
+        });
+      }
+      function renderSidebarSummary(room) {
+        lessonTitle.textContent = room.title;
+        lessonText.innerHTML = `<p>${room.summary}</p><ul>${room.points.map((point) => `<li>${point}</li>`).join("")}</ul>`;
+      }
+      function renderMainContent(contentHtml) {
+        mainLessonContent.innerHTML = contentHtml;
+        infoCard.hidden = false;
+      }
+      function renderMarkerSummary(contentHtml) {
+        const markerDoc = document.createElement("div");
+        markerDoc.innerHTML = contentHtml;
+        const markerTitle = markerDoc.querySelector("h2")?.textContent || "Room marker";
+        const markerSummary = markerDoc.querySelector("p")?.textContent || "Explore this object for a quick lesson hint.";
+        lessonTitle.textContent = markerTitle;
+        lessonText.innerHTML = `<p>${markerSummary}</p>`;
+      }
+      function renderRoom() {
+        const room = rooms[currentRoomIndex];
+        const isFinalRoom = currentRoomIndex === rooms.length - 1;
+        roomStage.classList.toggle("is-welcome-room", currentRoomIndex === 0);
+        roomBg.src = room.image;
+        updateCounter();
+        hotspots.hidden = currentRoomIndex !== 0;
+        prevRoom.hidden = currentRoomIndex === 0;
+        nextRoom.hidden = isFinalRoom;
+        topReturn.hidden = isFinalRoom;
+        finalReturn.hidden = !isFinalRoom;
+        renderSidebarSummary(room);
+        renderMainContent(room.contentHtml);
+        renderRoomList();
+        completeIfFinalRoom();
+      }
+      prevRoom.addEventListener("click", () => { if (currentRoomIndex > 0) currentRoomIndex -= 1; renderRoom(); });
+      nextRoom.addEventListener("click", () => { if (currentRoomIndex < rooms.length - 1) { currentRoomIndex += 1; if (currentRoomIndex > buildingProgress().highestRoomUnlocked) { buildingProgress().highestRoomUnlocked = currentRoomIndex; saveProgress(progress); } } renderRoom(); });
+      document.querySelectorAll(".info-marker").forEach((spot) => { spot.addEventListener("click", () => { const markerContent = rooms[0].markers?.[spot.dataset.info]; if (markerContent) { renderMarkerSummary(markerContent); renderMainContent(markerContent); } }); });
+      function showReward() { rewardTitle.textContent = REWARD_TITLE; rewardMessage.textContent = REWARD_MESSAGE; rewardModal.hidden = false; }
+      function completeIfFinalRoom() { if (currentRoomIndex !== rooms.length - 1) return; const building = buildingProgress(); if (building.completed) return; building.highestRoomUnlocked = Math.max(building.highestRoomUnlocked, currentRoomIndex); if (completeBuilding(BUILDING_ID)) { unlockBuilding(NEXT_BUILDING_ID); saveProgress(progress); showReward(); } }
+      rewardContinue.addEventListener("click", () => { rewardModal.hidden = true; });
+      if (!buildingProgress().unlocked) { window.location.href = "index.html"; } else { markBuildingEntered(BUILDING_ID); renderRoom(); }
+    </script>
+  </body>
+</html>

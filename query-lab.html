@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Query Lab | SQL City</title>
+    <style>
+      :root {
+        --cream: #fff4c2;
+        --ink: #111827;
+        --stage: #0f172a;
+        --cyan: #5fffd6;
+        --yellow: #ffd76a;
+        --font-pixel: "Courier New", Courier, monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+      body { background: var(--stage); color: white; font-family: var(--font-pixel); }
+      .room-layout { width: 100vw; height: 100vh; display: grid; grid-template-columns: 260px 1fr; overflow: hidden; background: var(--stage); }
+      .side-panel { height: 100vh; padding: 18px; overflow: hidden; border-right: 4px solid #000; background: var(--ink); color: white; }
+      .side-panel h1 { margin: 0 0 14px; color: var(--cream); font-size: 30px; line-height: 1; text-shadow: 3px 3px 0 #000; }
+      .room-counter, .path-title { margin: 0 0 14px; font-size: 14px; font-weight: 900; line-height: 1.4; }
+      .room-counter { color: var(--cyan); }
+      .path-title { margin-top: 18px; color: var(--cream); text-transform: uppercase; }
+      .lesson-list { display: grid; gap: 6px; }
+      .room-tab, .pixel-btn { border: 3px solid rgba(255, 244, 194, 0.72); background: #172033; box-shadow: 4px 4px 0 #000; color: white; font-family: var(--font-pixel); font-weight: 900; }
+      .room-tab { width: 100%; min-height: 34px; padding: 8px; cursor: pointer; text-align: left; font-size: 12px; line-height: 1.2; }
+      .room-tab:not(.locked):hover, .room-tab:not(.locked):focus-visible { border-color: var(--cyan); box-shadow: 0 0 12px rgba(95, 255, 214, 0.55), 4px 4px 0 #000; outline: none; }
+      .room-tab.locked { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.6); }
+      .room-tab.active { color: var(--cyan); border-color: var(--cyan); background: rgba(95, 255, 214, 0.12); box-shadow: 0 0 12px rgba(95, 255, 214, 0.65), inset 0 0 12px rgba(95, 255, 214, 0.12); }
+      .room-tab.active::before { content: "> "; }
+      .room-tab.locked::before { content: "LOCK "; }
+      .lesson-card { margin-top: 12px; padding: 10px; border: 3px solid var(--cyan); background: #0b1220; box-shadow: 4px 4px 0 #000; }
+      .lesson-card h2 { margin: 0 0 8px; color: var(--cyan); font-size: 15px; }
+      .lesson-card p { margin: 0; color: var(--cream); font-size: 13px; font-weight: 900; line-height: 1.45; }
+      .room-summary p { margin: 0 0 8px; color: var(--cream); font-size: 13px; font-weight: 900; line-height: 1.45; }
+      .room-summary ul { margin: 0; padding-left: 18px; color: white; font-size: 12px; font-weight: 900; line-height: 1.45; }
+      .pixel-btn { display: inline-flex; align-items: center; justify-content: center; padding: 14px 22px; cursor: pointer; font-size: 14px; line-height: 1; text-decoration: none; text-transform: uppercase; }
+      .pixel-btn:hover, .pixel-btn:focus-visible { background: var(--yellow); color: var(--ink); outline: none; }
+      .room-stage { position: relative; width: 100%; height: 100vh; overflow: hidden; background: black; }
+      .room-bg { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; image-rendering: crisp-edges; user-select: none; }
+      .room-nav { position: absolute; z-index: 30; left: 50%; bottom: 32px; display: flex; gap: 24px; transform: translateX(-50%); }
+      .return-city-btn { position: absolute; top: 28px; right: 28px; z-index: 40; padding: 12px 18px; border: 3px solid var(--cream); background: var(--ink); box-shadow: 4px 4px 0 #000; color: var(--cream); font-family: var(--font-pixel); font-weight: 900; text-decoration: none; text-transform: uppercase; }
+      .return-city-btn:hover, .return-city-btn:focus-visible { background: var(--yellow); color: var(--ink); outline: none; }
+      .info-marker { position: absolute; z-index: 25; width: 18px; height: 18px; padding: 0; border: 3px solid var(--cyan); background: rgba(95, 255, 214, 0.45); box-shadow: 0 0 8px rgba(95, 255, 214, 0.9), inset 0 0 6px rgba(255, 255, 255, 0.6); cursor: pointer; image-rendering: pixelated; }
+      .info-marker::after { content: ""; position: absolute; inset: -7px; border: 2px solid rgba(95, 255, 214, 0.25); pointer-events: none; }
+      .info-marker:hover { background: rgba(95, 255, 214, 0.85); box-shadow: 0 0 12px rgba(95, 255, 214, 1), 0 0 24px rgba(95, 255, 214, 0.75), inset 0 0 8px rgba(255, 255, 255, 0.85); transform: scale(1.15); }
+      .info-marker:focus-visible { outline: 3px solid var(--cream); outline-offset: 4px; }
+      .marker-console { left: 50%; top: 48%; }
+      .marker-filter { left: 27%; top: 44%; }
+      .marker-sort { left: 68%; top: 72%; }
+      .marker-sample { left: 33%; top: 74%; }
+      .marker-ml { left: 87%; top: 56%; }
+      .info-card { position: absolute; z-index: 40; left: 50%; bottom: 112px; width: min(86%, 560px); padding: 18px; border: 4px solid var(--cream); background: rgba(17, 24, 39, 0.94); box-shadow: 8px 8px 0 #000; color: white; transform: translateX(-50%); }
+      .info-card[hidden], .hotspots[hidden], .return-city-btn[hidden], .reward-modal[hidden], .pixel-btn[hidden] { display: none; }
+      .info-card p { margin: 0 42px 0 0; font-size: 15px; font-weight: 900; line-height: 1.45; }
+      .close-card { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border: 2px solid var(--cream); background: var(--yellow); color: var(--ink); cursor: pointer; font: 900 18px/1 var(--font-pixel); }
+      .info-card { top: 110px; right: 32px; left: auto; bottom: auto; z-index: 35; width: min(560px, 42vw); max-height: calc(100vh - 180px); overflow-y: auto; padding: 18px; border: 3px solid var(--cyan); background: rgba(15, 23, 42, 0.92); box-shadow: 4px 4px 0 #000, 0 0 18px rgba(95, 255, 214, 0.45); color: var(--cream); transform: none; }
+      .info-card h2, .info-card h3 { margin: 0 0 10px; color: var(--cyan); text-shadow: 3px 3px 0 #000; }
+      .info-card h3 { margin-top: 18px; color: var(--yellow); font-size: 16px; }
+      .info-card p, .info-card li { color: white; font-size: 15px; font-weight: 900; line-height: 1.45; }
+      .info-card p { margin: 0 0 12px; }
+      .info-card ul { margin: 0 0 14px; padding-left: 22px; }
+      .sql-code { margin: 12px 0; padding: 12px; overflow-x: auto; border: 2px solid #334155; background: #020617; color: var(--cyan); font: 900 14px/1.45 var(--font-pixel); }
+      .result-table { width: 100%; margin: 12px 0; border-collapse: collapse; background: rgba(2, 6, 23, 0.78); font-size: 0.85rem; }
+      .result-table th, .result-table td { padding: 6px; border: 2px solid #334155; color: white; text-align: left; }
+      .result-table th { color: var(--yellow); }
+      .pixel-box, .flow-line { margin: 12px 0; padding: 12px; border: 2px solid var(--cream); background: rgba(2, 6, 23, 0.7); box-shadow: 4px 4px 0 #000; color: var(--cream); font-weight: 900; line-height: 1.5; }
+      .flow-line { border-color: var(--cyan); color: var(--cyan); }
+      .reward-note { color: var(--yellow) !important; text-shadow: 2px 2px 0 #000; }
+      .reward-modal { position: absolute; inset: 0; z-index: 60; display: grid; place-items: center; background: rgba(15, 23, 42, 0.45); }
+      .reward-card { width: min(88%, 520px); padding: 22px; border: 4px solid var(--cream); background: rgba(17, 24, 39, 0.96); box-shadow: 8px 8px 0 #000, 0 0 24px rgba(95, 255, 214, 0.45); color: var(--cream); text-align: center; }
+      .reward-card h2 { margin: 0 0 12px; color: var(--yellow); font-size: clamp(22px, 3vw, 34px); text-shadow: 3px 3px 0 #000; }
+      .reward-card p { margin: 0 0 18px; font-size: 15px; font-weight: 900; line-height: 1.45; }
+      .reward-key-img { width: clamp(90px, 12vw, 160px); height: auto; display: block; margin: 0 auto 18px; image-rendering: pixelated; image-rendering: crisp-edges; filter: drop-shadow(0 0 8px rgba(255, 215, 106, 0.85)) drop-shadow(0 0 16px rgba(95, 255, 214, 0.45)); animation: keyFloat 1.4s ease-in-out infinite alternate; }
+      @keyframes keyFloat { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+      @media (max-width: 760px) {
+        .room-layout { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+        .side-panel { height: auto; max-height: 44vh; overflow: hidden; border-right: 0; border-bottom: 4px solid #000; }
+        .side-panel h1 { font-size: 24px; }
+        .room-stage { height: 100%; min-height: 0; }
+        .room-nav { bottom: 18px; gap: 12px; }
+        .pixel-btn { padding: 11px 12px; font-size: 12px; }
+        .info-card { left: 16px; right: 16px; top: auto; bottom: 86px; width: auto; max-height: 34vh; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="room-layout">
+      <aside class="side-panel">
+        <h1>Query Lab</h1>
+        <p class="room-counter" id="roomCounter">Current Room: 0 / 8</p>
+        <p class="path-title">Learning Path</p>
+        <div class="lesson-list" id="roomList"></div>
+        <article class="lesson-card" id="lessonCard">
+          <h2 id="lessonTitle">Welcoming Room</h2>
+          <div class="room-summary" id="lessonText"></div>
+        </article>
+      </aside>
+      <section class="room-stage" aria-label="Query Lab rooms">
+        <img class="room-bg" id="roomBg" src="res/rooms_background/Room_4_Query_Lab.png" alt="" />
+        <a class="return-city-btn" id="topReturn" href="index.html">Return to the City</a>
+        <div class="hotspots" id="hotspots">
+          <button class="info-marker marker-console" type="button" data-info="console" aria-label="Main console info"></button>
+          <button class="info-marker marker-filter" type="button" data-info="filter" aria-label="Filter machine info"></button>
+          <button class="info-marker marker-sort" type="button" data-info="sort" aria-label="Sorting machine info"></button>
+          <button class="info-marker marker-sample" type="button" data-info="sample" aria-label="Sample box info"></button>
+          <button class="info-marker marker-ml" type="button" data-info="ml" aria-label="ML machine info"></button>
+        </div>
+        <div class="room-nav">
+          <button class="pixel-btn" id="prevRoom" type="button">Previous Room</button>
+          <button class="pixel-btn" id="nextRoom" type="button">Next Room</button>
+          <a class="pixel-btn" id="finalReturn" href="index.html" hidden>Return to the City</a>
+        </div>
+        <article class="info-card" id="infoCard" aria-live="polite">
+          <div id="mainLessonContent"></div>
+        </article>
+        <article class="reward-modal" id="rewardModal" hidden>
+          <div class="reward-card">
+            <img src="res/keys/regular-key.png" class="reward-key-img" alt="Reward key">
+            <h2 id="rewardTitle">Badge Earned!</h2>
+            <p id="rewardMessage">You completed SQL Foundations.</p>
+            <button class="pixel-btn" id="rewardContinue" type="button">Continue</button>
+          </div>
+        </article>
+      </section>
+    </main>
+    <script>
+      const DEFAULT_PROGRESS = {
+        buildings: {
+          dataVault: { unlocked: true, completed: false, newlyUnlocked: false, entered: false, highestRoomUnlocked: 0 },
+          tableDepartment: { unlocked: false, completed: false, newlyUnlocked: false, entered: false, highestRoomUnlocked: 0 },
+          keyBridgeHall: { unlocked: false, completed: false, newlyUnlocked: false, entered: false, highestRoomUnlocked: 0 },
+          queryLab: { unlocked: false, completed: false, newlyUnlocked: false, entered: false, highestRoomUnlocked: 0 }
+        },
+        badges: { sqlFoundations: false }
+      };
+      const BUILDING_ID = "queryLab";
+      const NEXT_BUILDING_ID = "";
+      const REWARD_TITLE = "Badge Earned!";
+      const REWARD_MESSAGE = "You completed SQL Foundations.";
+      const rooms = [
+        {
+          title: "Welcoming Room",
+          image: "res/rooms_background/Room_4_Query_Lab.png",
+          type: "welcome",
+          summary: "Welcome to the Query Lab. This building teaches SQL commands used to retrieve and prepare data.",
+          points: ["SELECT chooses data", "WHERE filters data", "ORDER BY sorts data"],
+          contentHtml: `
+            <h2>Welcome to the Query Lab</h2>
+            <p>This building teaches the SQL commands used to retrieve, filter, sort, and prepare data.</p>
+            <p>These commands help us explore data before using it in Machine Learning.</p>
+            <ul>
+              <li>Click the cyan markers to inspect lab tools.</li>
+              <li>Use Next Room to begin writing SQL queries.</li>
+            </ul>
+          `,
+          markers: {
+            console: `<h2>Query Console</h2><p>This is where SQL queries are written and tested.</p>`,
+            filter: `<h2>WHERE Filter</h2><p>WHERE filters rows using conditions.</p>`,
+            sort: `<h2>ORDER BY</h2><p>ORDER BY sorts the result in ascending or descending order.</p>`,
+            sample: `<h2>LIMIT</h2><p>LIMIT returns only a selected number of rows.</p>`,
+            ml: `<h2>SQL to ML</h2><p>SQL prepares clean data that can later be used by a Machine Learning model.</p>`
+          }
+        },
+        {
+          title: "SELECT and FROM",
+          image: "res/rooms_background/04_Query_Lab_background.png",
+          type: "lesson",
+          summary: "SELECT chooses columns and FROM chooses the table.",
+          points: ["SELECT = columns", "FROM = table", "* = all columns"],
+          contentHtml: `
+            <h2>SELECT and FROM</h2>
+            <p><strong>SELECT</strong> chooses which columns you want.</p>
+            <p><strong>FROM</strong> chooses which table the data comes from.</p>
+            <pre class="sql-code"><code>SELECT * FROM students;</code></pre>
+            <p><strong>*</strong> means all columns. This query gets all data from the students table.</p>
+            <pre class="sql-code"><code>SELECT name FROM students;</code></pre>
+            <p>This gets only the name column.</p>
+          `
+        },
+        {
+          title: "WHERE",
+          image: "res/rooms_background/04_Query_Lab_background.png",
+          type: "lesson",
+          summary: "WHERE filters rows using a condition.",
+          points: ["Keeps matching rows", "Removes unwanted rows", "Useful before ML"],
+          contentHtml: `
+            <h2>WHERE</h2>
+            <p><strong>WHERE</strong> filters rows using a condition.</p>
+            <p>It helps us keep only the rows we need.</p>
+            <pre class="sql-code"><code>SELECT name FROM students WHERE age > 18;</code></pre>
+            <p>This means: get the names of students whose age is greater than 18.</p>
+            <table class="result-table">
+              <thead><tr><th>name</th></tr></thead>
+              <tbody>
+                <tr><td>Med</td></tr>
+                <tr><td>Lina</td></tr>
+              </tbody>
+            </table>
+            <h3>Machine Learning connection</h3>
+            <p>WHERE is useful when selecting only relevant data for a model.</p>
+          `
+        },
+        {
+          title: "DISTINCT",
+          image: "res/rooms_background/04_Query_Lab_background.png",
+          type: "lesson",
+          summary: "DISTINCT removes duplicate values.",
+          points: ["Shows unique values", "Helps explore categories", "Useful for checking data"],
+          contentHtml: `
+            <h2>DISTINCT</h2>
+            <p><strong>DISTINCT</strong> removes duplicate values from the result.</p>
+            <p>It is useful when we want to see unique values only.</p>
+            <pre class="sql-code"><code>SELECT DISTINCT city FROM customers;</code></pre>
+            <table class="result-table">
+              <thead><tr><th>city</th></tr></thead>
+              <tbody>
+                <tr><td>Tunis</td></tr>
+                <tr><td>Sfax</td></tr>
+                <tr><td>Amman</td></tr>
+              </tbody>
+            </table>
+            <h3>Machine Learning connection</h3>
+            <p>DISTINCT helps us explore categories before using them in ML.</p>
+          `
+        },
+        {
+          title: "LIMIT",
+          image: "res/rooms_background/04_Query_Lab_background.png",
+          type: "lesson",
+          summary: "LIMIT controls how many rows are returned.",
+          points: ["Previews data", "Avoids huge results", "Useful for quick checks"],
+          contentHtml: `
+            <h2>LIMIT</h2>
+            <p><strong>LIMIT</strong> controls how many rows are returned.</p>
+            <p>It is useful when a table is large and we only want to preview a small part.</p>
+            <pre class="sql-code"><code>SELECT * FROM students LIMIT 5;</code></pre>
+            <p>This query shows only the first 5 rows from the students table.</p>
+            <h3>Machine Learning connection</h3>
+            <p>LIMIT is useful for quickly checking data before processing a full dataset.</p>
+          `
+        },
+        {
+          title: "ORDER BY",
+          image: "res/rooms_background/04_Query_Lab_background.png",
+          type: "lesson",
+          summary: "ORDER BY sorts the result.",
+          points: ["ASC = smallest to largest", "DESC = largest to smallest", "Useful for ranking"],
+          contentHtml: `
+            <h2>ORDER BY</h2>
+            <p><strong>ORDER BY</strong> sorts the result.</p>
+            <p><strong>ASC</strong> means ascending order. <strong>DESC</strong> means descending order.</p>
+            <pre class="sql-code"><code>SELECT * FROM orders ORDER BY price DESC;</code></pre>
+            <p>This means: show all orders sorted from highest price to lowest price.</p>
+            <table class="result-table">
+              <thead><tr><th>order_id</th><th>item</th><th>price</th></tr></thead>
+              <tbody>
+                <tr><td>3</td><td>Laptop</td><td>1200</td></tr>
+                <tr><td>1</td><td>Phone</td><td>800</td></tr>
+                <tr><td>2</td><td>Mouse</td><td>30</td></tr>
+              </tbody>
+            </table>
+          `
+        },
+        {
+          title: "Query examples",
+          image: "res/rooms_background/04_Query_Lab_background.png",
+          type: "lesson",
+          summary: "A real query can combine SELECT, FROM, WHERE, ORDER BY, and LIMIT.",
+          points: ["Choose columns", "Filter rows", "Sort and limit results"],
+          contentHtml: `
+            <h2>Query examples</h2>
+            <p>We can combine SQL commands to get exactly the data we need.</p>
+            <pre class="sql-code"><code>SELECT name, city
+FROM customers
+WHERE city = 'Tunis'
+ORDER BY name ASC
+LIMIT 10;</code></pre>
+            <p>This query:</p>
+            <ul>
+              <li>chooses name and city</li>
+              <li>reads from customers</li>
+              <li>keeps only customers from Tunis</li>
+              <li>sorts them by name</li>
+              <li>returns only 10 rows</li>
+            </ul>
+          `
+        },
+        {
+          title: "SQL to ML pipeline",
+          image: "res/rooms_background/04_Query_Lab_background.png",
+          type: "lesson",
+          summary: "SQL prepares clean data before Machine Learning.",
+          points: ["Query database", "Build clean table", "Send dataset to ML model"],
+          contentHtml: `
+            <h2>SQL to ML pipeline</h2>
+            <p>SQL is important in Machine Learning because it helps us prepare the data before training.</p>
+            <p>A good ML pipeline often starts with SQL.</p>
+            <div class="flow-line">Database -> SQL Query -> Clean Table -> Features and Target -> ML Model</div>
+            <pre class="sql-code"><code>SELECT age, study_hours, attendance, passed
+FROM students_performance
+WHERE attendance IS NOT NULL
+ORDER BY age;</code></pre>
+            <p>The selected columns can become the dataset used by the model.</p>
+          `
+        },
+        {
+          title: "Final recap",
+          image: "res/rooms_background/04_Query_Lab_background.png",
+          type: "lesson",
+          summary: "You completed the SQL foundations path.",
+          points: ["Retrieve data", "Filter data", "Sort data", "Prepare data for ML"],
+          contentHtml: `
+            <h2>Final SQL Foundations Recap</h2>
+            <p>You learned:</p>
+            <ul>
+              <li>SELECT chooses columns.</li>
+              <li>FROM chooses the table.</li>
+              <li>WHERE filters rows.</li>
+              <li>DISTINCT removes duplicates.</li>
+              <li>LIMIT controls result size.</li>
+              <li>ORDER BY sorts data.</li>
+              <li>SQL helps prepare clean data for Machine Learning.</li>
+            </ul>
+            <p class="reward-note">You completed SQL Foundations.</p>
+          `
+        }
+      ];
+      let currentRoomIndex = 0;
+      let progress = getProgress();
+      const roomBg = document.querySelector("#roomBg");
+      const roomCounter = document.querySelector("#roomCounter");
+      const hotspots = document.querySelector("#hotspots");
+      const prevRoom = document.querySelector("#prevRoom");
+      const nextRoom = document.querySelector("#nextRoom");
+      const topReturn = document.querySelector("#topReturn");
+      const finalReturn = document.querySelector("#finalReturn");
+      const infoCard = document.querySelector("#infoCard");
+      const roomList = document.querySelector("#roomList");
+      const lessonTitle = document.querySelector("#lessonTitle");
+      const lessonText = document.querySelector("#lessonText");
+      const mainLessonContent = document.querySelector("#mainLessonContent");
+      const rewardModal = document.querySelector("#rewardModal");
+      const rewardTitle = document.querySelector("#rewardTitle");
+      const rewardMessage = document.querySelector("#rewardMessage");
+      const rewardContinue = document.querySelector("#rewardContinue");
+      function createDefaultProgress() { return JSON.parse(JSON.stringify(DEFAULT_PROGRESS)); }
+      function getProgress() {
+        const progress = createDefaultProgress();
+        try {
+          const saved = JSON.parse(localStorage.getItem("sqlCityProgress"));
+          if (saved && saved.buildings) Object.keys(progress.buildings).forEach((id) => { if (saved.buildings[id]) Object.assign(progress.buildings[id], saved.buildings[id]); });
+          if (saved && saved.badges) Object.assign(progress.badges, saved.badges);
+        } catch (error) { localStorage.removeItem("sqlCityProgress"); }
+        progress.buildings.dataVault.unlocked = true;
+        return progress;
+      }
+      function saveProgress(progress) { localStorage.setItem("sqlCityProgress", JSON.stringify(progress)); }
+      function unlockBuilding(buildingId) { if (!buildingId) return; const building = progress.buildings[buildingId]; if (!building) return; if (!building.unlocked) { building.unlocked = true; building.newlyUnlocked = true; } }
+      function completeBuilding(buildingId) { const building = progress.buildings[buildingId]; if (!building || building.completed) return false; building.completed = true; return true; }
+      function markBuildingEntered(buildingId) { const building = progress.buildings[buildingId]; if (!building) return; building.entered = true; building.newlyUnlocked = false; saveProgress(progress); }
+      function buildingProgress() { return progress.buildings[BUILDING_ID]; }
+      function updateCounter() { roomCounter.textContent = `Current Room: ${currentRoomIndex} / ${rooms.length - 1}`; }
+      function formatRoomTitle(room, index) { return index === 0 ? "0. Welcoming Room" : `${String(index).padStart(2, "0")}. ${room.title}`; }
+      function renderRoomList() {
+        roomList.innerHTML = "";
+        rooms.forEach((room, index) => {
+          const tab = document.createElement("button");
+          tab.type = "button";
+          tab.className = "room-tab";
+          tab.textContent = formatRoomTitle(room, index);
+          const isUnlocked = index <= buildingProgress().highestRoomUnlocked;
+          if (!isUnlocked) tab.classList.add("locked");
+          if (index === currentRoomIndex) tab.classList.add("active");
+          tab.addEventListener("click", () => {
+            if (!isUnlocked) {
+              lessonTitle.textContent = "Room locked";
+              lessonText.innerHTML = "<p>Explore previous rooms first to unlock this room.</p>";
+              mainLessonContent.innerHTML = "<h2>Room locked</h2><p>Explore previous rooms first to unlock this room.</p>";
+              return;
+            }
+            currentRoomIndex = index;
+            renderRoom();
+          });
+          roomList.appendChild(tab);
+        });
+      }
+      function renderSidebarSummary(room) {
+        lessonTitle.textContent = room.title;
+        lessonText.innerHTML = `<p>${room.summary}</p><ul>${room.points.map((point) => `<li>${point}</li>`).join("")}</ul>`;
+      }
+      function renderMainContent(contentHtml) {
+        mainLessonContent.innerHTML = contentHtml;
+        infoCard.hidden = false;
+      }
+      function renderRoom() {
+        const room = rooms[currentRoomIndex];
+        const isFinalRoom = currentRoomIndex === rooms.length - 1;
+        roomBg.src = room.image;
+        updateCounter();
+        hotspots.hidden = currentRoomIndex !== 0;
+        prevRoom.hidden = currentRoomIndex === 0;
+        nextRoom.hidden = isFinalRoom;
+        topReturn.hidden = isFinalRoom;
+        finalReturn.hidden = !isFinalRoom;
+        renderSidebarSummary(room);
+        renderMainContent(room.contentHtml);
+        renderRoomList();
+        completeIfFinalRoom();
+      }
+      prevRoom.addEventListener("click", () => { if (currentRoomIndex > 0) currentRoomIndex -= 1; renderRoom(); });
+      nextRoom.addEventListener("click", () => { if (currentRoomIndex < rooms.length - 1) { currentRoomIndex += 1; if (currentRoomIndex > buildingProgress().highestRoomUnlocked) { buildingProgress().highestRoomUnlocked = currentRoomIndex; saveProgress(progress); } } renderRoom(); });
+      document.querySelectorAll(".info-marker").forEach((spot) => { spot.addEventListener("click", () => { const markerContent = rooms[0].markers?.[spot.dataset.info]; if (markerContent) renderMainContent(markerContent); }); });
+      function showReward() { rewardTitle.textContent = REWARD_TITLE; rewardMessage.textContent = REWARD_MESSAGE; rewardModal.hidden = false; }
+      function completeIfFinalRoom() { if (currentRoomIndex !== rooms.length - 1) return; const building = buildingProgress(); if (building.completed) return; building.highestRoomUnlocked = Math.max(building.highestRoomUnlocked, currentRoomIndex); if (completeBuilding(BUILDING_ID)) { progress.badges.sqlFoundations = true; saveProgress(progress); showReward(); } }
+      rewardContinue.addEventListener("click", () => { rewardModal.hidden = true; });
+      if (!buildingProgress().unlocked) { window.location.href = "index.html"; } else { markBuildingEntered(BUILDING_ID); renderRoom(); }
+    </script>
+  </body>
+</html>
