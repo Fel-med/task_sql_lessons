@@ -4,8 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Table Department | SQL City</title>
-    <link rel="icon" type="image/webp" href="../res/city_1/item/badge.webp">
-    <link rel="shortcut icon" type="image/webp" href="../res/city_1/item/badge.webp">
+    <link rel="shortcut icon" href="../res/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../shared_files/shared-room-layout.css" />
     <link rel="stylesheet" href="../shared_files/shared-room-components.css" />
     <style>
@@ -106,7 +105,7 @@
             board: `<h2>Table Grid</h2><p>A table stores data in rows and columns. It is like a spreadsheet inside a database.</p>`,
             row: `<h2>Row</h2><p>A row represents one complete record. In a students table, one row represents one student.</p>`,
             column: `<h2>Column</h2><p>A column represents one attribute. In Machine Learning, columns often become features.</p>`,
-            desk: `<h2>Dataset Example</h2><p>The table can become a dataset. Rows become examples, and columns become features.</p>`
+            desk: `<h2>Dataset Example</h2><p>The table can become a dataset. Rows become samples or observations, and columns become features.</p>`
           }
         },
         {
@@ -134,7 +133,7 @@
           image: "../res/city_1/rooms_background/02_Table_Department_background.webp",
           type: "lesson",
           summary: "A row is one complete record in a table.",
-          points: ["One row = one record", "In students table, one row = one student", "In ML, one row can be one example"],
+          points: ["One row = one record", "In students table, one row = one student", "In ML, one row can be one sample or observation"],
           contentHtml: `
             <h2>What is a row?</h2>
             <p>A row is one complete record in a table.</p>
@@ -146,7 +145,7 @@
               </tbody>
             </table>
             <h3>Machine Learning connection</h3>
-            <p>In Machine Learning, one row is often one example used for training.</p>
+            <p>Each row is one record in the table. In a Machine Learning dataset, each row usually represents one sample or observation that the model can learn from.</p>
           `
         },
         {
@@ -202,12 +201,12 @@
           image: "../res/city_1/rooms_background/02_Table_Department_background.webp",
           type: "lesson",
           summary: "Database tables can become Machine Learning datasets.",
-          points: ["Rows = examples", "Columns = features", "Target = what we predict"],
+          points: ["Rows = samples or observations", "Columns = features", "Target = what we predict"],
           contentHtml: `
             <h2>Rows and columns in ML datasets</h2>
             <p>A database table can become a Machine Learning dataset.</p>
             <ul>
-              <li><strong>Rows</strong> are examples.</li>
+              <li><strong>Rows</strong> are samples or observations.</li>
               <li><strong>Columns</strong> are features.</li>
               <li><strong>Target column</strong> is what we want to predict.</li>
             </ul>
@@ -265,7 +264,7 @@
         { id: "board", title: "Table Grid", text: "A table stores data in rows and columns. It is like a spreadsheet inside a database." },
         { id: "row", title: "Row", text: "A row represents one complete record. In a students table, one row represents one student." },
         { id: "column", title: "Column", text: "A column represents one attribute. In Machine Learning, columns often become features." },
-        { id: "dataset", title: "Dataset Example", text: "The table can become a dataset. Rows become examples, and columns become features." }
+        { id: "dataset", title: "Dataset Example", text: "The table can become a dataset. Rows become samples or observations, and columns become features." }
       ];
       let currentRoomIndex = 0;
       let discoveryCompleteAnimationPlayed = false;

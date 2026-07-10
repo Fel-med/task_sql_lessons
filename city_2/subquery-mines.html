@@ -4,15 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Subquery Mines | Data Prep City</title>
-    <link rel="icon" type="image/webp" href="../res/city_2/item/badge.webp">
-    <link rel="shortcut icon" type="image/webp" href="../res/city_2/item/badge.webp">
+    <link rel="shortcut icon" href="../res/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../shared_files/shared-room-layout.css" />
     <link rel="stylesheet" href="../shared_files/shared-room-components.css" />
     <style>
       .side-panel h1 { font-size: 28px; }
-      .marker-tunnel { left: 31%; top: 48%; }
-      .marker-crystal { left: 50%; top: 36%; }
-      .marker-scanner { left: 69%; top: 55%; }
+      .marker-tunnel { left: 81%; top: 27%; }
+      .marker-crystal { left: 25%; top: 78%; }
+      .marker-scanner { left: 45%; top: 55%; }
+
+      .room-stage.is-welcome-room .info-card {
+        top: 72px;
+      }
 
       @media (max-width: 760px) {
         .side-panel h1 { font-size: 24px; }
@@ -67,7 +70,7 @@
     <script src="../shared_files/shared-reset-system.js"></script>
     <script>
       const canOpenSubqueryMines = window.SQLKingdomResetSystem?.guardDataPrepBuildingAccess?.("subqueryMines", "index_city_2.html", "Complete Join Junction first.", "../index.html") ?? true;
-      const QUIZ_ADVANCE_DELAY_MS = 650;
+      const QUIZ_ADVANCE_DELAY_MS = 380;
 
       // Data Prep City examples use international neutral sample data.
       const rooms = [
