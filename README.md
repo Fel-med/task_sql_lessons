@@ -1,10 +1,10 @@
-# SQL City — SQL for Machine Learning Foundations
+# SQL Kingdom — Interactive SQL Learning Game
 
-**SQL City** is a pixel-art educational web project that teaches SQL fundamentals through a small game-style city.  
-Learners enter buildings, discover objects, complete lessons, pass quizzes, collect keys, and finish the first phase of the **SQL for Machine Learning** learning path.
+**SQL Kingdom** is a pixel-art educational web project that teaches SQL through a multi-city game world.
+Learners explore islands, enter themed cities, complete building lessons, pass quizzes, collect keys and badges, and unlock the next learning area step by step.
 
-The project is built with plain **HTML**, **CSS**, and **JavaScript**.  
-It has no backend, no framework dependency, and can be hosted as a static website.
+The project is built with plain **HTML**, **CSS**, and **JavaScript**.
+It has no backend, no framework dependency, no build step, and can be hosted as a static website with GitHub Pages.
 
 ---
 
@@ -20,87 +20,82 @@ https://Fel-med.github.io/task_sql_lessons/
 
 ## Project Goal
 
-The goal of SQL City is to explain relational database concepts and beginner SQL queries in a visual, interactive, and beginner-friendly way.
+The goal of SQL Kingdom is to make SQL learning more visual, interactive, and beginner-friendly.
+Instead of reading lessons as plain text, learners move through a game-style world where each city represents a learning phase and each building represents a SQL topic.
 
-The project covers:
+The current learning path contains two completed playable cities:
 
-- What databases are
-- Tables, rows, and columns
-- Primary keys and foreign keys
-- How relational tables connect
-- Why SQL is useful before preparing data for machine learning workflows
-- Core SQL commands:
-  - `SELECT`
-  - `FROM`
-  - `WHERE`
-  - `DISTINCT`
-  - `LIMIT`
-  - `ORDER BY`
+1. **Foundation City** — SQL foundations and basic queries.
+2. **Data Prep City** — filtering, aggregation, joins, subqueries, and cleaning data before analysis or machine learning.
+
+Future islands are displayed as unavailable areas and remain hidden until future phases are created.
 
 ---
 
-## Assignment Requirement Coverage
+## Technologies Used
 
-This project satisfies the SQL Foundations phase requirements by including:
+- HTML
+- CSS
+- JavaScript
+- Browser `localStorage`
+- Pixel-art image assets
+- GitHub Pages
 
-| Requirement | Covered In |
-|---|---|
-| What is a database? | Data Vault |
-| What are tables, rows, and columns? | Table Department |
-| Primary key vs foreign key | Key Bridge Hall |
-| Why SQL is important in ML workflows | Data Vault and Query Lab |
-| Basic SQL queries | Query Lab |
-| Visual educational content | City map, buildings, rooms, markers, tables, diagrams |
-| Code examples | Lesson cards and query examples |
-| Structured HTML content | Building pages, lesson cards, sidebar summaries |
-| References section | Homepage menu and README |
+No framework is used:
+
+- no React
+- no Vue
+- no Angular
+- no Node.js backend
+- no database server
 
 ---
 
-## Game Concept
+## Main Game Concept
 
-The homepage is a pixel-art city map called **SQL City**.
+The root page is the **SQL Kingdom** world map.
 
-Each building represents one learning area:
+From the Kingdom page, the learner can choose unlocked islands:
 
-| Building | Main Topic | Reward |
+| Island | Status | Topic |
 |---|---|---|
-| **Data Vault** | Databases, SQL basics, and SQL before ML | Table Department Key |
-| **Table Department** | Tables, rows, columns, and dataset structure | Key Bridge Hall Key |
-| **Key Bridge Hall** | Primary keys, foreign keys, and relationships | Query Lab Key |
-| **Query Lab** | SQL queries and SQL-to-ML pipeline | SQL Foundations Badge |
+| **Foundation City** | Playable | SQL foundations |
+| **Data Prep City** | Playable after Foundation City completion | Data preparation with SQL |
+| **Future Islands** | Coming soon | Hidden future content |
 
-The learner starts with only **Data Vault** unlocked.  
-Completing each building unlocks the next one.
+Only unlocked playable islands can be entered.
+Locked playable islands appear as mystery islands, and future islands appear as coming-soon islands.
 
 ---
 
 ## Current Features
 
-- Pixel-art city homepage
-- Fullscreen game-style layout
-- Layered city assets
+- SQL Kingdom world selection page
+- Floating island carousel
+- Locked, unlocked, and coming-soon island states
+- Foundation City and Data Prep City progression
+- Fullscreen pixel-art city homepages
 - Clickable building hotspots
-- Building hover glow
-- Locked building states
-- Pixel-art lock indicators
-- LED-style building labels
-- Animated random traffic on the homepage road
-- Key reward system
-- Magic key option to unlock everything
-- Reset Everything option
-- Burger menu with references
-- Four separate building pages
-- Room-by-room navigation
+- Building hover glow effects
+- Shared building board style
+- Shared building hover/effect system
+- Shared lively animation system
+- Animated cars, tracks, and drones
+- Shared burger menu on homepage/map pages only
+- References section with W3Schools and GeeksforGeeks links
+- Magic Master Key system
+- Global reset on Kingdom page
+- Local city reset on city pages
+- City access guards for locked islands/buildings
+- Room-by-room lesson pages
+- Shared room layout and components
 - Left sidebar learning path
-- Active lesson glow
-- Sidebar summary screen
-- Welcome-room object markers
-- Marker discovery requirement before entering Room 1
-- Hover/focus tooltips for marker explanations
-- Quiz room before each recap
-- Recap room locked until the quiz is answered correctly
-- Final SQL Foundations badge after Query Lab
+- Welcome-room pointer markers
+- Tooltip/object discovery system
+- Quiz tabs showing one question at a time
+- Randomized quiz answer options
+- Recap rooms locked until quiz completion
+- Keys and badges as rewards
 - Progress saved in browser `localStorage`
 - Static deployment support through GitHub Pages
 
@@ -108,30 +103,36 @@ Completing each building unlocks the next one.
 
 ## Learning Roadmap
 
+## City 1 — Foundation City
+
+**Foundation City** teaches SQL and relational database foundations.
+
+The learner starts here first. Completing the final building awards the **SQL Foundations Badge** and unlocks **Data Prep City**.
+
+### Foundation City Buildings
+
+| Building | Main Topic | Reward |
+|---|---|---|
+| **Data Vault** | Databases, SQL basics, and SQL before ML | Table Department Key |
+| **Table Department** | Tables, rows, columns, and dataset structure | Key Bridge Hall Key |
+| **Key Bridge Hall** | Primary keys, foreign keys, and table relationships | Query Lab Key |
+| **Query Lab** | SELECT, FROM, WHERE, DISTINCT, LIMIT, ORDER BY | SQL Foundations Badge |
+
 ### 1. Data Vault
 
 Introduces databases, SQL, and why organized data matters.
 
 Rooms:
 
-0. Welcoming Room  
-1. What is a database?  
-2. What is SQL?  
-3. Why organize data?  
-4. Databases before Machine Learning  
-5. Quiz Room  
-6. Data Vault Recap  
-
-Welcome markers:
-
-- Organized Data
-- Database Storage
-- SQL Language
-- SQL for ML
+0. Welcoming Room
+1. What is a database?
+2. What is SQL?
+3. Why organize data?
+4. Databases before Machine Learning
+5. Quiz Room
+6. Data Vault Recap
 
 Reward: **Table Department Key**
-
----
 
 ### 2. Table Department
 
@@ -139,25 +140,16 @@ Explains how relational data is structured in tables.
 
 Rooms:
 
-0. Welcoming Room  
-1. What is a table?  
-2. What is a row?  
-3. What is a column?  
-4. Example: students table  
-5. Rows and columns in ML datasets  
-6. Quiz Room  
-7. Table Department Recap  
-
-Welcome markers:
-
-- Table Grid
-- Row
-- Column
-- Dataset Example
+0. Welcoming Room
+1. What is a table?
+2. What is a row?
+3. What is a column?
+4. Example: students table
+5. Rows and columns in ML datasets
+6. Quiz Room
+7. Table Department Recap
 
 Reward: **Key Bridge Hall Key**
-
----
 
 ### 3. Key Bridge Hall
 
@@ -165,25 +157,16 @@ Explains how tables connect using primary keys and foreign keys.
 
 Rooms:
 
-0. Welcoming Room  
-1. What is a primary key?  
-2. Why IDs must be unique  
-3. What is a foreign key?  
-4. How tables connect  
-5. Example: students and enrollments  
-6. Quiz Room  
-7. Key Bridge Recap  
-
-Welcome markers:
-
-- Primary Key Board
-- Primary Key
-- Bridge Connection
-- Foreign Key Board
+0. Welcoming Room
+1. What is a primary key?
+2. Why IDs must be unique
+3. What is a foreign key?
+4. How tables connect
+5. Example: students and enrollments
+6. Quiz Room
+7. Key Bridge Recap
 
 Reward: **Query Lab Key**
-
----
 
 ### 4. Query Lab
 
@@ -191,64 +174,245 @@ Teaches practical SQL commands used to retrieve, filter, sort, and prepare data.
 
 Rooms:
 
-0. Welcoming Room  
-1. SELECT and FROM  
-2. WHERE  
-3. DISTINCT  
-4. LIMIT  
-5. ORDER BY  
-6. Query examples  
-7. SQL to ML pipeline  
-8. Quiz Room  
-9. Final recap  
-
-Welcome markers:
-
-- WHERE Filter
-- Query Console
-- ORDER BY
-- LIMIT
-- SQL to ML
+0. Welcoming Room
+1. SELECT and FROM
+2. WHERE
+3. DISTINCT
+4. LIMIT
+5. ORDER BY
+6. Query examples
+7. SQL to ML pipeline
+8. Quiz Room
+9. Final recap
 
 Reward: **SQL Foundations Badge**
 
 ---
 
-## SQL Examples Included
+## City 2 — Data Prep City
 
-The lessons include beginner-friendly SQL examples such as:
+**Data Prep City** teaches SQL skills used to prepare data for analysis and machine learning.
 
-```sql
-SELECT * FROM students;
-```
+It unlocks after completing Foundation City or by using the Magic Master Key.
 
-```sql
-SELECT name FROM students WHERE age > 18;
-```
+### Data Prep City Buildings
 
-```sql
-SELECT DISTINCT city FROM customers;
-```
+| Building | Main Topic | Reward |
+|---|---|---|
+| **Filter Factory** | AND, OR, NOT, IN, BETWEEN, LIKE | Summary Tower Key |
+| **Summary Tower** | COUNT, SUM, AVG, MIN, MAX, GROUP BY, HAVING | Join Junction Key |
+| **Join Junction** | INNER JOIN, LEFT JOIN, RIGHT JOIN, FULL OUTER JOIN | Subquery Mines Key |
+| **Subquery Mines** | Subqueries in WHERE, IN, SELECT, correlated subqueries | Cleaning Clinic Key |
+| **Cleaning Clinic** | NULL, COALESCE, CASE WHEN, CAST, validation | Data Prep City Badge |
 
-```sql
-SELECT * FROM orders ORDER BY price DESC;
-```
+### 1. Filter Factory
 
-The sample data uses internationally familiar example names and cities, such as:
+Teaches advanced filtering conditions.
 
-- Alex
-- Emma
-- John
-- Maria
-- London
-- Paris
-- Berlin
+Rooms:
+
+0. Welcoming Room
+1. AND and OR
+2. NOT and IN
+3. BETWEEN and LIKE
+4. Filtering for Data Preparation
+5. Quiz Room
+6. Recap Room
+
+Reward: **Summary Tower Key**
+
+### 2. Summary Tower
+
+Teaches aggregation and summarization.
+
+Rooms:
+
+0. Welcoming Room
+1. COUNT and SUM
+2. AVG, MIN, and MAX
+3. GROUP BY
+4. HAVING
+5. Aggregation for Data Preparation
+6. Quiz Room
+7. Recap Room
+
+Reward: **Join Junction Key**
+
+### 3. Join Junction
+
+Teaches how to combine related tables.
+
+Rooms:
+
+0. Welcoming Room
+1. Why JOINs Matter
+2. INNER JOIN
+3. LEFT JOIN and RIGHT JOIN
+4. FULL OUTER JOIN
+5. JOINs for Data Preparation
+6. Quiz Room
+7. Recap Room
+
+Reward: **Subquery Mines Key**
+
+### 4. Subquery Mines
+
+Teaches nested SQL queries.
+
+Rooms:
+
+0. Welcoming Room
+1. What is a Subquery?
+2. Subqueries in WHERE
+3. Subqueries with IN
+4. Subqueries in SELECT
+5. Correlated Subqueries
+6. Subqueries for Data Preparation
+7. Quiz Room
+8. Recap Room
+
+Reward: **Cleaning Clinic Key**
+
+### 5. Cleaning Clinic
+
+Teaches SQL data cleaning techniques.
+
+Rooms:
+
+0. Welcoming Room
+1. Understanding NULL Values
+2. COALESCE
+3. CASE WHEN
+4. Data Type Conversions
+5. Basic Data Validation
+6. Cleaning for Data Preparation
+7. Quiz Room
+8. Recap Room
+
+Reward: **Data Prep City Badge**
 
 ---
 
-## How the Progress System Works
+## SQL Topics Covered
 
-SQL City saves progress in the browser using `localStorage`.
+### Foundation Topics
+
+- Databases
+- SQL basics
+- Tables
+- Rows
+- Columns
+- Primary keys
+- Foreign keys
+- Table relationships
+- SELECT
+- FROM
+- WHERE
+- DISTINCT
+- LIMIT
+- ORDER BY
+
+### Data Preparation Topics
+
+- AND
+- OR
+- NOT
+- IN
+- BETWEEN
+- LIKE
+- COUNT()
+- SUM()
+- AVG()
+- MIN()
+- MAX()
+- GROUP BY
+- HAVING
+- INNER JOIN
+- LEFT JOIN
+- RIGHT JOIN
+- FULL OUTER JOIN
+- Subqueries
+- Correlated subqueries
+- NULL values
+- COALESCE
+- CASE WHEN
+- CAST and data type conversions
+- Basic data validation
+
+---
+
+## Example SQL Queries
+
+```sql
+SELECT *
+FROM students;
+```
+
+```sql
+SELECT name
+FROM students
+WHERE age > 18;
+```
+
+```sql
+SELECT DISTINCT city
+FROM customers;
+```
+
+```sql
+SELECT *
+FROM orders
+ORDER BY price DESC;
+```
+
+```sql
+SELECT city, COUNT(*) AS total_customers
+FROM customers
+GROUP BY city;
+```
+
+```sql
+SELECT customers.name, orders.price
+FROM customers
+INNER JOIN orders
+ON customers.customer_id = orders.customer_id;
+```
+
+```sql
+SELECT name, price
+FROM products
+WHERE price > (
+  SELECT AVG(price)
+  FROM products
+);
+```
+
+```sql
+SELECT name,
+       COALESCE(email, 'No email') AS email_status
+FROM customers;
+```
+
+The sample data uses neutral international examples such as:
+
+- Emma
+- Noah
+- Sofia
+- Liam
+- Olivia
+- Daniel
+- London
+- Toronto
+- Madrid
+- Berlin
+- Paris
+- Tokyo
+
+---
+
+## Progress System
+
+The project saves progress in the browser using `localStorage`.
 
 Storage key:
 
@@ -258,24 +422,42 @@ sqlCityProgress
 
 Saved progress includes:
 
-- Which buildings are unlocked
-- Which buildings are completed
-- Whether a building is newly unlocked
-- Whether a building has been entered
-- Highest unlocked room per building
-- Quiz completion per building
-- Discovered welcome-room markers per building
-- Whether Unlock Everything was used
-- Final SQL Foundations badge state
+- unlocked islands
+- completed islands
+- unlocked buildings
+- completed buildings
+- earned keys
+- earned badges
+- highest unlocked room
+- quiz completion
+- discovered welcome-room markers
+- one-time unlock messages
+- Magic Master Key unlock state
 
-To manually reset progress, open browser DevTools and run:
+### Global Reset
 
-```js
-localStorage.removeItem("sqlCityProgress");
-location.reload();
-```
+The Kingdom page has **Reset Everything**.
 
-The homepage also includes a **Reset Everything** option.
+This resets the full game:
+
+- Foundation City remains available as the starting city
+- Data Prep City becomes locked again
+- all building progress is cleared
+- keys, badges, quizzes, and markers are reset
+
+### Local City Reset
+
+City homepages use **Reset This City**.
+
+This resets only the current city progress without destroying the entire Kingdom progress.
+
+For example, resetting Data Prep City does not lock the Data Prep island again if it was already unlocked.
+
+### Magic Master Key
+
+The Magic Master Key unlocks all currently playable content.
+
+It does not unlock future coming-soon islands or fake future content.
 
 ---
 
@@ -285,12 +467,14 @@ The homepage also includes a **Reset Everything** option.
 task_html/
 |-- index.html
 |-- README.md
+|
 |-- city_1/
 |   |-- index_city_1.html
 |   |-- data-vault.html
 |   |-- table-department.html
 |   |-- key-bridge-hall.html
 |   `-- query-lab.html
+|
 |-- city_2/
 |   |-- index_city_2.html
 |   |-- filter-factory.html
@@ -298,15 +482,29 @@ task_html/
 |   |-- join-junction.html
 |   |-- subquery-mines.html
 |   `-- cleaning-clinic.html
+|
 |-- shared_files/
-|   |-- shared menu, progress, reset, and magic key files
-|   |-- shared room layout/component styles
-|   `-- shared city board, hover, and lively animation files
+|   |-- shared-menu.css
+|   |-- shared-menu.js
+|   |-- shared-progress.js
+|   |-- shared-reset-system.js
+|   |-- shared-magic-key.js
+|   |-- shared-toast.js
+|   |-- shared-room-layout.css
+|   |-- shared-room-components.css
+|   |-- shared-building-boards.css
+|   |-- shared-building-effects.css
+|   `-- shared-lively-elements.css
+|
 `-- res/
     |-- w3schools.webp
     |-- geeksforgeeks.webp
     |-- magic-master-key.webp
     |-- kingdom/
+    |   |-- kingdom_bg.png
+    |   |-- city_1.png
+    |   |-- city_2.png
+    |   `-- shadow_island.png
     |-- city_1/
     |   |-- city_elements/
     |   |-- item/
@@ -320,6 +518,7 @@ task_html/
 ```
 
 ---
+
 ## How to Run Locally
 
 Because this is a static website, no backend is required.
@@ -368,41 +567,32 @@ https://Fel-med.github.io/task_sql_lessons/
 
 ---
 
-## Technologies Used
-
-- HTML
-- CSS
-- JavaScript
-- Browser `localStorage`
-- Pixel-art PNG assets
-- GitHub Pages for deployment
-
----
-
 ## Design Style
 
 The project uses a retro educational game style:
 
 - 16-bit pixel-art visuals
-- Dark UI panels
-- Cyan glow effects
-- Cream pixel borders
-- Building unlock progression
-- Game-like rewards
-- Room exploration through object markers
+- dark UI panels
+- cyan glow effects
+- cream pixel borders
+- floating island world map
+- building unlock progression
+- animated city elements
+- game-like keys and badges
+- room exploration through object markers
 
 ---
 
 ## References
 
-1. **W3Schools SQL Tutorial**  
+1. **W3Schools SQL Tutorial**
    https://www.w3schools.com/sql/default.asp
 
-2. **GeeksforGeeks SQL Tutorial**  
+2. **GeeksforGeeks SQL Tutorial**
    https://www.geeksforgeeks.org/sql/sql-tutorial/
 
 ---
 
 ## Author
 
-Created by **Fel-med** as a creative educational HTML project for learning SQL fundamentals.
+Created by **Fel-med** as a creative educational HTML project for learning SQL through an interactive pixel-art game world.
