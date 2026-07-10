@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Prep City | SQL Kingdom</title>
+    <link rel="icon" type="image/webp" href="../res/city_1/item/badge.webp" />
+    <link rel="shortcut icon" type="image/webp" href="../res/city_1/item/badge.webp" />
+    <link rel="stylesheet" href="../shared_files/shared-menu.css" />
+    <link rel="stylesheet" href="../shared_files/shared-building-boards.css" />
+    <link rel="stylesheet" href="../shared_files/shared-building-effects.css" />
+    <link rel="stylesheet" href="../shared_files/shared-lively-elements.css" />
+    <style>
+      :root {
+        --cream: #fff4c2;
+        --ink: #111827;
+        --cyan: #5fffd6;
+        --yellow: #ffd76a;
+        --violet: #b98cff;
+        --rose: #ff5f9e;
+        --font-pixel: "Courier New", Courier, monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: #070b1a;
+      }
+
+      body {
+        color: white;
+        font-family: var(--font-pixel);
+      }
+
+      .data-prep-home {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        background: #070b1a;
+      }
+
+      .city-screen {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .city-scene {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        background: #111c45;
+      }
+
+      /* Every city/building image is a full exported canvas layer. */
+      .city-layer {
+        position: absolute;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        pointer-events: none;
+        user-select: none;
+        transition:
+          filter 0.18s ease,
+          transform 0.18s ease;
+      }
+
+      .city-bg { z-index: 1; }
+      .layer-mines { z-index: 2; }
+      .layer-tower { z-index: 3; }
+      .layer-junction { z-index: 4; }
+      .layer-factory { z-index: 5; }
+      .layer-clinic { z-index: 6; }
+
+      .city-title {
+        position: absolute;
+        z-index: 45;
+        top: 6%;
+        left: 50%;
+        width: min(88vw, 980px);
+        margin: 0;
+        transform: translateX(-50%);
+        color: var(--cream);
+        font-size: clamp(34px, 6vw, 82px);
+        font-weight: 900;
+        line-height: 0.94;
+        text-align: center;
+        text-shadow:
+          5px 5px 0 #050914,
+          -2px -2px 0 #050914,
+          2px -2px 0 #050914,
+          -2px 2px 0 #050914,
+          0 0 18px rgba(255, 244, 194, 0.72);
+        pointer-events: none;
+      }
+
+      .city-subtitle {
+        position: absolute;
+        z-index: 45;
+        top: calc(6% + clamp(38px, 6vw, 86px));
+        left: 50%;
+        width: min(88vw, 760px);
+        margin: 0;
+        transform: translateX(-50%);
+        color: white;
+        font-size: clamp(11px, 1.6vw, 18px);
+        font-weight: 900;
+        line-height: 1.35;
+        text-align: center;
+        text-shadow: 3px 3px 0 #050914;
+        pointer-events: none;
+      }
+
+      .city-completion-banner {
+        position: absolute;
+        z-index: 46;
+        left: 50%;
+        bottom: 5%;
+        width: min(88vw, 560px);
+        padding: 10px 14px;
+        border: 3px solid var(--cyan);
+        background: rgba(17, 24, 39, 0.86);
+        box-shadow:
+          4px 4px 0 #000,
+          0 0 18px rgba(95, 255, 214, 0.72);
+        color: var(--cream);
+        font-size: clamp(11px, 1.4vw, 16px);
+        font-weight: 900;
+        text-align: center;
+        text-shadow: 2px 2px 0 #000;
+        transform: translateX(-50%);
+        pointer-events: none;
+      }
+
+      .city-completion-banner[hidden] {
+        display: none;
+      }
+
+      .building-hotspot {
+        position: absolute;
+        z-index: 32;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+      }
+
+      .hotspot-mines {
+        left: 0%;
+        top: 47%;
+        width: 22%;
+        height: 35%;
+      }
+
+      .hotspot-tower {
+        left: 15%;
+        top: 22%;
+        width: 22%;
+        height: 61%;
+      }
+
+      .hotspot-junction {
+        left: 34%;
+        top: 37%;
+        width: 30%;
+        height: 46%;
+      }
+
+      .hotspot-factory {
+        left: 61%;
+        top: 45%;
+        width: 23%;
+        height: 39%;
+      }
+
+      .hotspot-clinic {
+        left: 79%;
+        top: 38%;
+        width: 21%;
+        height: 45%;
+      }
+
+      .sign-mines {
+        left: 4%;
+        top: 43%;
+      }
+
+      .sign-tower {
+        left: 20%;
+        top: 28%;
+      }
+
+      .sign-junction {
+        left: 43%;
+        top: 34%;
+      }
+
+      .sign-factory {
+        left: 66%;
+        top: 42%;
+      }
+
+      .sign-clinic {
+        right: 3%;
+        top: 35%;
+      }
+
+      .glow-mines {
+        left: 2%;
+        top: 49%;
+        width: 18%;
+        height: 28%;
+      }
+
+      .glow-tower {
+        left: 18%;
+        top: 23%;
+        width: 17%;
+        height: 52%;
+      }
+
+      .glow-junction {
+        left: 39%;
+        top: 40%;
+        width: 23%;
+        height: 35%;
+      }
+
+      .glow-factory {
+        left: 63%;
+        top: 48%;
+        width: 20%;
+        height: 32%;
+      }
+
+      .glow-clinic {
+        left: 82%;
+        top: 40%;
+        width: 17%;
+        height: 38%;
+      }
+
+      .building-lock {
+        position: absolute;
+        z-index: 31;
+        width: clamp(34px, 4.8vw, 76px);
+        height: auto;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        pointer-events: none;
+        user-select: none;
+        filter:
+          drop-shadow(3px 3px 0 #000)
+          drop-shadow(0 0 12px rgba(255, 244, 194, 0.55));
+      }
+
+      .building-lock[hidden] {
+        display: none;
+      }
+
+      .lock-mines {
+        left: 10%;
+        top: 59%;
+      }
+
+      .lock-tower {
+        left: 25%;
+        top: 49%;
+      }
+
+      .lock-junction {
+        left: 49%;
+        top: 55%;
+      }
+
+      .lock-factory {
+        left: 70%;
+        top: 58%;
+      }
+
+      .lock-clinic {
+        right: 10%;
+        top: 55%;
+      }
+
+      .city2-track {
+        left: 0;
+        width: clamp(110px, 15vw, 230px);
+        bottom: 3%;
+      }
+
+      .city2-track-img,
+      .city2-drone-img {
+        display: block;
+        width: 100%;
+        height: auto;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        pointer-events: none;
+        user-select: none;
+        will-change: transform;
+        backface-visibility: hidden;
+      }
+
+      .city2-track-img {
+        filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.36));
+      }
+
+      .city2-track-to-left {
+        animation: city2TrackToLeft 13s linear infinite;
+      }
+
+      .city2-track-to-right {
+        animation: city2TrackToRight 16s linear infinite;
+        animation-delay: -5s;
+      }
+
+      .city2-track-to-left .city2-track-img {
+        transform: scaleX(1);
+      }
+
+      .city2-track-to-right .city2-track-img {
+        transform: scaleX(-1);
+      }
+
+      .city2-drone {
+        left: 0;
+        width: clamp(86px, 12vw, 190px);
+      }
+
+      .city2-drone-img {
+        filter:
+          drop-shadow(0 0 8px rgba(95, 255, 214, 0.55))
+          drop-shadow(0 10px 0 rgba(0, 0, 0, 0.24));
+      }
+
+      .city2-drone-to-right {
+        top: 18%;
+        animation: city2DroneToRight 19s ease-in-out infinite;
+      }
+
+      .city2-drone-to-left {
+        width: clamp(68px, 9vw, 140px);
+        top: 30%;
+        animation: city2DroneToLeft 17s ease-in-out infinite;
+        animation-delay: -4s;
+        opacity: 0.86;
+      }
+
+      .city2-drone-to-right .city2-drone-img {
+        transform: scaleX(-1);
+      }
+
+      .city2-drone-to-left .city2-drone-img {
+        transform: scaleX(1);
+      }
+
+      @keyframes city2TrackToLeft {
+        0% {
+          transform: translate3d(112vw, 0, 0);
+        }
+
+        100% {
+          transform: translate3d(-24vw, 0, 0);
+        }
+      }
+
+      @keyframes city2TrackToRight {
+        0% {
+          transform: translate3d(-18vw, 0, 0);
+        }
+
+        100% {
+          transform: translate3d(116vw, 0, 0);
+        }
+      }
+
+      @keyframes city2DroneToRight {
+        0% {
+          transform: translate3d(-14vw, 0, 0);
+        }
+
+        50% {
+          transform: translate3d(58vw, -20px, 0);
+        }
+
+        100% {
+          transform: translate3d(126vw, 12px, 0);
+        }
+      }
+
+      @keyframes city2DroneToLeft {
+        0% {
+          transform: translate3d(110vw, 0, 0);
+        }
+
+        50% {
+          transform: translate3d(52vw, 18px, 0);
+        }
+
+        100% {
+          transform: translate3d(-16vw, -14px, 0);
+        }
+      }
+
+      @media (max-width: 760px) {
+        .city-title {
+          top: 8%;
+          width: 82vw;
+        }
+
+        .city-subtitle {
+          display: none;
+        }
+
+        .building-sign {
+          min-width: 72px;
+          min-height: 28px;
+          padding: 6px 7px;
+          font-size: 9px;
+        }
+
+        .sign-tower {
+          top: 29%;
+        }
+
+        .sign-junction {
+          top: 36%;
+        }
+
+        .city2-drone-to-right {
+          top: 20%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="data-prep-home">
+      <section class="city-screen" aria-label="Data Prep City">
+        <div class="city-scene uses-cheap-building-hover" id="cityScene">
+          <img class="city-layer city-bg" src="../res/city_2/city_elements/bg.webp" alt="" />
+          <img class="city-layer city-building-layer layer-mines" data-building-layer="mines" src="../res/city_2/city_elements/mines.webp" alt="" />
+          <img class="city-layer city-building-layer layer-tower" data-building-layer="tower" src="../res/city_2/city_elements/tower.webp" alt="" />
+          <img class="city-layer city-building-layer layer-junction" data-building-layer="junction" src="../res/city_2/city_elements/juction.webp" alt="" />
+          <img class="city-layer city-building-layer layer-factory" data-building-layer="factory" src="../res/city_2/city_elements/factory.webp" alt="" />
+          <img class="city-layer city-building-layer layer-clinic" data-building-layer="clinic" src="../res/city_2/city_elements/clinic.webp" alt="" />
+
+          <div class="city-building-glow glow-mines" data-building-glow="mines"></div>
+          <div class="city-building-glow glow-tower" data-building-glow="tower"></div>
+          <div class="city-building-glow glow-junction" data-building-glow="junction"></div>
+          <div class="city-building-glow glow-factory" data-building-glow="factory"></div>
+          <div class="city-building-glow glow-clinic" data-building-glow="clinic"></div>
+
+          <img class="building-lock lock-mines" data-building-lock="mines" src="../res/city_2/item/lock.webp" alt="Locked" hidden />
+          <img class="building-lock lock-tower" data-building-lock="tower" src="../res/city_2/item/lock.webp" alt="Locked" hidden />
+          <img class="building-lock lock-junction" data-building-lock="junction" src="../res/city_2/item/lock.webp" alt="Locked" hidden />
+          <img class="building-lock lock-factory" data-building-lock="factory" src="../res/city_2/item/lock.webp" alt="Locked" hidden />
+          <img class="building-lock lock-clinic" data-building-lock="clinic" src="../res/city_2/item/lock.webp" alt="Locked" hidden />
+
+          <div class="city-lively-layer city2-lively-layer" aria-hidden="true">
+            <div class="city-lively-item city2-track city2-track-to-left">
+              <img class="city-lively-img city2-track-img" src="../res/city_2/city_elements/track.webp" alt="" />
+            </div>
+            <div class="city-lively-item city2-track city2-track-to-right">
+              <img class="city-lively-img city2-track-img" src="../res/city_2/city_elements/track.webp" alt="" />
+            </div>
+            <div class="city-lively-item city2-drone city2-drone-to-right">
+              <img class="city-lively-img city2-drone-img" src="../res/city_2/city_elements/drone.webp" alt="" />
+            </div>
+            <div class="city-lively-item city2-drone city2-drone-to-left">
+              <img class="city-lively-img city2-drone-img" src="../res/city_2/city_elements/drone.webp" alt="" />
+            </div>
+          </div>
+
+          <button class="building-hotspot city-building-hotspot hotspot-mines" type="button" data-building="mines" aria-label="Subquery Mines"></button>
+          <button class="building-hotspot city-building-hotspot hotspot-tower" type="button" data-building="tower" aria-label="Summary Tower"></button>
+          <button class="building-hotspot city-building-hotspot hotspot-junction" type="button" data-building="junction" aria-label="Join Junction"></button>
+          <button class="building-hotspot city-building-hotspot hotspot-factory" type="button" data-building="factory" aria-label="Filter Factory"></button>
+          <button class="building-hotspot city-building-hotspot hotspot-clinic" type="button" data-building="clinic" aria-label="Cleaning Clinic"></button>
+
+          <div class="building-sign sign-mines" data-building-sign="mines">Subquery Mines</div>
+          <div class="building-sign sign-tower" data-building-sign="tower">Summary Tower</div>
+          <div class="building-sign sign-junction" data-building-sign="junction">Join Junction</div>
+          <div class="building-sign sign-factory" data-building-sign="factory">Filter Factory</div>
+          <div class="building-sign sign-clinic" data-building-sign="clinic">Cleaning Clinic</div>
+
+          <h1 class="city-title">Data Prep City</h1>
+          <p class="city-subtitle">Filtering, Summarizing, Joining, Subqueries, and Data Cleaning</p>
+          <p class="city-completion-banner" id="cityCompletionBanner" hidden>Data Prep City completed! Future islands are coming soon.</p>
+        </div>
+      </section>
+    </main>
+
+    <div id="sharedMenuMount" data-menu-page="data-prep-city" data-menu-title="Data Prep City Menu" data-menu-base="../"></div>
+    <script src="../shared_files/shared-progress.js"></script>
+    <script src="../shared_files/shared-reset-system.js"></script>
+    <script src="../shared_files/shared-magic-key.js"></script>
+    <script src="../shared_files/shared-menu.js"></script>
+    <script src="../shared_files/shared-building-effects.js"></script>
+    <script>
+      const canOpenDataPrepCity = window.SQLKingdomResetSystem?.guardIslandAccess("data-prep-city", "../index.html") ?? true;
+
+      if (canOpenDataPrepCity) {
+        window.SQLCityBuildingEffects?.init({
+          sceneSelector: "#cityScene"
+        });
+
+        function dataPrepBuildingId(buildingId) {
+          return {
+            factory: "filterFactory",
+            tower: "summaryTower",
+            junction: "joinJunction",
+            mines: "subqueryMines",
+            clinic: "cleaningClinic"
+          }[buildingId] || "";
+        }
+
+        function applyDataPrepBuildingStates() {
+          document.querySelectorAll(".building-hotspot").forEach((hotspot) => {
+            const buildingId = hotspot.dataset.building;
+            const progressId = dataPrepBuildingId(buildingId);
+            const isPlayable = progressId === "filterFactory" || progressId === "summaryTower" || progressId === "joinJunction" || progressId === "subqueryMines" || progressId === "cleaningClinic";
+            const isUnlocked = isPlayable && window.SQLKingdomProgress?.isDataPrepBuildingUnlocked?.(progressId);
+            const sign = document.querySelector(`[data-building-sign="${buildingId}"]`);
+            const layer = document.querySelector(`[data-building-layer="${buildingId}"]`);
+            const lock = document.querySelector(`[data-building-lock="${buildingId}"]`);
+
+            hotspot.classList.toggle("locked", !isUnlocked);
+            hotspot.classList.toggle("is-disabled", !isUnlocked && buildingId !== "factory");
+            hotspot.setAttribute("aria-disabled", isUnlocked ? "false" : "true");
+
+            sign?.classList.toggle("is-unlocked", Boolean(isUnlocked));
+            sign?.classList.toggle("is-locked", !isUnlocked);
+            layer?.classList.toggle("is-locked", !isUnlocked && isPlayable);
+            if (lock) {
+              lock.hidden = Boolean(isUnlocked) || !isPlayable;
+            }
+          });
+
+          const progress = window.SQLKingdomProgress?.getGameProgress?.();
+          const banner = document.querySelector("#cityCompletionBanner");
+          if (banner) {
+            banner.hidden = !progress?.cities?.dataPrepCity?.completed;
+          }
+        }
+
+        applyDataPrepBuildingStates();
+        window.addEventListener("sqlKingdom:reset", applyDataPrepBuildingStates);
+        window.addEventListener("sqlKingdom:unlockAll", applyDataPrepBuildingStates);
+
+        document.querySelectorAll(".building-hotspot").forEach((hotspot) => {
+          const buildingId = hotspot.dataset.building;
+
+          hotspot.addEventListener("click", () => {
+            if (buildingId === "factory") {
+              window.location.href = "filter-factory.html";
+              return;
+            }
+
+            if (buildingId === "tower") {
+              if (window.SQLKingdomProgress?.isDataPrepBuildingUnlocked?.("summaryTower")) {
+                window.location.href = "summary-tower.html";
+                return;
+              }
+
+              window.SQLKingdomMenu?.showToast("Complete Filter Factory first.");
+              return;
+            }
+
+            if (buildingId === "junction") {
+              if (window.SQLKingdomProgress?.isDataPrepBuildingUnlocked?.("joinJunction")) {
+                window.location.href = "join-junction.html";
+                return;
+              }
+
+              window.SQLKingdomMenu?.showToast("Complete Summary Tower first.");
+              return;
+            }
+
+            if (buildingId === "mines") {
+              if (window.SQLKingdomProgress?.isDataPrepBuildingUnlocked?.("subqueryMines")) {
+                window.location.href = "subquery-mines.html";
+                return;
+              }
+
+              window.SQLKingdomMenu?.showToast("Complete Join Junction first.");
+              return;
+            }
+
+            if (buildingId === "clinic") {
+              if (window.SQLKingdomProgress?.isDataPrepBuildingUnlocked?.("cleaningClinic")) {
+                window.location.href = "cleaning-clinic.html";
+                return;
+              }
+
+              window.SQLKingdomMenu?.showToast("Complete Subquery Mines first.");
+              return;
+            }
+
+            window.SQLKingdomMenu?.showToast("This building will open soon.");
+          });
+        });
+
+        window.SQLKingdomMenu?.showToast(window.SQLKingdomResetSystem?.consumeGuardMessage?.());
+      }
+    </script>
+  </body>
+</html>

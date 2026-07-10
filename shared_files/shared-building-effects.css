@@ -1,0 +1,103 @@
+.city-building-layer {
+  transition:
+    filter 0.18s ease,
+    transform 0.18s ease;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.city-building-hotspot {
+  cursor: pointer;
+}
+
+.city-building-hotspot.locked,
+.city-building-hotspot.is-disabled {
+  cursor: not-allowed;
+}
+
+.city-building-layer.is-hovered {
+  filter:
+    drop-shadow(0 0 8px var(--building-glow, #5fffd6))
+    drop-shadow(0 0 var(--building-glow-size, 24px) var(--building-glow, #5fffd6)) !important;
+  transform: translateY(-4px) !important;
+}
+
+.city-scene.uses-cheap-building-hover .city-building-layer.is-hovered {
+  filter: none !important;
+  transform: translate3d(0, -3px, 0) !important;
+}
+
+.city-building-glow {
+  position: absolute;
+  z-index: 23;
+  border-radius: 18px;
+  opacity: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle, var(--building-glow-soft, rgba(95, 255, 214, 0.42)) 0%, transparent 62%);
+  mix-blend-mode: screen;
+  transition:
+    opacity 0.14s ease,
+    transform 0.14s ease;
+  transform: translate3d(0, 0, 0) scale(0.96);
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+  contain: layout paint;
+}
+
+.city-building-glow.is-hovered {
+  opacity: 0.78;
+  transform: translate3d(0, -3px, 0) scale(1);
+}
+
+.city-building-layer.is-locked {
+  filter: brightness(0.45) grayscale(0.35);
+}
+
+.city-building-hotspot:focus-visible {
+  outline: 3px solid var(--cream, #fff4c2);
+  outline-offset: 4px;
+}
+
+[data-building-layer="dataVault"],
+[data-building-layer="tableDepartment"],
+[data-building-layer="mines"],
+[data-building-glow="dataVault"],
+[data-building-glow="tableDepartment"],
+[data-building-glow="mines"] {
+  --building-glow: var(--rose, #ff4d6d);
+  --building-glow-soft: rgba(255, 77, 109, 0.42);
+  --building-glow-size: 22px;
+}
+
+[data-building-layer="keyBridgeHall"],
+[data-building-layer="tower"],
+[data-building-glow="keyBridgeHall"],
+[data-building-glow="tower"] {
+  --building-glow: var(--yellow, #ffd76a);
+  --building-glow-soft: rgba(255, 215, 106, 0.42);
+  --building-glow-size: 24px;
+}
+
+[data-building-layer="queryLab"],
+[data-building-layer="clinic"],
+[data-building-glow="queryLab"],
+[data-building-glow="clinic"] {
+  --building-glow: var(--green, #74ff9f);
+  --building-glow-soft: rgba(116, 255, 159, 0.42);
+  --building-glow-size: 24px;
+}
+
+[data-building-layer="junction"],
+[data-building-glow="junction"] {
+  --building-glow: var(--cyan, #5fffd6);
+  --building-glow-soft: rgba(95, 255, 214, 0.42);
+  --building-glow-size: 24px;
+}
+
+[data-building-layer="factory"],
+[data-building-glow="factory"] {
+  --building-glow: var(--violet, #b98cff);
+  --building-glow-soft: rgba(185, 140, 255, 0.42);
+  --building-glow-size: 24px;
+}

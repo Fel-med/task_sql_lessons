@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Summary Tower | Data Prep City</title>
+    <link rel="icon" type="image/webp" href="../res/city_2/item/badge.webp">
+    <link rel="shortcut icon" type="image/webp" href="../res/city_2/item/badge.webp">
+    <link rel="stylesheet" href="../shared_files/shared-room-layout.css" />
+    <link rel="stylesheet" href="../shared_files/shared-room-components.css" />
+    <style>
+      .side-panel h1 { font-size: 28px; }
+      .marker-screen { left: 35%; top: 33%; }
+      .marker-console { left: 53%; top: 50%; }
+      .marker-meter { left: 69%; top: 36%; }
+
+      @media (max-width: 760px) {
+        .side-panel h1 { font-size: 24px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="room-layout">
+      <aside class="side-panel">
+        <h1>Summary Tower</h1>
+        <p class="room-counter" id="roomCounter">Current Room: 0 / 7</p>
+        <p class="path-title">Learning Path</p>
+        <div class="lesson-list" id="roomList"></div>
+        <article class="lesson-card" id="lessonCard">
+          <h2 id="lessonTitle">Welcoming Room</h2>
+          <div class="room-summary" id="lessonText"></div>
+        </article>
+      </aside>
+
+      <section class="room-stage" aria-label="Summary Tower rooms">
+        <img class="room-bg" id="roomBg" src="../res/city_2/rooms_background/Summary_Tower.webp" alt="" />
+        <a class="return-city-btn" id="topReturn" href="index_city_2.html">Back to Data Prep City</a>
+        <div class="hotspots" id="hotspots">
+          <button class="info-marker marker-screen" type="button" data-marker-id="screen" aria-label="Summary screen info"></button>
+          <button class="info-marker marker-console" type="button" data-marker-id="console" aria-label="Grouping console info"></button>
+          <button class="info-marker marker-meter" type="button" data-marker-id="meter" aria-label="Insight meter info"></button>
+        </div>
+        <div class="marker-tooltip" id="markerTooltip" aria-hidden="true">
+          <h3 id="markerTooltipTitle"></h3>
+          <p id="markerTooltipText"></p>
+        </div>
+        <div class="room-nav">
+          <button class="pixel-btn" id="prevRoom" type="button">Previous</button>
+          <button class="pixel-btn" id="nextRoom" type="button">Next</button>
+          <a class="pixel-btn" id="finalReturn" href="index_city_2.html" hidden>Back to Data Prep City</a>
+        </div>
+        <article class="info-card" id="infoCard" aria-live="polite">
+          <div id="mainLessonContent"></div>
+        </article>
+        <article class="reward-modal" id="rewardModal" hidden>
+          <div class="reward-card">
+            <img src="../res/city_2/item/regular-key.webp" class="reward-key-img" alt="Join Junction Key">
+            <h2 id="rewardTitle">Join Junction Key</h2>
+            <p id="rewardMessage">You received the Join Junction Key.</p>
+            <button class="pixel-btn" id="rewardContinue" type="button">Continue</button>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script src="../shared_files/shared-progress.js"></script>
+    <script src="../shared_files/shared-reset-system.js"></script>
+    <script>
+      const canOpenSummaryTower = window.SQLKingdomResetSystem?.guardDataPrepBuildingAccess?.("summaryTower", "index_city_2.html", "Complete Filter Factory first.", "../index.html") ?? true;
+      const QUIZ_ADVANCE_DELAY_MS = 650;
+
+      // Data Prep City examples use international neutral sample data.
+      const rooms = [
+        {
+          title: "Welcoming Room",
+          image: "../res/city_2/rooms_background/Summary_Tower.webp",
+          type: "welcome",
+          summary: "Aggregation turns many rows into useful summaries.",
+          points: ["Summary Screen", "Grouping Console", "Insight Meter"],
+          contentHtml: `
+            <h2>Welcome to Summary Tower</h2>
+            <p>Aggregation is the process of turning many rows into useful summaries.</p>
+            <p>Explore the glowing markers to inspect the tower tools before starting the lesson path.</p>
+            <ul>
+              <li>Summary functions answer questions like how many and how much.</li>
+              <li>Groups create one summary per category.</li>
+              <li>Summaries help reveal patterns before analysis.</li>
+            </ul>
+          `
+        },
+        {
+          title: "COUNT and SUM",
+          image: "../res/city_2/rooms_background/Summary_Tower_room.webp",
+          type: "lesson",
+          summary: "COUNT tells us how many. SUM tells us how much in total.",
+          points: ["COUNT() counts rows or values", "SUM() adds numeric values", "Aliases name the result"],
+          contentHtml: `
+            <h2>COUNT and SUM</h2>
+            <p><strong>COUNT()</strong> counts rows or values.</p>
+            <pre class="sql-code"><code>SELECT COUNT(*) AS total_students
+FROM students;</code></pre>
+            <p>This returns one number: the total number of student rows.</p>
+            <p><strong>SUM()</strong> adds numeric values.</p>
+            <pre class="sql-code"><code>SELECT SUM(price) AS total_sales
+FROM orders;</code></pre>
+            <p>This returns the total value of all order prices.</p>
+            <div class="pixel-box">COUNT tells us "how many." SUM tells us "how much in total."</div>
+            <table class="result-table">
+              <thead><tr><th>metric</th><th>answer</th></tr></thead>
+              <tbody>
+                <tr><td>total_students</td><td>42</td></tr>
+                <tr><td>total_sales</td><td>1250</td></tr>
+              </tbody>
+            </table>
+          `
+        },
+        {
+          title: "AVG, MIN, and MAX",
+          image: "../res/city_2/rooms_background/Summary_Tower_room.webp",
+          type: "lesson",
+          summary: "AVG finds the average. MIN and MAX show the range.",
+          points: ["AVG() finds a typical value", "MIN() finds the smallest value", "MAX() finds the largest value"],
+          contentHtml: `
+            <h2>AVG, MIN, and MAX</h2>
+            <p><strong>AVG()</strong> finds the average value.</p>
+            <pre class="sql-code"><code>SELECT AVG(score) AS average_score
+FROM exams;</code></pre>
+            <p>This helps understand typical performance.</p>
+            <p><strong>MIN()</strong> finds the smallest value.</p>
+            <pre class="sql-code"><code>SELECT MIN(price) AS lowest_price
+FROM products;</code></pre>
+            <p><strong>MAX()</strong> finds the largest value.</p>
+            <pre class="sql-code"><code>SELECT MAX(price) AS highest_price
+FROM products;</code></pre>
+            <div class="pixel-box">AVG is useful for typical performance. MIN and MAX show the range of the data.</div>
+          `
+        },
+        {
+          title: "GROUP BY",
+          image: "../res/city_2/rooms_background/Summary_Tower_room.webp",
+          type: "lesson",
+          summary: "GROUP BY creates one summary for each category or group.",
+          points: ["One result for each group", "Often used with COUNT, AVG, or SUM", "Great for category summaries"],
+          contentHtml: `
+            <h2>GROUP BY</h2>
+            <p><strong>GROUP BY</strong> creates summaries for each group.</p>
+            <pre class="sql-code"><code>SELECT city, COUNT(*) AS total_customers
+FROM customers
+GROUP BY city;</code></pre>
+            <p>Without GROUP BY, aggregation gives one result for all rows. With GROUP BY, aggregation gives one result per group.</p>
+            <pre class="sql-code"><code>SELECT category, AVG(price) AS average_price
+FROM products
+GROUP BY category;</code></pre>
+            <p>This finds the average price inside each product category.</p>
+            <table class="result-table">
+              <thead><tr><th>city</th><th>total_customers</th></tr></thead>
+              <tbody>
+                <tr><td>London</td><td>14</td></tr>
+                <tr><td>Toronto</td><td>8</td></tr>
+                <tr><td>Madrid</td><td>11</td></tr>
+              </tbody>
+            </table>
+          `
+        },
+        {
+          title: "HAVING",
+          image: "../res/city_2/rooms_background/Summary_Tower_room.webp",
+          type: "lesson",
+          summary: "HAVING filters grouped results after aggregation.",
+          points: ["Used after GROUP BY", "Filters summary rows", "Different from WHERE"],
+          contentHtml: `
+            <h2>HAVING</h2>
+            <p><strong>HAVING</strong> filters grouped results. It is used after GROUP BY.</p>
+            <pre class="sql-code"><code>SELECT city, COUNT(*) AS total_customers
+FROM customers
+GROUP BY city
+HAVING COUNT(*) &gt; 10;</code></pre>
+            <p>This keeps only cities with more than 10 customers.</p>
+            <div class="pixel-box">WHERE filters rows before grouping. HAVING filters groups after aggregation.</div>
+          `
+        },
+        {
+          title: "Aggregation for Data Preparation",
+          image: "../res/city_2/rooms_background/Summary_Tower_room.webp",
+          type: "lesson",
+          summary: "Aggregation turns raw activity into useful summary features.",
+          points: ["Count user actions", "Calculate averages and totals", "Create ML-ready feature rows"],
+          contentHtml: `
+            <h2>Aggregation for Data Preparation</h2>
+            <p>Aggregation is useful before analysis or machine learning because it creates compact summaries from raw data.</p>
+            <ul>
+              <li>Count user actions.</li>
+              <li>Calculate average spending.</li>
+              <li>Find maximum and minimum values.</li>
+              <li>Summarize sales by region.</li>
+              <li>Create features for ML datasets.</li>
+            </ul>
+            <pre class="sql-code"><code>SELECT customer_id,
+       COUNT(*) AS total_orders,
+       SUM(price) AS total_spent,
+       AVG(price) AS average_order_value
+FROM orders
+GROUP BY customer_id;</code></pre>
+            <p>This creates one row per customer with total orders, total money spent, and average order value.</p>
+            <div class="pixel-box">This kind of summary can become useful feature data for machine learning.</div>
+          `
+        },
+        {
+          title: "Quiz Room",
+          image: "../res/city_2/rooms_background/Summary_Tower_room.webp",
+          type: "quiz",
+          summary: "Test aggregation functions and grouped summaries before unlocking the recap.",
+          points: ["Six questions", "Randomized answer order", "Correct answers unlock the recap"],
+          contentHtml: `
+            <h2>Quiz Room</h2>
+            <p>Answer every question correctly to unlock the recap room.</p>
+            <div class="quiz-box">
+              <article class="quiz-question" data-question-id="count">
+                <h3>Question 1</h3>
+                <p>Which function counts rows?</p>
+                <button class="quiz-option" type="button" data-correct="true">COUNT()</button>
+                <button class="quiz-option" type="button">SUM()</button>
+                <button class="quiz-option" type="button">AVG()</button>
+                <button class="quiz-option" type="button">GROUP BY</button>
+              </article>
+              <article class="quiz-question" data-question-id="sum">
+                <h3>Question 2</h3>
+                <p>Which function adds numeric values?</p>
+                <button class="quiz-option" type="button" data-correct="true">SUM()</button>
+                <button class="quiz-option" type="button">COUNT()</button>
+                <button class="quiz-option" type="button">MIN()</button>
+                <button class="quiz-option" type="button">HAVING</button>
+              </article>
+              <article class="quiz-question" data-question-id="avg">
+                <h3>Question 3</h3>
+                <p>Which function finds the average?</p>
+                <button class="quiz-option" type="button" data-correct="true">AVG()</button>
+                <button class="quiz-option" type="button">MAX()</button>
+                <button class="quiz-option" type="button">COUNT()</button>
+                <button class="quiz-option" type="button">WHERE</button>
+              </article>
+              <article class="quiz-question" data-question-id="group-by">
+                <h3>Question 4</h3>
+                <p>What does GROUP BY do?</p>
+                <button class="quiz-option" type="button" data-correct="true">Creates summaries for each group</button>
+                <button class="quiz-option" type="button">Deletes duplicate rows</button>
+                <button class="quiz-option" type="button">Sorts rows from highest to lowest</button>
+                <button class="quiz-option" type="button">Filters text patterns</button>
+              </article>
+              <article class="quiz-question" data-question-id="having">
+                <h3>Question 5</h3>
+                <p>Which clause filters grouped results?</p>
+                <button class="quiz-option" type="button" data-correct="true">HAVING</button>
+                <button class="quiz-option" type="button">WHERE</button>
+                <button class="quiz-option" type="button">SELECT</button>
+                <button class="quiz-option" type="button">ORDER BY</button>
+              </article>
+              <article class="quiz-question" data-question-id="where-having">
+                <h3>Question 6</h3>
+                <p>What is the difference between WHERE and HAVING?</p>
+                <button class="quiz-option" type="button" data-correct="true">WHERE filters rows before grouping, HAVING filters groups after aggregation</button>
+                <button class="quiz-option" type="button">WHERE only works with text, HAVING only works with numbers</button>
+                <button class="quiz-option" type="button">WHERE creates groups, HAVING sorts rows</button>
+                <button class="quiz-option" type="button">There is no difference</button>
+              </article>
+            </div>
+            <p class="quiz-feedback"></p>
+          `
+        },
+        {
+          title: "Recap Room",
+          image: "../res/city_2/rooms_background/Summary_Tower_room.webp",
+          type: "lesson",
+          summary: "You learned how SQL summarizes raw data into useful insight.",
+          points: ["Aggregation functions reviewed", "GROUP BY and HAVING understood", "Join Junction Key reward"],
+          contentHtml: `
+            <h2>Recap Room</h2>
+            <p>You finished the Summary Tower. You can now summarize raw data before deeper analysis.</p>
+            <ul>
+              <li><strong>COUNT</strong> counts rows.</li>
+              <li><strong>SUM</strong> adds values.</li>
+              <li><strong>AVG</strong> finds the average.</li>
+              <li><strong>MIN</strong> finds the smallest value.</li>
+              <li><strong>MAX</strong> finds the largest value.</li>
+              <li><strong>GROUP BY</strong> summarizes rows by category or group.</li>
+              <li><strong>HAVING</strong> filters grouped results.</li>
+              <li>Aggregation helps create useful summaries and ML-ready features.</li>
+            </ul>
+            <p class="reward-note">Reward unlocked: Join Junction Key.</p>
+          `
+        }
+      ];
+
+      const welcomeMarkers = [
+        { id: "screen", title: "Summary Screen", text: "Aggregation helps turn many rows into one useful result." },
+        { id: "console", title: "Grouping Console", text: "GROUP BY creates summaries for each category or group." },
+        { id: "meter", title: "Insight Meter", text: "Summaries help us understand data before analysis or machine learning." }
+      ];
+
+      const TEMPLATE_KEY = "summaryTower";
+      let currentRoomIndex = 0;
+      let currentQuizIndex = 0;
+      let discoveryCompleteAnimationPlayed = false;
+      let progress = getProgress();
+
+      const roomBg = document.querySelector("#roomBg");
+      const roomStage = document.querySelector(".room-stage");
+      const roomCounter = document.querySelector("#roomCounter");
+      const hotspots = document.querySelector("#hotspots");
+      const prevRoom = document.querySelector("#prevRoom");
+      const nextRoom = document.querySelector("#nextRoom");
+      const topReturn = document.querySelector("#topReturn");
+      const finalReturn = document.querySelector("#finalReturn");
+      const roomList = document.querySelector("#roomList");
+      const lessonTitle = document.querySelector("#lessonTitle");
+      const lessonText = document.querySelector("#lessonText");
+      const mainLessonContent = document.querySelector("#mainLessonContent");
+      const rewardModal = document.querySelector("#rewardModal");
+      const rewardContinue = document.querySelector("#rewardContinue");
+      const markerTooltip = document.querySelector("#markerTooltip");
+      const markerTooltipTitle = document.querySelector("#markerTooltipTitle");
+      const markerTooltipText = document.querySelector("#markerTooltipText");
+
+      function getProgress() {
+        return window.SQLKingdomProgress.getGameProgress();
+      }
+
+      function saveProgress(progressToSave) {
+        window.SQLKingdomProgress.saveGameProgress(progressToSave);
+      }
+
+      function templateProgress() {
+        progress.cities = progress.cities || {};
+        progress.cities.dataPrepCity = progress.cities.dataPrepCity || {};
+        progress.cities.dataPrepCity[TEMPLATE_KEY] = progress.cities.dataPrepCity[TEMPLATE_KEY] || {
+          discoveredMarkers: [],
+          highestRoomUnlocked: 0,
+          quizPassed: false,
+          completed: false,
+          correctQuizAnswers: []
+        };
+        if (!Array.isArray(progress.cities.dataPrepCity[TEMPLATE_KEY].discoveredMarkers)) {
+          progress.cities.dataPrepCity[TEMPLATE_KEY].discoveredMarkers = [];
+        }
+        if (!Array.isArray(progress.cities.dataPrepCity[TEMPLATE_KEY].correctQuizAnswers)) {
+          progress.cities.dataPrepCity[TEMPLATE_KEY].correctQuizAnswers = [];
+        }
+        return progress.cities.dataPrepCity[TEMPLATE_KEY];
+      }
+
+      function markerIds() {
+        return welcomeMarkers.map((marker) => marker.id);
+      }
+
+      function discoveredMarkers() {
+        const template = templateProgress();
+        if (!Array.isArray(template.discoveredMarkers)) template.discoveredMarkers = [];
+        return template.discoveredMarkers;
+      }
+
+      function discoveryCount() {
+        const validMarkerIds = markerIds();
+        return discoveredMarkers().filter((id) => validMarkerIds.includes(id)).length;
+      }
+
+      function allWelcomeMarkersDiscovered() {
+        const discovered = discoveredMarkers();
+        return welcomeMarkers.every((marker) => discovered.includes(marker.id));
+      }
+
+      function getWelcomeMarker(markerId) {
+        return welcomeMarkers.find((marker) => marker.id === markerId);
+      }
+
+      function renderMainContent(contentHtml) {
+        mainLessonContent.innerHTML = contentHtml;
+      }
+
+      function renderWelcomeContent(message = "", animateComplete = false) {
+        const complete = allWelcomeMarkersDiscovered();
+        const shouldAnimate = complete && animateComplete && !discoveryCompleteAnimationPlayed;
+        const statusClass = complete ? `discovery-complete${shouldAnimate ? " animate-complete" : ""}` : "discovery-status";
+        const statusText = complete ? "All tower objects discovered! You can enter the next room." : `Objects discovered: ${discoveryCount()} / ${welcomeMarkers.length}`;
+        const warning = message ? `<p class="discovery-warning">${message}</p>` : "";
+        return `
+          <h2>Welcome to Summary Tower</h2>
+          <p>Explore every glowing object marker before starting the aggregation path.</p>
+          <p class="${statusClass}">${statusText}</p>
+          ${complete ? "" : `<p class="discovery-hint">Hover or click each marker to discover it.</p>`}
+          ${warning}
+        `;
+      }
+
+      function renderWelcomeSidebarSummary() {
+        const complete = allWelcomeMarkersDiscovered();
+        lessonTitle.textContent = rooms[0].title;
+        lessonText.innerHTML = `
+          <p>${rooms[0].summary}</p>
+          <ul>
+            <li>Objects discovered: ${discoveryCount()} / ${welcomeMarkers.length}</li>
+            <li>${complete ? "Next Room unlocked." : "Discover all tower objects to unlock Room 1."}</li>
+          </ul>
+        `;
+      }
+
+      function updateMarkerStates() {
+        const discovered = discoveredMarkers();
+        document.querySelectorAll(".info-marker").forEach((markerElement) => {
+          const markerData = getWelcomeMarker(markerElement.dataset.markerId);
+          const isDiscovered = discovered.includes(markerElement.dataset.markerId);
+          markerElement.classList.toggle("is-discovered", isDiscovered);
+          if (markerData) markerElement.setAttribute("aria-label", `${markerData.title} ${isDiscovered ? "discovered" : "not discovered"}`);
+        });
+      }
+
+      function unlockFirstLessonIfReady() {
+        if (!allWelcomeMarkersDiscovered()) return false;
+        const template = templateProgress();
+        const unlockedNow = template.highestRoomUnlocked < 1;
+        template.highestRoomUnlocked = Math.max(template.highestRoomUnlocked, 1);
+        saveProgress(progress);
+        return unlockedNow;
+      }
+
+      function markWelcomeMarkerDiscovered(markerId) {
+        const markerData = getWelcomeMarker(markerId);
+        if (!markerData) return;
+        const wasComplete = allWelcomeMarkersDiscovered();
+        const discovered = discoveredMarkers();
+        if (!discovered.includes(markerId)) {
+          discovered.push(markerId);
+          saveProgress(progress);
+        }
+        const isComplete = allWelcomeMarkersDiscovered();
+        if (isComplete) unlockFirstLessonIfReady();
+        updateMarkerStates();
+        if (currentRoomIndex === 0) {
+          const shouldAnimateComplete = isComplete && !wasComplete && !discoveryCompleteAnimationPlayed;
+          renderWelcomeSidebarSummary();
+          renderMainContent(renderWelcomeContent("", shouldAnimateComplete));
+          if (shouldAnimateComplete) discoveryCompleteAnimationPlayed = true;
+          renderRoomList();
+          updateNextButtonState();
+        }
+      }
+
+      function showMarkerTooltip(markerElement, markerData) {
+        markerTooltipTitle.textContent = markerData.title;
+        markerTooltipText.textContent = markerData.text;
+        markerTooltip.classList.add("is-visible");
+        markerTooltip.setAttribute("aria-hidden", "false");
+        const stageRect = roomStage.getBoundingClientRect();
+        const markerRect = markerElement.getBoundingClientRect();
+        const tooltipRect = markerTooltip.getBoundingClientRect();
+        let left = markerRect.left - stageRect.left + markerRect.width / 2 - tooltipRect.width / 2;
+        let top = markerRect.top - stageRect.top - tooltipRect.height - 14;
+        if (top < 10) top = markerRect.bottom - stageRect.top + 14;
+        left = Math.max(10, Math.min(left, stageRect.width - tooltipRect.width - 10));
+        top = Math.max(10, Math.min(top, stageRect.height - tooltipRect.height - 10));
+        markerTooltip.style.left = `${left}px`;
+        markerTooltip.style.top = `${top}px`;
+      }
+
+      function hideMarkerTooltip() {
+        markerTooltip.classList.remove("is-visible");
+        markerTooltip.setAttribute("aria-hidden", "true");
+      }
+
+      function handleMarkerEnter(markerElement) {
+        if (currentRoomIndex !== 0) return;
+        const markerData = getWelcomeMarker(markerElement.dataset.markerId);
+        if (!markerData) return;
+        markWelcomeMarkerDiscovered(markerData.id);
+        showMarkerTooltip(markerElement, markerData);
+      }
+
+      function updateNextButtonState() {
+        const locked = currentRoomIndex === 0 && !allWelcomeMarkersDiscovered();
+        nextRoom.classList.toggle("is-disabled", locked);
+        nextRoom.setAttribute("aria-disabled", locked ? "true" : "false");
+      }
+
+      function updateCounter() {
+        roomCounter.textContent = `Current Room: ${currentRoomIndex} / ${rooms.length - 1}`;
+      }
+
+      function formatRoomTitle(room, index) {
+        return index === 0 ? "0. Welcoming Room" : `${String(index).padStart(2, "0")}. ${room.title}`;
+      }
+
+      function isRecapRoom(index) {
+        return index === rooms.length - 1;
+      }
+
+      function canEnterRoom(index) {
+        const template = templateProgress();
+        if (index === 1 && !allWelcomeMarkersDiscovered()) return false;
+        if (isRecapRoom(index) && !template.quizPassed) return false;
+        return index <= template.highestRoomUnlocked;
+      }
+
+      function roomLockedMessage(index) {
+        if (index === 1 && !allWelcomeMarkersDiscovered()) return "Discover all welcome-room tower objects first.";
+        if (isRecapRoom(index) && !templateProgress().quizPassed) return "Complete the quiz first to unlock the recap room.";
+        return "Explore previous rooms first to unlock this room.";
+      }
+
+      function renderRoomList() {
+        roomList.innerHTML = "";
+        rooms.forEach((room, index) => {
+          const tab = document.createElement("button");
+          tab.type = "button";
+          tab.className = "room-tab";
+          tab.textContent = formatRoomTitle(room, index);
+          const isUnlocked = canEnterRoom(index);
+          if (!isUnlocked) tab.classList.add("locked");
+          if (index === currentRoomIndex) tab.classList.add("active");
+          tab.addEventListener("click", () => {
+            if (!isUnlocked) {
+              const message = roomLockedMessage(index);
+              lessonTitle.textContent = "Room locked";
+              lessonText.innerHTML = `<p>${message}</p>`;
+              renderMainContent(`<h2>Room locked</h2><p>${message}</p>`);
+              return;
+            }
+            currentRoomIndex = index;
+            renderRoom();
+          });
+          roomList.appendChild(tab);
+        });
+      }
+
+      function renderSidebarSummary(room) {
+        lessonTitle.textContent = room.title;
+        lessonText.innerHTML = `<p>${room.summary}</p><ul>${room.points.map((point) => `<li>${point}</li>`).join("")}</ul>`;
+      }
+
+      function setQuizFeedback(message) {
+        const feedback = mainLessonContent.querySelector(".quiz-feedback");
+        if (feedback) feedback.textContent = message;
+      }
+
+      function shuffleArray(array) {
+        const copy = [...array];
+        for (let i = copy.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      }
+
+      function optionTextWithoutLetter(text) {
+        return text.replace(/^[A-D]\.\s*/, "");
+      }
+
+      function quizQuestions() {
+        return Array.from(mainLessonContent.querySelectorAll(".quiz-question"));
+      }
+
+      function quizQuestionIds() {
+        return quizQuestions().map((question) => question.dataset.questionId);
+      }
+
+      function completedQuizQuestionCount() {
+        const template = templateProgress();
+        return quizQuestionIds().filter((id) => template.correctQuizAnswers.includes(id)).length;
+      }
+
+      function renderQuizTabs() {
+        const quizBox = mainLessonContent.querySelector(".quiz-box");
+        const questions = quizQuestions();
+        if (!quizBox || questions.length <= 1) return;
+
+        let tabs = mainLessonContent.querySelector(".quiz-tabs");
+        if (!tabs) {
+          tabs = document.createElement("div");
+          tabs.className = "quiz-tabs";
+          tabs.setAttribute("role", "tablist");
+          tabs.setAttribute("aria-label", "Quiz questions");
+          quizBox.insertBefore(tabs, quizBox.firstElementChild);
+        }
+
+        const template = templateProgress();
+        currentQuizIndex = Math.max(0, Math.min(currentQuizIndex, questions.length - 1));
+        tabs.innerHTML = "";
+
+        questions.forEach((question, index) => {
+          const questionId = question.dataset.questionId;
+          const isActive = index === currentQuizIndex;
+          const isComplete = template.correctQuizAnswers.includes(questionId);
+          question.classList.add("quiz-question-panel");
+          question.hidden = !isActive;
+          question.classList.toggle("is-active", isActive);
+
+          const tab = document.createElement("button");
+          tab.type = "button";
+          tab.className = "quiz-tab";
+          tab.textContent = `Quiz ${index + 1}`;
+          tab.setAttribute("role", "tab");
+          tab.setAttribute("aria-selected", isActive ? "true" : "false");
+          tab.classList.toggle("is-active", isActive);
+          tab.classList.toggle("is-complete", isComplete);
+          tab.addEventListener("click", () => {
+            currentQuizIndex = index;
+            renderQuizTabs();
+            updateQuizFeedback();
+          });
+          tabs.appendChild(tab);
+        });
+      }
+
+      function goToNextUnansweredQuizQuestion() {
+        const template = templateProgress();
+        const questions = quizQuestions();
+        const nextIndex = questions.findIndex((question) => !template.correctQuizAnswers.includes(question.dataset.questionId));
+        if (nextIndex !== -1) currentQuizIndex = nextIndex;
+      }
+
+      function shuffleQuizOptions() {
+        quizQuestions().forEach((question) => {
+          if (question.dataset.shuffled === "true") return;
+          const options = Array.from(question.querySelectorAll(".quiz-option"));
+          const optionData = options.map((option) => ({
+            text: optionTextWithoutLetter(option.textContent),
+            correct: option.dataset.correct === "true"
+          }));
+
+          shuffleArray(optionData).forEach((data, index) => {
+            const option = options[index];
+            option.textContent = `${String.fromCharCode(65 + index)}. ${data.text}`;
+            if (data.correct) option.dataset.correct = "true";
+            else delete option.dataset.correct;
+            question.appendChild(option);
+          });
+          question.dataset.shuffled = "true";
+        });
+      }
+
+      function updateQuizFeedback() {
+        const template = templateProgress();
+        const total = quizQuestionIds().length;
+        const correct = completedQuizQuestionCount();
+        if (template.quizPassed) {
+          setQuizFeedback("Correct! The recap room is unlocked.");
+          return;
+        }
+        setQuizFeedback(`Answer all quiz questions correctly to continue. Progress: ${correct} / ${total}.`);
+      }
+
+      function bindQuizOptions() {
+        if (rooms[currentRoomIndex].type !== "quiz") return;
+        shuffleQuizOptions();
+        const template = templateProgress();
+        renderQuizTabs();
+        const allQuestionsAlreadyCorrect = quizQuestionIds().every((id) => template.correctQuizAnswers.includes(id));
+        if (allQuestionsAlreadyCorrect && !template.quizPassed) {
+          template.quizPassed = true;
+          template.highestRoomUnlocked = Math.max(template.highestRoomUnlocked, currentRoomIndex + 1);
+          saveProgress(progress);
+        }
+
+        quizQuestions().forEach((question) => {
+          const questionId = question.dataset.questionId;
+          const isComplete = template.correctQuizAnswers.includes(questionId);
+          question.classList.toggle("is-complete", isComplete);
+          question.querySelectorAll(".quiz-option").forEach((option) => {
+            const isCorrect = option.dataset.correct === "true";
+            option.classList.toggle("correct", isComplete && isCorrect);
+            option.disabled = isComplete || template.quizPassed;
+            option.addEventListener("click", () => handleQuizAnswer(option));
+          });
+        });
+
+        updateQuizFeedback();
+      }
+
+      function handleQuizAnswer(option) {
+        if (option.disabled) return;
+        const question = option.closest(".quiz-question");
+        if (!question) return;
+
+        const questionId = question.dataset.questionId;
+        const questionOptions = question.querySelectorAll(".quiz-option");
+        questionOptions.forEach((item) => item.classList.remove("wrong"));
+        question.classList.remove("is-transitioning");
+
+        if (option.dataset.correct !== "true") {
+          option.classList.add("wrong");
+          setQuizFeedback("Not yet. Review the concept and try that question again.");
+          return;
+        }
+
+        const template = templateProgress();
+        if (!template.correctQuizAnswers.includes(questionId)) {
+          template.correctQuizAnswers.push(questionId);
+        }
+
+        question.classList.add("is-complete", "is-transitioning");
+        option.classList.add("correct");
+        questionOptions.forEach((item) => { item.disabled = true; });
+
+        const allCorrect = quizQuestionIds().every((id) => template.correctQuizAnswers.includes(id));
+        if (allCorrect) {
+          template.quizPassed = true;
+          template.highestRoomUnlocked = Math.max(template.highestRoomUnlocked, currentRoomIndex + 1);
+          setQuizFeedback("Correct! The recap room is unlocked.");
+          saveProgress(progress);
+          window.setTimeout(() => {
+            question.classList.remove("is-transitioning");
+            nextRoom.hidden = false;
+            renderQuizTabs();
+            renderRoomList();
+          }, QUIZ_ADVANCE_DELAY_MS);
+          return;
+        }
+
+        setQuizFeedback("Correct! Loading the next question...");
+        saveProgress(progress);
+        window.setTimeout(() => {
+          question.classList.remove("is-transitioning");
+          goToNextUnansweredQuizQuestion();
+          renderQuizTabs();
+          updateQuizFeedback();
+        }, QUIZ_ADVANCE_DELAY_MS);
+      }
+
+      function renderRoom() {
+        const room = rooms[currentRoomIndex];
+        const template = templateProgress();
+        const isFinalRoom = currentRoomIndex === rooms.length - 1;
+        roomBg.src = room.image;
+        roomStage.classList.toggle("is-welcome-room", currentRoomIndex === 0);
+        roomCounter.textContent = `Current Room: ${currentRoomIndex} / ${rooms.length - 1}`;
+        hotspots.hidden = currentRoomIndex !== 0;
+        prevRoom.hidden = currentRoomIndex === 0;
+        nextRoom.hidden = isFinalRoom || (room.type === "quiz" && !template.quizPassed);
+        topReturn.hidden = isFinalRoom;
+        finalReturn.hidden = !isFinalRoom;
+        hideMarkerTooltip();
+
+        if (currentRoomIndex === 0) {
+          renderWelcomeSidebarSummary();
+          renderMainContent(renderWelcomeContent());
+        } else {
+          renderSidebarSummary(room);
+          renderMainContent(room.contentHtml);
+        }
+
+        bindQuizOptions();
+        updateMarkerStates();
+        updateNextButtonState();
+        renderRoomList();
+        updateCounter();
+        completeIfFinalRoom();
+      }
+
+      prevRoom.addEventListener("click", () => {
+        currentRoomIndex = Math.max(0, currentRoomIndex - 1);
+        renderRoom();
+      });
+
+      nextRoom.addEventListener("click", () => {
+        if (currentRoomIndex === 0 && !allWelcomeMarkersDiscovered()) {
+          renderMainContent(renderWelcomeContent("Discover all tower objects first."));
+          updateNextButtonState();
+          return;
+        }
+
+        const room = rooms[currentRoomIndex];
+        if (room.type === "quiz" && !templateProgress().quizPassed) {
+          setQuizFeedback("Answer every quiz question correctly to continue.");
+          return;
+        }
+
+        if (currentRoomIndex < rooms.length - 1) {
+          currentRoomIndex += 1;
+          const template = templateProgress();
+          if (currentRoomIndex > template.highestRoomUnlocked) {
+            template.highestRoomUnlocked = currentRoomIndex;
+            saveProgress(progress);
+          }
+        }
+        renderRoom();
+      });
+
+      document.querySelectorAll(".info-marker").forEach((spot) => {
+        spot.addEventListener("mouseenter", () => handleMarkerEnter(spot));
+        spot.addEventListener("focus", () => handleMarkerEnter(spot));
+        spot.addEventListener("click", (event) => {
+          event.preventDefault();
+          handleMarkerEnter(spot);
+        });
+        spot.addEventListener("mouseleave", () => {
+          hideMarkerTooltip();
+          if (currentRoomIndex === 0) renderWelcomeSidebarSummary();
+        });
+        spot.addEventListener("blur", () => {
+          hideMarkerTooltip();
+          if (currentRoomIndex === 0) renderWelcomeSidebarSummary();
+        });
+      });
+
+      function completeIfFinalRoom() {
+        if (currentRoomIndex !== rooms.length - 1) return;
+        const template = templateProgress();
+        if (template.completed) return;
+        template.completed = true;
+        template.reward = "Join Junction Key";
+        window.SQLKingdomProgress?.markDataPrepBuildingComplete?.(progress, "summaryTower", "Join Junction Key");
+        saveProgress(progress);
+        rewardModal.hidden = false;
+      }
+
+      finalReturn.addEventListener("click", () => {
+        completeIfFinalRoom();
+      });
+
+      rewardContinue.addEventListener("click", () => {
+        rewardModal.hidden = true;
+      });
+
+      window.addEventListener("sqlKingdom:reset", (event) => {
+        if (event.detail.resetMode !== "local" || event.detail.cityId !== "data-prep-city") return;
+        progress = getProgress();
+        currentRoomIndex = 0;
+        currentQuizIndex = 0;
+        discoveryCompleteAnimationPlayed = false;
+        renderRoom();
+      });
+
+      if (canOpenSummaryTower) {
+        templateProgress();
+        saveProgress(progress);
+        renderRoom();
+      }
+    </script>
+  </body>
+</html>

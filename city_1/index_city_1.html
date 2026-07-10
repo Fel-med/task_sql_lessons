@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Foundation City | SQL City</title>
+    <link rel="icon" type="image/webp" href="../res/city_1/item/badge.webp">
+    <link rel="shortcut icon" type="image/webp" href="../res/city_1/item/badge.webp">
+    <link rel="stylesheet" href="../shared_files/shared-menu.css" />
+    <link rel="stylesheet" href="../shared_files/shared-building-boards.css" />
+    <link rel="stylesheet" href="../shared_files/shared-building-effects.css" />
+    <style>
+      :root {
+        --cream: #fff4c2;
+        --ink: #111827;
+        --rose: #ff4d6d;
+        --yellow: #ffd76a;
+        --green: #74ff9f;
+        --font-pixel: "Courier New", Courier, monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: #0f172a;
+      }
+
+      body {
+        color: white;
+        font-family: var(--font-pixel);
+      }
+
+      .game-home,
+      .game-screen,
+      .city-scene {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      /* Each city element is a full 1920x1080 layer exported in place. */
+      .city-layer {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        pointer-events: none;
+        user-select: none;
+        transition: filter 0.18s ease, transform 0.18s ease;
+      }
+
+      .layer-bg {
+        z-index: 1;
+      }
+
+      .layer-red2 {
+        z-index: 3;
+      }
+
+      .layer-red1 {
+        z-index: 2;
+      }
+
+      .layer-yellow {
+        z-index: 4;
+      }
+
+      .layer-green {
+        z-index: 5;
+      }
+
+      .city-layer.locked {
+        filter: brightness(0.45) grayscale(0.35);
+      }
+
+      .city-layer.newly-unlocked {
+        filter:
+          drop-shadow(0 0 8px #5fffd6)
+          drop-shadow(0 0 22px #5fffd6);
+        animation: unlockPulse 1.4s infinite alternate;
+      }
+
+      @keyframes unlockPulse {
+        from {
+          filter:
+            drop-shadow(0 0 6px #5fffd6)
+            drop-shadow(0 0 14px #5fffd6);
+        }
+        to {
+          filter:
+            drop-shadow(0 0 12px #ffd76a)
+            drop-shadow(0 0 30px #5fffd6);
+        }
+      }
+
+      .traffic-layer {
+        position: absolute;
+        inset: 0;
+        z-index: 14;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .car {
+        position: absolute;
+        left: 0;
+        z-index: 15;
+        width: clamp(90px, 11vw, 220px);
+        height: auto;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        pointer-events: none;
+        user-select: none;
+        will-change: transform;
+      }
+
+      .map-title {
+        position: absolute;
+        z-index: 30;
+        top: 7%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0;
+        color: var(--cream);
+        font-family: var(--font-pixel);
+        font-size: clamp(34px, 5vw, 78px);
+        font-weight: 900;
+        letter-spacing: 4px;
+        line-height: 1;
+        pointer-events: none;
+        text-align: center;
+        text-shadow:
+          4px 4px 0 var(--ink),
+          -2px -2px 0 var(--ink),
+          2px -2px 0 var(--ink),
+          -2px 2px 0 var(--ink),
+          0 0 14px rgba(255, 244, 194, 0.65);
+        white-space: nowrap;
+      }
+
+      /* Transparent click zones sit over visible buildings, not over PNG boxes. */
+      .hotspot {
+        position: absolute;
+        z-index: 15;
+        display: block;
+        background: transparent;
+        cursor: pointer;
+      }
+
+      .hotspot.locked {
+        cursor: not-allowed;
+      }
+
+      .hotspot:focus-visible {
+        outline: 3px solid var(--cream);
+        outline-offset: 4px;
+      }
+
+      .hotspot-red2 {
+        left: 0%;
+        top: 15%;
+        width: 20%;
+        height: 65%;
+      }
+
+      .hotspot-red1 {
+        left: 19%;
+        top: 30%;
+        width: 24%;
+        height: 42%;
+      }
+
+      .hotspot-yellow {
+        left: 52%;
+        top: 15%;
+        width: 25%;
+        height: 68%;
+      }
+
+      .hotspot-green {
+        left: 74%;
+        top: 2%;
+        width: 26%;
+        height: 83%;
+      }
+
+      .building-lock {
+        position: absolute;
+        z-index: 26;
+        width: clamp(42px, 5vw, 76px);
+        height: auto;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        pointer-events: none;
+        user-select: none;
+        filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.72));
+      }
+
+      .lock-dataVault {
+        left: 11%;
+        top: 44%;
+      }
+
+      .lock-tableDepartment {
+        left: 31%;
+        top: 45%;
+      }
+
+      .lock-keyBridgeHall {
+        left: 60%;
+        top: 45%;
+      }
+
+      .lock-queryLab {
+        left: 83%;
+        top: 43%;
+      }
+
+      .sign-data-vault {
+        left: 8%;
+        top: 18%;
+      }
+
+      .sign-table-department {
+        left: 27%;
+        top: 30%;
+      }
+
+      .sign-key-bridge {
+        left: 55%;
+        top: 20%;
+      }
+
+      .sign-query-lab {
+        left: 80%;
+        top: 18%;
+      }
+
+      .city-message {      .city-message {
+        position: absolute;
+        left: 50%;
+        bottom: 8%;
+        z-index: 35;
+        max-width: min(90vw, 560px);
+        padding: 12px 16px;
+        border: 3px solid var(--cream);
+        background: rgba(17, 24, 39, 0.92);
+        box-shadow: 4px 4px 0 #000;
+        color: var(--cream);
+        font-size: clamp(12px, 1.8vw, 16px);
+        font-weight: 900;
+        text-align: center;
+        transform: translateX(-50%);
+      }
+
+      .city-message[hidden],
+      .building-lock[hidden] {
+        display: none;
+      }
+
+      .burger-btn {
+        position: fixed;
+        top: 24px;
+        right: 28px;
+        z-index: 100;
+        display: grid;
+        width: 64px;
+        height: 56px;
+        place-items: center;
+        gap: 4px;
+        border: 4px solid #ff7a2f;
+        background: rgba(255, 244, 194, 0.92);
+        box-shadow: 4px 4px 0 var(--ink);
+        cursor: pointer;
+      }
+
+      .burger-btn span {
+        display: block;
+        width: 34px;
+        height: 5px;
+        background: #ff7a2f;
+        box-shadow: 2px 2px 0 rgba(17, 24, 39, 0.14);
+      }
+
+      .burger-btn:hover,
+      .burger-btn:focus-visible {
+        transform: translateY(-2px);
+        box-shadow: 6px 6px 0 var(--ink);
+        outline: none;
+      }
+
+      .menu-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 90;
+        display: none;
+        background: rgba(0, 0, 0, 0.35);
+      }
+
+      .menu-backdrop.open {
+        display: block;
+      }
+
+      .city-menu {
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 110;
+        width: min(360px, 88vw);
+        height: 100vh;
+        padding: 24px;
+        overflow-y: auto;
+        border-left: 5px solid var(--cream);
+        background: var(--ink);
+        box-shadow: -8px 0 0 #000;
+        color: var(--cream);
+        font-family: var(--font-pixel);
+        transform: translateX(110%);
+        transition: transform 0.2s ease;
+      }
+
+      .city-menu.open {
+        transform: translateX(0);
+      }
+
+      .city-menu h2,
+      .city-menu h3 {
+        margin-top: 0;
+        padding-right: 42px;
+        text-shadow: 3px 3px 0 #000;
+      }
+
+      .city-menu h3 {
+        margin-bottom: 12px;
+      }
+
+      .menu-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 34px;
+        height: 34px;
+        border: 3px solid var(--cream);
+        background: #0f172a;
+        box-shadow: 3px 3px 0 #000;
+        color: var(--cream);
+        cursor: pointer;
+        font: 900 18px/1 var(--font-pixel);
+      }
+
+      .menu-close:hover,
+      .menu-close:focus-visible {
+        background: var(--yellow);
+        color: var(--ink);
+        outline: none;
+      }
+
+      .unlock-all-btn {
+        width: 100%;
+        margin: 0;
+        padding: 14px 16px;
+        border: 3px solid #5fffd6;
+        background: #0f172a;
+        box-shadow: 4px 4px 0 #000;
+        color: #5fffd6;
+        cursor: pointer;
+        font-family: var(--font-pixel);
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .unlock-all-btn:hover,
+      .unlock-all-btn:focus-visible {
+        background: #5fffd6;
+        color: var(--ink);
+        outline: none;
+      }
+
+      .reset-all-btn {
+        width: 100%;
+        margin: 12px 0 0;
+        padding: 12px 16px;
+        border: 3px solid var(--yellow);
+        background: #0f172a;
+        box-shadow: 4px 4px 0 #000;
+        color: var(--yellow);
+        cursor: pointer;
+        font-family: var(--font-pixel);
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .reset-all-btn:hover,
+      .reset-all-btn:focus-visible {
+        background: var(--yellow);
+        color: var(--ink);
+        outline: none;
+      }
+
+      .unlock-everything-card {
+        margin: 22px 0;
+        padding: 16px;
+        border: 3px solid #5fffd6;
+        background: rgba(15, 23, 42, 0.75);
+        box-shadow:
+          4px 4px 0 #000,
+          0 0 18px rgba(95, 255, 214, 0.35);
+        text-align: center;
+      }
+
+      .magic-key-img {
+        width: clamp(100px, 42%, 180px);
+        height: auto;
+        display: block;
+        margin: 0 auto 14px;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        filter:
+          drop-shadow(0 0 8px rgba(95, 255, 214, 0.9))
+          drop-shadow(0 0 22px rgba(255, 215, 106, 0.65));
+        animation: magicKeyPulse 1.2s ease-in-out infinite alternate;
+      }
+
+      .unlock-confirmation {
+        margin: 12px 0 0;
+        color: var(--yellow);
+        font-size: 12px;
+        font-weight: 900;
+        line-height: 1.4;
+        text-shadow: 2px 2px 0 #000;
+      }
+
+      .unlock-confirmation[hidden] {
+        display: none;
+      }
+
+      .reset-confirmation {
+        margin: 12px 0 0;
+        color: var(--cream);
+        font-size: 12px;
+        font-weight: 900;
+        line-height: 1.4;
+        text-shadow: 2px 2px 0 #000;
+      }
+
+      .reset-confirmation[hidden] {
+        display: none;
+      }
+
+      @keyframes magicKeyPulse {
+        from {
+          transform: translateY(0) scale(1);
+          filter:
+            drop-shadow(0 0 6px rgba(95, 255, 214, 0.75))
+            drop-shadow(0 0 14px rgba(255, 215, 106, 0.5));
+        }
+        to {
+          transform: translateY(-6px) scale(1.04);
+          filter:
+            drop-shadow(0 0 12px rgba(95, 255, 214, 1))
+            drop-shadow(0 0 28px rgba(255, 215, 106, 0.85));
+        }
+      }
+
+      .reference-card {
+        display: block;
+        margin: 16px 0;
+        padding: 10px;
+        border: 3px solid var(--cream);
+        background: #0f172a;
+        box-shadow: 4px 4px 0 #000;
+        color: var(--cream);
+        font-weight: 900;
+        text-decoration: none;
+      }
+
+      .reference-card:hover,
+      .reference-card:focus-visible {
+        border-color: #5fffd6;
+        box-shadow:
+          4px 4px 0 #000,
+          0 0 16px rgba(95, 255, 214, 0.8);
+        outline: none;
+      }
+
+      .reference-card img {
+        display: block;
+        width: 100%;
+        height: auto;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+      }
+
+      .reference-card span {
+        display: block;
+        margin-top: 10px;
+        font-size: 13px;
+        line-height: 1.3;
+      }
+
+      .reference-card small {
+        display: block;
+        margin-top: 6px;
+        color: #5fffd6;
+        font-size: 10px;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+      }
+
+      @media (max-width: 760px) {
+        .map-title {
+          top: 6%;
+          font-size: clamp(34px, 12vw, 70px);
+          letter-spacing: 2px;
+        }
+
+        .building-sign {
+          min-width: 88px;
+          padding: 6px 8px;
+          font-size: 9px;
+          letter-spacing: 1px;
+        }
+
+        .sign-data-vault {
+          left: 4%;
+          top: 18%;
+        }
+
+        .sign-table-department {
+          left: 23%;
+          top: 32%;
+        }
+
+        .sign-key-bridge {
+          left: 53%;
+          top: 21%;
+        }
+
+        .sign-query-lab {
+          left: 76%;
+          top: 18%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="game-home">
+      <section class="game-screen" aria-labelledby="page-title">
+        <div class="city-scene" id="cityScene">
+          <!-- City layers stay stacked exactly on the same fullscreen canvas. -->
+          <img src="../res/city_1/city_elements/bg.webp" class="city-layer layer-bg" alt="" />
+          <img src="../res/city_1/city_elements/red2.webp" class="city-layer city-building-layer layer-red2" data-building-layer="dataVault" alt="" />
+          <img src="../res/city_1/city_elements/red1.webp" class="city-layer city-building-layer layer-red1" data-building-layer="tableDepartment" alt="" />
+          <img src="../res/city_1/city_elements/yellow.webp" class="city-layer city-building-layer layer-yellow" data-building-layer="keyBridgeHall" alt="" />
+          <img src="../res/city_1/city_elements/green.webp" class="city-layer city-building-layer layer-green" data-building-layer="queryLab" alt="" />
+
+          <div class="traffic-layer" id="trafficLayer" aria-hidden="true"></div>
+
+          <img src="../res/city_1/item/lock.webp" class="building-lock lock-dataVault" data-lock="dataVault" alt="Locked" hidden />
+          <img src="../res/city_1/item/lock.webp" class="building-lock lock-tableDepartment" data-lock="tableDepartment" alt="Locked" hidden />
+          <img src="../res/city_1/item/lock.webp" class="building-lock lock-keyBridgeHall" data-lock="keyBridgeHall" alt="Locked" hidden />
+          <img src="../res/city_1/item/lock.webp" class="building-lock lock-queryLab" data-lock="queryLab" alt="Locked" hidden />
+
+          <div class="building-sign sign-data-vault" data-building="dataVault">
+            <span>DATA VAULT</span>
+          </div>
+          <div class="building-sign sign-table-department" data-building="tableDepartment">
+            <span>TABLE DEPT</span>
+          </div>
+          <div class="building-sign sign-key-bridge" data-building="keyBridgeHall">
+            <span>KEY BRIDGE</span>
+          </div>
+          <div class="building-sign sign-query-lab" data-building="queryLab">
+            <span>QUERY LAB</span>
+          </div>
+
+          <a class="hotspot city-building-hotspot hotspot-red2" href="data-vault.html" data-building="red2" data-building-id="dataVault" aria-label="Enter Data Vault"></a>
+          <a class="hotspot city-building-hotspot hotspot-red1" href="table-department.html" data-building="red1" data-building-id="tableDepartment" aria-label="Enter Table Department"></a>
+          <a class="hotspot city-building-hotspot hotspot-yellow" href="key-bridge-hall.html" data-building="yellow" data-building-id="keyBridgeHall" aria-label="Enter Key Bridge Hall"></a>
+          <a class="hotspot city-building-hotspot hotspot-green" href="query-lab.html" data-building="green" data-building-id="queryLab" aria-label="Enter Query Lab"></a>
+
+          <h1 class="map-title" id="page-title">Foundation City</h1>
+          <p class="city-message" id="cityMessage" hidden>Locked. Complete the previous building first.</p>
+        </div>
+      </section>
+    </main>
+
+    <div id="sharedMenuMount" data-menu-page="foundation-city" data-menu-title="Foundation City Menu" data-menu-references="true" data-menu-base="../"></div>
+    <script src="../shared_files/shared-progress.js"></script>
+    <script src="../shared_files/shared-reset-system.js"></script>
+    <script src="../shared_files/shared-magic-key.js"></script>
+    <script src="../shared_files/shared-menu.js"></script>
+    <script src="../shared_files/shared-building-effects.js"></script>
+    <script>
+      const DEFAULT_PROGRESS = {
+        buildings: {
+          dataVault: {
+            unlocked: true,
+            completed: false,
+            newlyUnlocked: false,
+            entered: false,
+            quizPassed: false,
+            discoveredMarkers: [],
+            highestRoomUnlocked: 0
+          },
+          tableDepartment: {
+            unlocked: false,
+            completed: false,
+            newlyUnlocked: false,
+            entered: false,
+            quizPassed: false,
+            discoveredMarkers: [],
+            highestRoomUnlocked: 0
+          },
+          keyBridgeHall: {
+            unlocked: false,
+            completed: false,
+            newlyUnlocked: false,
+            entered: false,
+            quizPassed: false,
+            discoveredMarkers: [],
+            highestRoomUnlocked: 0
+          },
+          queryLab: {
+            unlocked: false,
+            completed: false,
+            newlyUnlocked: false,
+            entered: false,
+            quizPassed: false,
+            discoveredMarkers: [],
+            highestRoomUnlocked: 0
+          }
+        },
+        badges: {
+          sqlFoundations: false
+        },
+        unlockEverythingUsed: false
+      };
+
+      function createDefaultProgress() {
+        if (window.SQLKingdomProgress) {
+          return window.SQLKingdomProgress.createDefaultProgress();
+        }
+        return JSON.parse(JSON.stringify(DEFAULT_PROGRESS));
+      }
+
+      function getProgress() {
+        if (window.SQLKingdomProgress) {
+          return window.SQLKingdomProgress.getGameProgress({ queueMigrationMessage: true });
+        }
+        const progress = createDefaultProgress();
+        try {
+          const saved = JSON.parse(localStorage.getItem("sqlCityProgress"));
+          if (saved && saved.buildings) {
+            Object.keys(progress.buildings).forEach((buildingId) => {
+              if (saved.buildings[buildingId]) {
+                Object.assign(progress.buildings[buildingId], saved.buildings[buildingId]);
+              }
+            });
+          }
+          if (saved && saved.badges) {
+            Object.assign(progress.badges, saved.badges);
+          }
+          if (typeof saved?.unlockEverythingUsed === "boolean") {
+            progress.unlockEverythingUsed = saved.unlockEverythingUsed;
+          }
+        } catch (error) {
+          localStorage.removeItem("sqlCityProgress");
+        }
+        progress.buildings.dataVault.unlocked = true;
+        return progress;
+      }
+
+      function saveProgress(progress) {
+        if (window.SQLKingdomProgress) {
+          window.SQLKingdomProgress.saveGameProgress(progress);
+          return;
+        }
+        localStorage.setItem("sqlCityProgress", JSON.stringify(progress));
+      }
+
+      let progress = getProgress();
+
+      function unlockBuilding(buildingId) {
+        const building = progress.buildings[buildingId];
+        if (!building) return;
+        if (!building.unlocked) {
+          building.unlocked = true;
+          building.newlyUnlocked = true;
+        }
+      }
+
+      function completeBuilding(buildingId) {
+        const building = progress.buildings[buildingId];
+        if (!building || building.completed) return false;
+        building.completed = true;
+        return true;
+      }
+
+      function markBuildingEntered(buildingId) {
+        const building = progress.buildings[buildingId];
+        if (!building) return;
+        building.entered = true;
+        building.newlyUnlocked = false;
+        saveProgress(progress);
+      }
+
+      const buildingConfig = {
+        dataVault: {
+          layer: document.querySelector(".layer-red2"),
+          hotspot: document.querySelector(".hotspot-red2"),
+          lock: document.querySelector(".lock-dataVault"),
+          sign: document.querySelector(".sign-data-vault"),
+          href: "data-vault.html"
+        },
+        tableDepartment: {
+          layer: document.querySelector(".layer-red1"),
+          hotspot: document.querySelector(".hotspot-red1"),
+          lock: document.querySelector(".lock-tableDepartment"),
+          sign: document.querySelector(".sign-table-department"),
+          href: "table-department.html"
+        },
+        keyBridgeHall: {
+          layer: document.querySelector(".layer-yellow"),
+          hotspot: document.querySelector(".hotspot-yellow"),
+          lock: document.querySelector(".lock-keyBridgeHall"),
+          sign: document.querySelector(".sign-key-bridge"),
+          href: "key-bridge-hall.html"
+        },
+        queryLab: {
+          layer: document.querySelector(".layer-green"),
+          hotspot: document.querySelector(".hotspot-green"),
+          lock: document.querySelector(".lock-queryLab"),
+          sign: document.querySelector(".sign-query-lab"),
+          href: "query-lab.html"
+        }
+      };
+      const cityMessage = document.querySelector("#cityMessage");
+      let cityMessageTimer;
+
+      function showCityMessage(message) {
+        cityMessage.textContent = message;
+        cityMessage.hidden = false;
+        window.clearTimeout(cityMessageTimer);
+        cityMessageTimer = window.setTimeout(() => {
+          cityMessage.hidden = true;
+        }, 1800);
+      }
+
+      function showLockedMessage() {
+        showCityMessage("Locked. Complete the previous building first.");
+      }
+
+      function applyBuildingStates() {
+        Object.entries(buildingConfig).forEach(([buildingId, config]) => {
+          const building = progress.buildings[buildingId];
+          const isLocked = !building.unlocked;
+          config.layer.classList.toggle("locked", isLocked);
+          config.layer.classList.toggle("newly-unlocked", building.newlyUnlocked && !isLocked);
+          config.hotspot.classList.toggle("locked", isLocked);
+          config.hotspot.setAttribute("aria-disabled", isLocked ? "true" : "false");
+          if (isLocked) {
+            config.hotspot.removeAttribute("href");
+          } else {
+            config.hotspot.href = config.href;
+          }
+          config.lock.hidden = !isLocked;
+          config.sign.classList.remove("is-locked", "is-unlocked", "is-new", "is-lit", "is-active");
+          if (isLocked) {
+            config.sign.classList.add("is-locked");
+          } else if (building.newlyUnlocked) {
+            config.sign.classList.add("is-new");
+          } else {
+            config.sign.classList.add("is-unlocked");
+          }
+        });
+      }
+
+      window.SQLCityBuildingEffects?.init({
+        sceneSelector: "#cityScene"
+      });
+
+      Object.entries(buildingConfig).forEach(([buildingId, config]) => {
+        config.hotspot.addEventListener("click", (event) => {
+          const building = progress.buildings[buildingId];
+          if (!building.unlocked) {
+            event.preventDefault();
+            showLockedMessage();
+            return;
+          }
+          markBuildingEntered(buildingId);
+        });
+      });
+
+      window.addEventListener("keydown", (event) => {
+        if (event.shiftKey && event.key.toLowerCase() === "r") {
+          resetThisCity();
+          return;
+        }
+
+        if (event.key === "Escape") {
+          window.SQLKingdomMenu?.closeMenu();
+        }
+      });
+
+      applyBuildingStates();
+
+      function resetThisCity() {
+        if (!window.SQLKingdomResetSystem) return;
+        const result = window.SQLKingdomResetSystem.handleResetByMode({
+          resetMode: "local",
+          cityId: "foundation-city"
+        });
+        window.SQLKingdomMenu?.showToast(result.message);
+      }
+
+      window.addEventListener("sqlKingdom:unlockAll", (event) => {
+        progress = event.detail.progress || getProgress();
+        applyBuildingStates();
+      });
+
+      window.addEventListener("sqlKingdom:reset", (event) => {
+        progress = event.detail.progress || getProgress();
+        applyBuildingStates();
+      });
+
+      const pendingKingdomMessage = window.SQLKingdomProgress?.consumePendingUnlockMessage();
+      if (pendingKingdomMessage) {
+        window.SQLKingdomMenu?.showToast(pendingKingdomMessage);
+      }
+
+      const trafficLayer = document.querySelector("#trafficLayer");
+      const carSources = [
+        "../res/city_1/city_elements/car1.webp",
+        "../res/city_1/city_elements/car2.webp"
+      ];
+      const lanes = ["-3%", "-4%", "-5%"];
+      const maxActiveCars = 2;
+      let activeCars = 0;
+
+      function randomItem(items) {
+        return items[Math.floor(Math.random() * items.length)];
+      }
+
+      function randomBetween(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function scheduleNextCar() {
+        window.setTimeout(spawnCar, randomBetween(1200, 4500));
+      }
+
+      function spawnCar() {
+        if (activeCars >= maxActiveCars) {
+          scheduleNextCar();
+          return;
+        }
+
+        const car = document.createElement("img");
+        const direction = Math.random() < 0.5 ? "left" : "right";
+        const duration = randomBetween(8000, 15000);
+
+        car.className = "car";
+        car.src = randomItem(carSources);
+        car.alt = "";
+        car.setAttribute("aria-hidden", "true");
+        car.style.bottom = randomItem(lanes);
+
+        trafficLayer.appendChild(car);
+        activeCars += 1;
+
+        const keyframes = direction === "left"
+          ? [
+              { transform: "translateX(110vw)" },
+              { transform: "translateX(-25vw)" }
+            ]
+          : [
+              { transform: "translateX(-25vw) scaleX(-1)" },
+              { transform: "translateX(110vw) scaleX(-1)" }
+            ];
+
+        const animation = car.animate(keyframes, {
+          duration,
+          easing: "linear",
+          fill: "forwards"
+        });
+
+        animation.finished
+          .catch(() => {})
+          .finally(() => {
+            car.remove();
+            activeCars = Math.max(0, activeCars - 1);
+          });
+
+        scheduleNextCar();
+      }
+
+      window.addEventListener("load", () => {
+        scheduleNextCar();
+        window.setTimeout(spawnCar, randomBetween(400, 1400));
+      });
+    </script>
+  </body>
+</html>

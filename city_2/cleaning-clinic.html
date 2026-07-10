@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cleaning Clinic | Data Prep City</title>
+    <link rel="icon" type="image/webp" href="../res/city_2/item/badge.webp">
+    <link rel="shortcut icon" type="image/webp" href="../res/city_2/item/badge.webp">
+    <link rel="stylesheet" href="../shared_files/shared-room-layout.css" />
+    <link rel="stylesheet" href="../shared_files/shared-room-components.css" />
+    <style>
+      .side-panel h1 { font-size: 28px; }
+      .marker-null { left: 33%; top: 42%; }
+      .marker-console { left: 52%; top: 50%; }
+      .marker-validation { left: 70%; top: 38%; }
+
+      @media (max-width: 760px) {
+        .side-panel h1 { font-size: 24px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="room-layout">
+      <aside class="side-panel">
+        <h1>Cleaning Clinic</h1>
+        <p class="room-counter" id="roomCounter">Current Room: 0 / 8</p>
+        <p class="path-title">Learning Path</p>
+        <div class="lesson-list" id="roomList"></div>
+        <article class="lesson-card" id="lessonCard">
+          <h2 id="lessonTitle">Welcoming Room</h2>
+          <div class="room-summary" id="lessonText"></div>
+        </article>
+      </aside>
+
+      <section class="room-stage" aria-label="Cleaning Clinic rooms">
+        <img class="room-bg" id="roomBg" src="../res/city_2/rooms_background/Cleaning_Clinic.webp" alt="" />
+        <a class="return-city-btn" id="topReturn" href="index_city_2.html">Back to Data Prep City</a>
+        <div class="hotspots" id="hotspots">
+          <button class="info-marker marker-null" type="button" data-marker-id="nullScanner" aria-label="Null scanner info"></button>
+          <button class="info-marker marker-console" type="button" data-marker-id="cleaningConsole" aria-label="Cleaning console info"></button>
+          <button class="info-marker marker-validation" type="button" data-marker-id="validationMonitor" aria-label="Validation monitor info"></button>
+        </div>
+        <div class="marker-tooltip" id="markerTooltip" aria-hidden="true">
+          <h3 id="markerTooltipTitle"></h3>
+          <p id="markerTooltipText"></p>
+        </div>
+        <div class="room-nav">
+          <button class="pixel-btn" id="prevRoom" type="button">Previous</button>
+          <button class="pixel-btn" id="nextRoom" type="button">Next</button>
+          <a class="pixel-btn" id="finalReturn" href="index_city_2.html" hidden>Back to Data Prep City</a>
+        </div>
+        <article class="info-card" id="infoCard" aria-live="polite">
+          <div id="mainLessonContent"></div>
+        </article>
+        <article class="reward-modal" id="rewardModal" hidden>
+          <div class="reward-card">
+            <img src="../res/city_2/item/badge.webp" class="reward-key-img" alt="Data Prep City Badge">
+            <h2 id="rewardTitle">Data Prep City Badge</h2>
+            <p id="rewardMessage">Data Prep City completed! Future islands are coming soon.</p>
+            <button class="pixel-btn" id="rewardContinue" type="button">Continue</button>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script src="../shared_files/shared-progress.js"></script>
+    <script src="../shared_files/shared-reset-system.js"></script>
+    <script>
+      const canOpenCleaningClinic = window.SQLKingdomResetSystem?.guardDataPrepBuildingAccess?.("cleaningClinic", "index_city_2.html", "Complete Subquery Mines first.", "../index.html") ?? true;
+      const QUIZ_ADVANCE_DELAY_MS = 650;
+
+      // Data Prep City examples use international neutral sample data.
+      const rooms = [
+        {
+          title: "Welcoming Room",
+          image: "../res/city_2/rooms_background/Cleaning_Clinic.webp",
+          type: "welcome",
+          summary: "Data cleaning fixes missing, inconsistent, or messy values before analysis.",
+          points: ["Null Scanner", "Cleaning Console", "Validation Monitor"],
+          contentHtml: `
+            <h2>Welcome to Cleaning Clinic</h2>
+            <p>Data cleaning is the process of fixing missing, inconsistent, or messy values before analysis.</p>
+            <p>Explore the glowing markers to inspect the clinic tools before starting the lesson path.</p>
+            <ul>
+              <li>Missing values need careful handling.</li>
+              <li>Labels and conversions make data easier to use.</li>
+              <li>Validation helps catch values that look wrong.</li>
+            </ul>
+          `
+        },
+        {
+          title: "Understanding NULL Values",
+          image: "../res/city_2/rooms_background/Cleaning_Clinic_room.webp",
+          type: "lesson",
+          summary: "NULL means a value is missing or unknown.",
+          points: ["NULL is not 0", "NULL is not an empty string", "Use IS NULL and IS NOT NULL"],
+          contentHtml: `
+            <h2>Understanding NULL Values</h2>
+            <p><strong>NULL</strong> means a value is missing or unknown. NULL is not the same as 0, and it is not the same as an empty string.</p>
+            <pre class="sql-code"><code>SELECT *
+FROM customers
+WHERE email IS NULL;</code></pre>
+            <p>This finds customers with missing email addresses.</p>
+            <pre class="sql-code"><code>SELECT *
+FROM orders
+WHERE delivery_date IS NOT NULL;</code></pre>
+            <p>This finds orders that already have a delivery date.</p>
+            <h3>customers</h3>
+            <table class="result-table">
+              <thead><tr><th>customer_id</th><th>name</th><th>city</th><th>email</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>Emma</td><td>London</td><td>emma@example.com</td></tr>
+                <tr><td>2</td><td>Noah</td><td>Toronto</td><td>NULL</td></tr>
+                <tr><td>3</td><td>Sofia</td><td>Madrid</td><td>sofia@example.com</td></tr>
+              </tbody>
+            </table>
+          `
+        },
+        {
+          title: "COALESCE",
+          image: "../res/city_2/rooms_background/Cleaning_Clinic_room.webp",
+          type: "lesson",
+          summary: "COALESCE returns the first non-NULL value.",
+          points: ["Replace missing text", "Replace missing numbers", "Make calculations safer"],
+          contentHtml: `
+            <h2>COALESCE</h2>
+            <p><strong>COALESCE</strong> returns the first non-NULL value. It is useful for replacing missing values with a default value.</p>
+            <pre class="sql-code"><code>SELECT name,
+       COALESCE(email, 'No email') AS email_status
+FROM customers;</code></pre>
+            <p>If email exists, it is shown. If email is NULL, <code>No email</code> is shown instead.</p>
+            <pre class="sql-code"><code>SELECT product_name,
+       COALESCE(discount, 0) AS discount
+FROM products;</code></pre>
+            <p>Missing discounts are replaced with 0. This can make calculations safer.</p>
+          `
+        },
+        {
+          title: "CASE WHEN",
+          image: "../res/city_2/rooms_background/Cleaning_Clinic_room.webp",
+          type: "lesson",
+          summary: "CASE WHEN creates new values based on conditions.",
+          points: ["Create labels", "Build categories", "Transform messy values"],
+          contentHtml: `
+            <h2>CASE WHEN</h2>
+            <p><strong>CASE WHEN</strong> creates new values based on conditions. It is useful for labels, categories, and simple transformations.</p>
+            <pre class="sql-code"><code>SELECT name,
+       total_spent,
+       CASE
+         WHEN total_spent &gt;= 1000 THEN 'High value'
+         WHEN total_spent &gt;= 500 THEN 'Medium value'
+         ELSE 'Low value'
+       END AS customer_group
+FROM customer_summary;</code></pre>
+            <p>Customers are grouped by spending. This can create useful categories for analysis.</p>
+            <pre class="sql-code"><code>SELECT product_name,
+       stock,
+       CASE
+         WHEN stock = 0 THEN 'Out of stock'
+         WHEN stock &lt; 10 THEN 'Low stock'
+         ELSE 'Available'
+       END AS stock_status
+FROM products;</code></pre>
+          `
+        },
+        {
+          title: "Data Type Conversions",
+          image: "../res/city_2/rooms_background/Cleaning_Clinic_room.webp",
+          type: "lesson",
+          summary: "CAST converts values into better data types.",
+          points: ["Numbers can be stored as text", "Dates can be stored as text", "Different databases may vary"],
+          contentHtml: `
+            <h2>Data Type Conversions</h2>
+            <p>Sometimes values are stored as the wrong type. Numbers, dates, or prices may be stored as text.</p>
+            <p>SQL can convert values using functions such as <strong>CAST()</strong>. Some databases also use <strong>CONVERT()</strong>.</p>
+            <pre class="sql-code"><code>SELECT order_id,
+       CAST(price_text AS DECIMAL(10, 2)) AS price
+FROM orders;</code></pre>
+            <p><code>price_text</code> is converted into a numeric price. Numeric values are easier to calculate with.</p>
+            <pre class="sql-code"><code>SELECT order_id,
+       CAST(order_date_text AS DATE) AS order_date
+FROM orders;</code></pre>
+            <p>Text dates can be converted to real date values. This helps with date filtering and time-based analysis.</p>
+          `
+        },
+        {
+          title: "Basic Data Validation",
+          image: "../res/city_2/rooms_background/Cleaning_Clinic_room.webp",
+          type: "lesson",
+          summary: "Validation checks if values look correct.",
+          points: ["Prices should not be negative", "Important IDs should not be NULL", "Ages should be realistic"],
+          contentHtml: `
+            <h2>Basic Data Validation</h2>
+            <p>Validation means checking if values look correct.</p>
+            <pre class="sql-code"><code>SELECT *
+FROM products
+WHERE price &lt; 0;</code></pre>
+            <p>This finds products with invalid negative prices.</p>
+            <pre class="sql-code"><code>SELECT *
+FROM customers
+WHERE customer_id IS NULL;</code></pre>
+            <p>This finds rows missing an important ID.</p>
+            <pre class="sql-code"><code>SELECT *
+FROM employees
+WHERE age &lt; 18 OR age &gt; 100;</code></pre>
+            <p>This finds ages that may need checking.</p>
+          `
+        },
+        {
+          title: "Cleaning for Data Preparation",
+          image: "../res/city_2/rooms_background/Cleaning_Clinic_room.webp",
+          type: "lesson",
+          summary: "Cleaning makes datasets more reliable before modeling.",
+          points: ["Replace missing values", "Flag impossible values", "Create useful categories"],
+          contentHtml: `
+            <h2>Cleaning for Data Preparation</h2>
+            <p>Data cleaning helps before analysis or machine learning because it reduces errors and makes datasets more consistent.</p>
+            <ul>
+              <li>Replace missing values.</li>
+              <li>Remove or flag impossible values.</li>
+              <li>Create useful categories.</li>
+              <li>Convert text numbers into numeric values.</li>
+              <li>Make datasets more consistent.</li>
+              <li>Reduce errors before modeling.</li>
+            </ul>
+            <pre class="sql-code"><code>SELECT customer_id,
+       COALESCE(city, 'Unknown') AS city,
+       COALESCE(total_spent, 0) AS total_spent,
+       CASE
+         WHEN total_spent &gt;= 1000 THEN 'High value'
+         WHEN total_spent &gt;= 500 THEN 'Medium value'
+         ELSE 'Low value'
+       END AS customer_group
+FROM customer_summary
+WHERE customer_id IS NOT NULL;</code></pre>
+            <p>Missing city becomes Unknown. Missing spending becomes 0. Customers are grouped by spending.</p>
+            <p>Rows without customer_id are removed, so the result is cleaner for analysis.</p>
+          `
+        },
+        {
+          title: "Quiz Room",
+          image: "../res/city_2/rooms_background/Cleaning_Clinic_room.webp",
+          type: "quiz",
+          summary: "Test data cleaning basics before unlocking the recap.",
+          points: ["Seven questions", "Randomized answer order", "Correct answers unlock the recap"],
+          contentHtml: `
+            <h2>Quiz Room</h2>
+            <p>Answer every question correctly to unlock the recap room.</p>
+            <div class="quiz-box">
+              <article class="quiz-question" data-question-id="null">
+                <h3>Question 1</h3>
+                <p>What does NULL mean?</p>
+                <button class="quiz-option" type="button" data-correct="true">A missing or unknown value</button>
+                <button class="quiz-option" type="button">The number zero</button>
+                <button class="quiz-option" type="button">An empty table</button>
+                <button class="quiz-option" type="button">A sorted row</button>
+              </article>
+              <article class="quiz-question" data-question-id="is-null">
+                <h3>Question 2</h3>
+                <p>Which condition finds missing emails?</p>
+                <button class="quiz-option" type="button" data-correct="true">email IS NULL</button>
+                <button class="quiz-option" type="button">email = 0</button>
+                <button class="quiz-option" type="button">email IS NOT NULL</button>
+                <button class="quiz-option" type="button">email ORDER BY NULL</button>
+              </article>
+              <article class="quiz-question" data-question-id="coalesce">
+                <h3>Question 3</h3>
+                <p>What does COALESCE do?</p>
+                <button class="quiz-option" type="button" data-correct="true">Returns the first non-NULL value</button>
+                <button class="quiz-option" type="button">Deletes every NULL row</button>
+                <button class="quiz-option" type="button">Sorts missing values first</button>
+                <button class="quiz-option" type="button">Creates a new database</button>
+              </article>
+              <article class="quiz-question" data-question-id="case">
+                <h3>Question 4</h3>
+                <p>What is CASE WHEN useful for?</p>
+                <button class="quiz-option" type="button" data-correct="true">Creating labels or categories based on conditions</button>
+                <button class="quiz-option" type="button">Only counting rows</button>
+                <button class="quiz-option" type="button">Opening another webpage</button>
+                <button class="quiz-option" type="button">Removing all text columns</button>
+              </article>
+              <article class="quiz-question" data-question-id="cast">
+                <h3>Question 5</h3>
+                <p>What does CAST help with?</p>
+                <button class="quiz-option" type="button" data-correct="true">Converting a value from one data type to another</button>
+                <button class="quiz-option" type="button">Joining every table automatically</button>
+                <button class="quiz-option" type="button">Removing duplicate customers</button>
+                <button class="quiz-option" type="button">Creating passwords</button>
+              </article>
+              <article class="quiz-question" data-question-id="negative-price">
+                <h3>Question 6</h3>
+                <p>Which query can find invalid negative prices?</p>
+                <button class="quiz-option" type="button" data-correct="true">SELECT * FROM products WHERE price &lt; 0;</button>
+                <button class="quiz-option" type="button">SELECT * FROM products WHERE price IS NULL;</button>
+                <button class="quiz-option" type="button">SELECT price FROM products ORDER BY price;</button>
+                <button class="quiz-option" type="button">SELECT * FROM products WHERE price &gt; 0;</button>
+              </article>
+              <article class="quiz-question" data-question-id="ml-cleaning">
+                <h3>Question 7</h3>
+                <p>Why is data cleaning important before machine learning?</p>
+                <button class="quiz-option" type="button" data-correct="true">It reduces errors and makes the dataset more reliable</button>
+                <button class="quiz-option" type="button">It guarantees every model is perfect</button>
+                <button class="quiz-option" type="button">It removes the need for training data</button>
+                <button class="quiz-option" type="button">It only changes the table name</button>
+              </article>
+            </div>
+            <p class="quiz-feedback"></p>
+          `
+        },
+        {
+          title: "Recap Room",
+          image: "../res/city_2/rooms_background/Cleaning_Clinic_room.webp",
+          type: "lesson",
+          summary: "You learned how SQL cleans messy data before analysis.",
+          points: ["Cleaning tools reviewed", "Validation understood", "Data Prep City Badge reward"],
+          contentHtml: `
+            <h2>Recap Room</h2>
+            <p>You finished Cleaning Clinic and completed Data Prep City.</p>
+            <ul>
+              <li>NULL means a value is missing or unknown.</li>
+              <li>IS NULL and IS NOT NULL help find missing or existing values.</li>
+              <li>COALESCE can replace missing values.</li>
+              <li>CASE WHEN can create labels and categories.</li>
+              <li>CAST can convert values into better data types.</li>
+              <li>Validation helps find impossible or suspicious values.</li>
+              <li>Cleaning helps prepare reliable datasets for analysis and machine learning.</li>
+            </ul>
+            <p class="reward-note">Reward unlocked: Data Prep City Badge.</p>
+            <p class="reward-note">Data Prep City completed! Future islands are coming soon.</p>
+          `
+        }
+      ];
+
+      const welcomeMarkers = [
+        { id: "nullScanner", title: "Null Scanner", text: "NULL means a value is missing or unknown." },
+        { id: "cleaningConsole", title: "Cleaning Console", text: "SQL can replace missing values, create labels, and fix messy data." },
+        { id: "validationMonitor", title: "Validation Monitor", text: "Validation helps detect values that do not look correct." }
+      ];
+
+      const TEMPLATE_KEY = "cleaningClinic";
+      let currentRoomIndex = 0;
+      let currentQuizIndex = 0;
+      let discoveryCompleteAnimationPlayed = false;
+      let progress = getProgress();
+
+      const roomBg = document.querySelector("#roomBg");
+      const roomStage = document.querySelector(".room-stage");
+      const roomCounter = document.querySelector("#roomCounter");
+      const hotspots = document.querySelector("#hotspots");
+      const prevRoom = document.querySelector("#prevRoom");
+      const nextRoom = document.querySelector("#nextRoom");
+      const topReturn = document.querySelector("#topReturn");
+      const finalReturn = document.querySelector("#finalReturn");
+      const roomList = document.querySelector("#roomList");
+      const lessonTitle = document.querySelector("#lessonTitle");
+      const lessonText = document.querySelector("#lessonText");
+      const mainLessonContent = document.querySelector("#mainLessonContent");
+      const rewardModal = document.querySelector("#rewardModal");
+      const rewardContinue = document.querySelector("#rewardContinue");
+      const markerTooltip = document.querySelector("#markerTooltip");
+      const markerTooltipTitle = document.querySelector("#markerTooltipTitle");
+      const markerTooltipText = document.querySelector("#markerTooltipText");
+
+      function getProgress() {
+        return window.SQLKingdomProgress.getGameProgress();
+      }
+
+      function saveProgress(progressToSave) {
+        window.SQLKingdomProgress.saveGameProgress(progressToSave);
+      }
+
+      function templateProgress() {
+        progress.cities = progress.cities || {};
+        progress.cities.dataPrepCity = progress.cities.dataPrepCity || {};
+        progress.cities.dataPrepCity[TEMPLATE_KEY] = progress.cities.dataPrepCity[TEMPLATE_KEY] || {
+          discoveredMarkers: [],
+          highestRoomUnlocked: 0,
+          quizPassed: false,
+          completed: false,
+          correctQuizAnswers: []
+        };
+        if (!Array.isArray(progress.cities.dataPrepCity[TEMPLATE_KEY].discoveredMarkers)) {
+          progress.cities.dataPrepCity[TEMPLATE_KEY].discoveredMarkers = [];
+        }
+        if (!Array.isArray(progress.cities.dataPrepCity[TEMPLATE_KEY].correctQuizAnswers)) {
+          progress.cities.dataPrepCity[TEMPLATE_KEY].correctQuizAnswers = [];
+        }
+        return progress.cities.dataPrepCity[TEMPLATE_KEY];
+      }
+
+      function markerIds() {
+        return welcomeMarkers.map((marker) => marker.id);
+      }
+
+      function discoveredMarkers() {
+        const template = templateProgress();
+        if (!Array.isArray(template.discoveredMarkers)) template.discoveredMarkers = [];
+        return template.discoveredMarkers;
+      }
+
+      function discoveryCount() {
+        const validMarkerIds = markerIds();
+        return discoveredMarkers().filter((id) => validMarkerIds.includes(id)).length;
+      }
+
+      function allWelcomeMarkersDiscovered() {
+        const discovered = discoveredMarkers();
+        return welcomeMarkers.every((marker) => discovered.includes(marker.id));
+      }
+
+      function getWelcomeMarker(markerId) {
+        return welcomeMarkers.find((marker) => marker.id === markerId);
+      }
+
+      function renderMainContent(contentHtml) {
+        mainLessonContent.innerHTML = contentHtml;
+      }
+
+      function renderWelcomeContent(message = "", animateComplete = false) {
+        const complete = allWelcomeMarkersDiscovered();
+        const shouldAnimate = complete && animateComplete && !discoveryCompleteAnimationPlayed;
+        const statusClass = complete ? `discovery-complete${shouldAnimate ? " animate-complete" : ""}` : "discovery-status";
+        const statusText = complete ? "All clinic objects discovered! You can enter the next room." : `Objects discovered: ${discoveryCount()} / ${welcomeMarkers.length}`;
+        const warning = message ? `<p class="discovery-warning">${message}</p>` : "";
+        return `
+          <h2>Welcome to Cleaning Clinic</h2>
+          <p>Explore every glowing object marker before starting the cleaning path.</p>
+          <p class="${statusClass}">${statusText}</p>
+          ${complete ? "" : `<p class="discovery-hint">Hover or click each marker to discover it.</p>`}
+          ${warning}
+        `;
+      }
+
+      function renderWelcomeSidebarSummary() {
+        const complete = allWelcomeMarkersDiscovered();
+        lessonTitle.textContent = rooms[0].title;
+        lessonText.innerHTML = `
+          <p>${rooms[0].summary}</p>
+          <ul>
+            <li>Objects discovered: ${discoveryCount()} / ${welcomeMarkers.length}</li>
+            <li>${complete ? "Next Room unlocked." : "Discover all clinic objects to unlock Room 1."}</li>
+          </ul>
+        `;
+      }
+
+      function updateMarkerStates() {
+        const discovered = discoveredMarkers();
+        document.querySelectorAll(".info-marker").forEach((markerElement) => {
+          const markerData = getWelcomeMarker(markerElement.dataset.markerId);
+          const isDiscovered = discovered.includes(markerElement.dataset.markerId);
+          markerElement.classList.toggle("is-discovered", isDiscovered);
+          if (markerData) markerElement.setAttribute("aria-label", `${markerData.title} ${isDiscovered ? "discovered" : "not discovered"}`);
+        });
+      }
+
+      function unlockFirstLessonIfReady() {
+        if (!allWelcomeMarkersDiscovered()) return false;
+        const template = templateProgress();
+        const unlockedNow = template.highestRoomUnlocked < 1;
+        template.highestRoomUnlocked = Math.max(template.highestRoomUnlocked, 1);
+        saveProgress(progress);
+        return unlockedNow;
+      }
+
+      function markWelcomeMarkerDiscovered(markerId) {
+        const markerData = getWelcomeMarker(markerId);
+        if (!markerData) return;
+        const wasComplete = allWelcomeMarkersDiscovered();
+        const discovered = discoveredMarkers();
+        if (!discovered.includes(markerId)) {
+          discovered.push(markerId);
+          saveProgress(progress);
+        }
+        const isComplete = allWelcomeMarkersDiscovered();
+        if (isComplete) unlockFirstLessonIfReady();
+        updateMarkerStates();
+        if (currentRoomIndex === 0) {
+          const shouldAnimateComplete = isComplete && !wasComplete && !discoveryCompleteAnimationPlayed;
+          renderWelcomeSidebarSummary();
+          renderMainContent(renderWelcomeContent("", shouldAnimateComplete));
+          if (shouldAnimateComplete) discoveryCompleteAnimationPlayed = true;
+          renderRoomList();
+          updateNextButtonState();
+        }
+      }
+
+      function showMarkerTooltip(markerElement, markerData) {
+        markerTooltipTitle.textContent = markerData.title;
+        markerTooltipText.textContent = markerData.text;
+        markerTooltip.classList.add("is-visible");
+        markerTooltip.setAttribute("aria-hidden", "false");
+        const stageRect = roomStage.getBoundingClientRect();
+        const markerRect = markerElement.getBoundingClientRect();
+        const tooltipRect = markerTooltip.getBoundingClientRect();
+        let left = markerRect.left - stageRect.left + markerRect.width / 2 - tooltipRect.width / 2;
+        let top = markerRect.top - stageRect.top - tooltipRect.height - 14;
+        if (top < 10) top = markerRect.bottom - stageRect.top + 14;
+        left = Math.max(10, Math.min(left, stageRect.width - tooltipRect.width - 10));
+        top = Math.max(10, Math.min(top, stageRect.height - tooltipRect.height - 10));
+        markerTooltip.style.left = `${left}px`;
+        markerTooltip.style.top = `${top}px`;
+      }
+
+      function hideMarkerTooltip() {
+        markerTooltip.classList.remove("is-visible");
+        markerTooltip.setAttribute("aria-hidden", "true");
+      }
+
+      function handleMarkerEnter(markerElement) {
+        if (currentRoomIndex !== 0) return;
+        const markerData = getWelcomeMarker(markerElement.dataset.markerId);
+        if (!markerData) return;
+        markWelcomeMarkerDiscovered(markerData.id);
+        showMarkerTooltip(markerElement, markerData);
+      }
+
+      function updateNextButtonState() {
+        const locked = currentRoomIndex === 0 && !allWelcomeMarkersDiscovered();
+        nextRoom.classList.toggle("is-disabled", locked);
+        nextRoom.setAttribute("aria-disabled", locked ? "true" : "false");
+      }
+
+      function updateCounter() {
+        roomCounter.textContent = `Current Room: ${currentRoomIndex} / ${rooms.length - 1}`;
+      }
+
+      function formatRoomTitle(room, index) {
+        return index === 0 ? "0. Welcoming Room" : `${String(index).padStart(2, "0")}. ${room.title}`;
+      }
+
+      function isRecapRoom(index) {
+        return index === rooms.length - 1;
+      }
+
+      function canEnterRoom(index) {
+        const template = templateProgress();
+        if (index === 1 && !allWelcomeMarkersDiscovered()) return false;
+        if (isRecapRoom(index) && !template.quizPassed) return false;
+        return index <= template.highestRoomUnlocked;
+      }
+
+      function roomLockedMessage(index) {
+        if (index === 1 && !allWelcomeMarkersDiscovered()) return "Discover all welcome-room clinic objects first.";
+        if (isRecapRoom(index) && !templateProgress().quizPassed) return "Complete the quiz first to unlock the recap room.";
+        return "Explore previous rooms first to unlock this room.";
+      }
+
+      function renderRoomList() {
+        roomList.innerHTML = "";
+        rooms.forEach((room, index) => {
+          const tab = document.createElement("button");
+          tab.type = "button";
+          tab.className = "room-tab";
+          tab.textContent = formatRoomTitle(room, index);
+          const isUnlocked = canEnterRoom(index);
+          if (!isUnlocked) tab.classList.add("locked");
+          if (index === currentRoomIndex) tab.classList.add("active");
+          tab.addEventListener("click", () => {
+            if (!isUnlocked) {
+              const message = roomLockedMessage(index);
+              lessonTitle.textContent = "Room locked";
+              lessonText.innerHTML = `<p>${message}</p>`;
+              renderMainContent(`<h2>Room locked</h2><p>${message}</p>`);
+              return;
+            }
+            currentRoomIndex = index;
+            renderRoom();
+          });
+          roomList.appendChild(tab);
+        });
+      }
+
+      function renderSidebarSummary(room) {
+        lessonTitle.textContent = room.title;
+        lessonText.innerHTML = `<p>${room.summary}</p><ul>${room.points.map((point) => `<li>${point}</li>`).join("")}</ul>`;
+      }
+
+      function setQuizFeedback(message) {
+        const feedback = mainLessonContent.querySelector(".quiz-feedback");
+        if (feedback) feedback.textContent = message;
+      }
+
+      function shuffleArray(array) {
+        const copy = [...array];
+        for (let i = copy.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      }
+
+      function optionTextWithoutLetter(text) {
+        return text.replace(/^[A-D]\.\s*/, "");
+      }
+
+      function quizQuestions() {
+        return Array.from(mainLessonContent.querySelectorAll(".quiz-question"));
+      }
+
+      function quizQuestionIds() {
+        return quizQuestions().map((question) => question.dataset.questionId);
+      }
+
+      function completedQuizQuestionCount() {
+        const template = templateProgress();
+        return quizQuestionIds().filter((id) => template.correctQuizAnswers.includes(id)).length;
+      }
+
+      function renderQuizTabs() {
+        const quizBox = mainLessonContent.querySelector(".quiz-box");
+        const questions = quizQuestions();
+        if (!quizBox || questions.length <= 1) return;
+
+        let tabs = mainLessonContent.querySelector(".quiz-tabs");
+        if (!tabs) {
+          tabs = document.createElement("div");
+          tabs.className = "quiz-tabs";
+          tabs.setAttribute("role", "tablist");
+          tabs.setAttribute("aria-label", "Quiz questions");
+          quizBox.insertBefore(tabs, quizBox.firstElementChild);
+        }
+
+        const template = templateProgress();
+        currentQuizIndex = Math.max(0, Math.min(currentQuizIndex, questions.length - 1));
+        tabs.innerHTML = "";
+
+        questions.forEach((question, index) => {
+          const questionId = question.dataset.questionId;
+          const isActive = index === currentQuizIndex;
+          const isComplete = template.correctQuizAnswers.includes(questionId);
+          question.classList.add("quiz-question-panel");
+          question.hidden = !isActive;
+          question.classList.toggle("is-active", isActive);
+
+          const tab = document.createElement("button");
+          tab.type = "button";
+          tab.className = "quiz-tab";
+          tab.textContent = `Quiz ${index + 1}`;
+          tab.setAttribute("role", "tab");
+          tab.setAttribute("aria-selected", isActive ? "true" : "false");
+          tab.classList.toggle("is-active", isActive);
+          tab.classList.toggle("is-complete", isComplete);
+          tab.addEventListener("click", () => {
+            currentQuizIndex = index;
+            renderQuizTabs();
+            updateQuizFeedback();
+          });
+          tabs.appendChild(tab);
+        });
+      }
+
+      function goToNextUnansweredQuizQuestion() {
+        const template = templateProgress();
+        const questions = quizQuestions();
+        const nextIndex = questions.findIndex((question) => !template.correctQuizAnswers.includes(question.dataset.questionId));
+        if (nextIndex !== -1) currentQuizIndex = nextIndex;
+      }
+
+      function shuffleQuizOptions() {
+        quizQuestions().forEach((question) => {
+          if (question.dataset.shuffled === "true") return;
+          const options = Array.from(question.querySelectorAll(".quiz-option"));
+          const optionData = options.map((option) => ({
+            text: optionTextWithoutLetter(option.textContent),
+            correct: option.dataset.correct === "true"
+          }));
+
+          shuffleArray(optionData).forEach((data, index) => {
+            const option = options[index];
+            option.textContent = `${String.fromCharCode(65 + index)}. ${data.text}`;
+            if (data.correct) option.dataset.correct = "true";
+            else delete option.dataset.correct;
+            question.appendChild(option);
+          });
+          question.dataset.shuffled = "true";
+        });
+      }
+
+      function updateQuizFeedback() {
+        const template = templateProgress();
+        const total = quizQuestionIds().length;
+        const correct = completedQuizQuestionCount();
+        if (template.quizPassed) {
+          setQuizFeedback("Correct! The recap room is unlocked.");
+          return;
+        }
+        setQuizFeedback(`Answer all quiz questions correctly to continue. Progress: ${correct} / ${total}.`);
+      }
+
+      function bindQuizOptions() {
+        if (rooms[currentRoomIndex].type !== "quiz") return;
+        shuffleQuizOptions();
+        const template = templateProgress();
+        renderQuizTabs();
+        const allQuestionsAlreadyCorrect = quizQuestionIds().every((id) => template.correctQuizAnswers.includes(id));
+        if (allQuestionsAlreadyCorrect && !template.quizPassed) {
+          template.quizPassed = true;
+          template.highestRoomUnlocked = Math.max(template.highestRoomUnlocked, currentRoomIndex + 1);
+          saveProgress(progress);
+        }
+
+        quizQuestions().forEach((question) => {
+          const questionId = question.dataset.questionId;
+          const isComplete = template.correctQuizAnswers.includes(questionId);
+          question.classList.toggle("is-complete", isComplete);
+          question.querySelectorAll(".quiz-option").forEach((option) => {
+            const isCorrect = option.dataset.correct === "true";
+            option.classList.toggle("correct", isComplete && isCorrect);
+            option.disabled = isComplete || template.quizPassed;
+            option.addEventListener("click", () => handleQuizAnswer(option));
+          });
+        });
+
+        updateQuizFeedback();
+      }
+
+      function handleQuizAnswer(option) {
+        if (option.disabled) return;
+        const question = option.closest(".quiz-question");
+        if (!question) return;
+
+        const questionId = question.dataset.questionId;
+        const questionOptions = question.querySelectorAll(".quiz-option");
+        questionOptions.forEach((item) => item.classList.remove("wrong"));
+        question.classList.remove("is-transitioning");
+
+        if (option.dataset.correct !== "true") {
+          option.classList.add("wrong");
+          setQuizFeedback("Not yet. Review the concept and try that question again.");
+          return;
+        }
+
+        const template = templateProgress();
+        if (!template.correctQuizAnswers.includes(questionId)) {
+          template.correctQuizAnswers.push(questionId);
+        }
+
+        question.classList.add("is-complete", "is-transitioning");
+        option.classList.add("correct");
+        questionOptions.forEach((item) => { item.disabled = true; });
+
+        const allCorrect = quizQuestionIds().every((id) => template.correctQuizAnswers.includes(id));
+        if (allCorrect) {
+          template.quizPassed = true;
+          template.highestRoomUnlocked = Math.max(template.highestRoomUnlocked, currentRoomIndex + 1);
+          setQuizFeedback("Correct! The recap room is unlocked.");
+          saveProgress(progress);
+          window.setTimeout(() => {
+            question.classList.remove("is-transitioning");
+            nextRoom.hidden = false;
+            renderQuizTabs();
+            renderRoomList();
+          }, QUIZ_ADVANCE_DELAY_MS);
+          return;
+        }
+
+        setQuizFeedback("Correct! Loading the next question...");
+        saveProgress(progress);
+        window.setTimeout(() => {
+          question.classList.remove("is-transitioning");
+          goToNextUnansweredQuizQuestion();
+          renderQuizTabs();
+          updateQuizFeedback();
+        }, QUIZ_ADVANCE_DELAY_MS);
+      }
+
+      function renderRoom() {
+        const room = rooms[currentRoomIndex];
+        const template = templateProgress();
+        const isFinalRoom = currentRoomIndex === rooms.length - 1;
+        roomBg.src = room.image;
+        roomStage.classList.toggle("is-welcome-room", currentRoomIndex === 0);
+        roomCounter.textContent = `Current Room: ${currentRoomIndex} / ${rooms.length - 1}`;
+        hotspots.hidden = currentRoomIndex !== 0;
+        prevRoom.hidden = currentRoomIndex === 0;
+        nextRoom.hidden = isFinalRoom || (room.type === "quiz" && !template.quizPassed);
+        topReturn.hidden = isFinalRoom;
+        finalReturn.hidden = !isFinalRoom;
+        hideMarkerTooltip();
+
+        if (currentRoomIndex === 0) {
+          renderWelcomeSidebarSummary();
+          renderMainContent(renderWelcomeContent());
+        } else {
+          renderSidebarSummary(room);
+          renderMainContent(room.contentHtml);
+        }
+
+        bindQuizOptions();
+        updateMarkerStates();
+        updateNextButtonState();
+        renderRoomList();
+        updateCounter();
+        completeIfFinalRoom();
+      }
+
+      prevRoom.addEventListener("click", () => {
+        currentRoomIndex = Math.max(0, currentRoomIndex - 1);
+        renderRoom();
+      });
+
+      nextRoom.addEventListener("click", () => {
+        if (currentRoomIndex === 0 && !allWelcomeMarkersDiscovered()) {
+          renderMainContent(renderWelcomeContent("Discover all clinic objects first."));
+          updateNextButtonState();
+          return;
+        }
+
+        const room = rooms[currentRoomIndex];
+        if (room.type === "quiz" && !templateProgress().quizPassed) {
+          setQuizFeedback("Answer every quiz question correctly to continue.");
+          return;
+        }
+
+        if (currentRoomIndex < rooms.length - 1) {
+          currentRoomIndex += 1;
+          const template = templateProgress();
+          if (currentRoomIndex > template.highestRoomUnlocked) {
+            template.highestRoomUnlocked = currentRoomIndex;
+            saveProgress(progress);
+          }
+        }
+        renderRoom();
+      });
+
+      document.querySelectorAll(".info-marker").forEach((spot) => {
+        spot.addEventListener("mouseenter", () => handleMarkerEnter(spot));
+        spot.addEventListener("focus", () => handleMarkerEnter(spot));
+        spot.addEventListener("click", (event) => {
+          event.preventDefault();
+          handleMarkerEnter(spot);
+        });
+        spot.addEventListener("mouseleave", () => {
+          hideMarkerTooltip();
+          if (currentRoomIndex === 0) renderWelcomeSidebarSummary();
+        });
+        spot.addEventListener("blur", () => {
+          hideMarkerTooltip();
+          if (currentRoomIndex === 0) renderWelcomeSidebarSummary();
+        });
+      });
+
+      function completeIfFinalRoom() {
+        if (currentRoomIndex !== rooms.length - 1) return;
+        const template = templateProgress();
+        if (template.completed) return;
+        template.completed = true;
+        template.reward = "Data Prep City Badge";
+        window.SQLKingdomProgress?.markDataPrepBuildingComplete?.(progress, "cleaningClinic", "Data Prep City Badge");
+        saveProgress(progress);
+        rewardModal.hidden = false;
+      }
+
+      finalReturn.addEventListener("click", () => {
+        completeIfFinalRoom();
+      });
+
+      rewardContinue.addEventListener("click", () => {
+        rewardModal.hidden = true;
+      });
+
+      window.addEventListener("sqlKingdom:reset", (event) => {
+        if (event.detail.resetMode !== "local" || event.detail.cityId !== "data-prep-city") return;
+        progress = getProgress();
+        currentRoomIndex = 0;
+        currentQuizIndex = 0;
+        discoveryCompleteAnimationPlayed = false;
+        renderRoom();
+      });
+
+      if (canOpenCleaningClinic) {
+        templateProgress();
+        saveProgress(progress);
+        renderRoom();
+      }
+    </script>
+  </body>
+</html>

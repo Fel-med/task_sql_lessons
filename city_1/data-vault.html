@@ -4,674 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Data Vault | SQL City</title>
-    <link rel="icon" type="image/webp" href="res/badge.webp">
-    <link rel="shortcut icon" type="image/webp" href="res/badge.webp">
+    <link rel="icon" type="image/webp" href="../res/city_1/item/badge.webp">
+    <link rel="shortcut icon" type="image/webp" href="../res/city_1/item/badge.webp">
+    <link rel="stylesheet" href="../shared_files/shared-room-layout.css" />
+    <link rel="stylesheet" href="../shared_files/shared-room-components.css" />
     <style>
-      :root {
-        --cream: #fff4c2;
-        --ink: #111827;
-        --stage: #0f172a;
-        --cyan: #5fffd6;
-        --yellow: #ffd76a;
-        --font-pixel: "Courier New", Courier, monospace;
-      }
-
-      * { box-sizing: border-box; }
-
-      html,
-      body {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        overflow: hidden;
-      }
-
-      body {
-        background: var(--stage);
-        color: white;
-        font-family: var(--font-pixel);
-      }
-
-      .room-layout {
-        width: 100vw;
-        height: 100vh;
-        display: grid;
-        grid-template-columns: 260px 1fr;
-        overflow: hidden;
-        background: var(--stage);
-      }
-
-      .side-panel {
-        height: 100vh;
-        padding: 18px;
-        overflow: hidden;
-        border-right: 4px solid #000;
-        background: var(--ink);
-        color: white;
-      }
-
-      .side-panel h1 {
-        margin: 0 0 14px;
-        color: var(--cream);
-        font-size: 30px;
-        line-height: 1;
-        text-shadow: 3px 3px 0 #000;
-      }
-
-      .room-counter,
-      .path-title {
-        margin: 0 0 14px;
-        font-size: 14px;
-        font-weight: 900;
-        line-height: 1.4;
-      }
-
-      .room-counter { color: var(--cyan); }
-
-      .path-title {
-        margin-top: 18px;
-        color: var(--cream);
-        text-transform: uppercase;
-      }
-
-      .lesson-list {
-        display: grid;
-        gap: 6px;
-      }
-
-      .room-tab,
-      .pixel-btn {
-        border: 3px solid rgba(255, 244, 194, 0.72);
-        background: #172033;
-        box-shadow: 4px 4px 0 #000;
-        color: white;
-        font-family: var(--font-pixel);
-        font-weight: 900;
-      }
-
-      .room-tab {
-        width: 100%;
-        min-height: 34px;
-        padding: 8px;
-        cursor: pointer;
-        text-align: left;
-        font-size: 12px;
-        line-height: 1.2;
-      }
-
-      .room-tab:not(.locked):hover,
-      .room-tab:not(.locked):focus-visible {
-        border-color: var(--cyan);
-        box-shadow: 0 0 12px rgba(95, 255, 214, 0.55), 4px 4px 0 #000;
-        outline: none;
-      }
-
-      .room-tab.locked {
-        opacity: 0.45;
-        cursor: not-allowed;
-        filter: grayscale(0.6);
-      }
-
-      .room-tab.active {
-        color: var(--cyan);
-        border-color: var(--cyan);
-        background: rgba(95, 255, 214, 0.12);
-        box-shadow:
-          0 0 12px rgba(95, 255, 214, 0.65),
-          inset 0 0 12px rgba(95, 255, 214, 0.12);
-      }
-
-      .room-tab.active::before { content: "> "; }
-      .room-tab.locked::before { content: "LOCK "; }
-
-      .lesson-card {
-        margin-top: 12px;
-        padding: 10px;
-        border: 3px solid var(--cyan);
-        background: #0b1220;
-        box-shadow: 4px 4px 0 #000;
-      }
-
-      .lesson-card h2 {
-        margin: 0 0 8px;
-        color: var(--cyan);
-        font-size: 15px;
-      }
-
-      .lesson-card p {
-        margin: 0;
-        color: var(--cream);
-        font-size: 13px;
-        font-weight: 900;
-        line-height: 1.45;
-      }
-
-      .room-summary p {
-        margin: 0 0 8px;
-        color: var(--cream);
-        font-size: 13px;
-        font-weight: 900;
-        line-height: 1.45;
-      }
-
-      .room-summary ul {
-        margin: 0;
-        padding-left: 18px;
-        color: white;
-        font-size: 12px;
-        font-weight: 900;
-        line-height: 1.45;
-      }
-
-      .pixel-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 14px 22px;
-        cursor: pointer;
-        font-size: 14px;
-        line-height: 1;
-        text-decoration: none;
-        text-transform: uppercase;
-      }
-
-      .pixel-btn:hover,
-      .pixel-btn:focus-visible {
-        background: var(--yellow);
-        color: var(--ink);
-        outline: none;
-      }
-
-      .room-stage {
-        position: relative;
-        width: 100%;
-        height: 100vh;
-        overflow: hidden;
-        background: black;
-      }
-
-      .room-bg {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        image-rendering: pixelated;
-        image-rendering: crisp-edges;
-        user-select: none;
-      }
-
-      .room-nav {
-        position: absolute;
-        z-index: 90;
-        left: 50%;
-        bottom: 32px;
-        display: flex;
-        gap: 24px;
-        transform: translateX(-50%);
-      }
-
-      .return-city-btn {
-        position: absolute;
-        top: 28px;
-        right: 28px;
-        z-index: 95;
-        padding: 12px 18px;
-        border: 3px solid var(--cream);
-        background: var(--ink);
-        box-shadow: 4px 4px 0 #000;
-        color: var(--cream);
-        font-family: var(--font-pixel);
-        font-weight: 900;
-        text-decoration: none;
-        text-transform: uppercase;
-      }
-
-      .return-city-btn:hover,
-      .return-city-btn:focus-visible {
-        background: var(--yellow);
-        color: var(--ink);
-        outline: none;
-      }
-
-      .info-marker {
-        position: absolute;
-        z-index: 80;
-        width: 20px;
-        height: 20px;
-        padding: 0;
-        border: 3px solid var(--cyan);
-        background: rgba(255, 244, 194, 0.85);
-        box-shadow:
-          0 0 0 2px var(--stage),
-          0 0 12px rgba(95, 255, 214, 1),
-          0 0 24px rgba(95, 255, 214, 0.8),
-          inset 0 0 6px rgba(95, 255, 214, 0.7);
-        cursor: pointer;
-        opacity: 0.55;
-        image-rendering: pixelated;
-        transition:
-          opacity 160ms ease,
-          transform 160ms ease,
-          box-shadow 160ms ease;
-        animation: markerPulse 1.4s ease-in-out infinite alternate;
-      }
-
-      .info-marker::after {
-        content: "";
-        position: absolute;
-        inset: -7px;
-        border: 2px solid rgba(255, 244, 194, 0.45);
-        box-shadow: 0 0 10px rgba(95, 255, 214, 0.65);
-        pointer-events: none;
-      }
-
-      .info-marker:hover {
-        opacity: 1;
-        background: var(--cyan);
-        border-color: var(--cream);
-        box-shadow:
-          0 0 0 2px var(--stage),
-          0 0 18px rgba(95, 255, 214, 1),
-          0 0 32px rgba(255, 244, 194, 0.9),
-          inset 0 0 8px rgba(255, 255, 255, 0.9);
-        transform: scale(1.18);
-      }
-
-      .info-marker:focus-visible {
-        outline: 3px solid var(--cream);
-        outline-offset: 4px;
-      }
-
-      .info-marker.is-discovered {
-        opacity: 1;
-        animation: discoveredPulse 1.4s ease-in-out infinite alternate;
-        border-color: var(--cream);
-        background: var(--cyan);
-        box-shadow:
-          0 0 0 2px var(--stage),
-          0 0 16px rgba(95, 255, 214, 1),
-          0 0 30px rgba(255, 244, 194, 0.9),
-          inset 0 0 8px rgba(255, 255, 255, 0.9);
-      }
-
-      .info-marker.is-discovered::before {
-        content: "";
-        position: absolute;
-        inset: 4px;
-        background: var(--cream);
-        box-shadow: 0 0 8px var(--cream);
-      }
-
-      @keyframes markerPulse {
-        from {
-          box-shadow:
-            0 0 0 2px var(--stage),
-            0 0 8px rgba(95, 255, 214, 0.55);
-        }
-        to {
-          box-shadow:
-            0 0 0 2px var(--stage),
-            0 0 16px rgba(95, 255, 214, 0.85);
-        }
-      }
-
-      @keyframes discoveredPulse {
-        from { filter: brightness(1); }
-        to { filter: brightness(1.25); }
-      }
-
       .marker-shelf { left: 12%; top: 37%; }
       .marker-server { left: 28.5%; top: 48%; }
       .marker-terminal { left: 50%; top: 55%; }
       .marker-board { left: 77.5%; top: 33%; }
-
-      .marker-tooltip {
-        position: absolute;
-        z-index: 120;
-        max-width: 340px;
-        padding: 12px 14px;
-        border: 3px solid var(--cyan);
-        background: rgba(15, 23, 42, 0.94);
-        box-shadow:
-          4px 4px 0 #000,
-          0 0 18px rgba(95, 255, 214, 0.65);
-        color: var(--cream);
-        pointer-events: none;
-        opacity: 0;
-        transform: translateY(8px) scale(0.98);
-        transition:
-          opacity 160ms ease,
-          transform 160ms ease;
-      }
-
-      .marker-tooltip.is-visible {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-
-      .marker-tooltip h3 {
-        margin: 0 0 6px;
-        color: var(--cyan);
-        font-size: 1rem;
-      }
-
-      .marker-tooltip p {
-        margin: 0;
-        font-size: 0.85rem;
-        font-weight: 900;
-        line-height: 1.45;
-      }
-
-
-      .info-card {
-        position: absolute;
-        left: 50%;
-        top: 46%;
-        transform: translate(-50%, -50%);
-        z-index: 35;
-        width: min(760px, 55vw);
-        max-height: calc(100vh - 210px);
-        overflow: hidden;
-        padding: 18px 20px;
-        border: 3px solid var(--cyan);
-        background: rgba(15, 23, 42, 0.92);
-        box-shadow:
-          4px 4px 0 #000,
-          0 0 18px rgba(95, 255, 214, 0.45);
-        color: var(--cream);
-        font-size: clamp(0.72rem, 0.85vw, 0.95rem);
-        line-height: 1.45;
-      }
-
-      .room-stage.is-welcome-room .info-card {
-        left: 50%;
-        right: auto;
-        top: 96px;
-        bottom: auto;
-        width: min(560px, 42vw);
-        max-height: 240px;
-        transform: translateX(-50%);
-      }
-
-      .info-card[hidden],
-      .hotspots[hidden],
-      .return-city-btn[hidden],
-      .reward-modal[hidden],
-      .pixel-btn[hidden] { display: none; }
-
-      .info-card h2,
-      .info-card h3 {
-        margin: 0 0 10px;
-        color: var(--cyan);
-        font-size: clamp(1.1rem, 1.5vw, 1.6rem);
-        text-shadow: 3px 3px 0 #000;
-      }
-
-      .info-card h3 {
-        margin: 14px 0 8px;
-        color: var(--yellow);
-        font-size: clamp(0.9rem, 1.1vw, 1.1rem);
-      }
-
-      .info-card p,
-      .info-card li {
-        color: white;
-        font-size: inherit;
-        font-weight: 900;
-        line-height: 1.45;
-      }
-
-      .info-card p {
-        margin: 8px 0;
-      }
-
-      .info-card ul {
-        margin: 8px 0;
-        padding-left: 22px;
-      }
-
-      .sql-code {
-        max-width: 100%;
-        margin: 8px 0;
-        padding: 10px;
-        overflow-x: auto;
-        border: 2px solid #334155;
-        background: #020617;
-        color: var(--cyan);
-        font: 900 14px/1.45 var(--font-pixel);
-      }
-
-      .result-table {
-        width: 100%;
-        margin: 8px 0;
-        border-collapse: collapse;
-        background: rgba(2, 6, 23, 0.78);
-        font-size: 0.85rem;
-      }
-
-      .result-table th,
-      .result-table td {
-        padding: 5px 7px;
-        border: 2px solid #334155;
-        color: white;
-        text-align: left;
-      }
-
-      .result-table th {
-        color: var(--yellow);
-      }
-
-      .pixel-box,
-      .flow-line {
-        margin: 8px 0;
-        padding: 12px;
-        border: 2px solid var(--cream);
-        background: rgba(2, 6, 23, 0.7);
-        box-shadow: 4px 4px 0 #000;
-        color: var(--cream);
-        font-weight: 900;
-        line-height: 1.5;
-      }
-
-      .flow-line {
-        border-color: var(--cyan);
-        color: var(--cyan);
-      }
-
-      .reward-note {
-        color: var(--yellow) !important;
-        text-shadow: 2px 2px 0 #000;
-      }
-
-      .discovery-status,
-      .discovery-hint {
-        color: var(--cream) !important;
-        font-weight: 900;
-      }
-
-      .discovery-complete,
-      .discovery-warning {
-        padding: 8px 10px;
-        border: 2px solid #74ff9f;
-        background: rgba(15, 23, 42, 0.88);
-        box-shadow: 0 0 14px rgba(116, 255, 159, 0.65);
-        color: #74ff9f !important;
-      }
-
-      .discovery-complete.animate-complete {
-        animation: completePop 220ms ease;
-      }
-
-      .discovery-warning {
-        border-color: #ff7a2f;
-        color: #ffb088 !important;
-        box-shadow: 0 0 14px rgba(255, 122, 47, 0.55);
-      }
-
-      .pixel-btn.is-disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        filter: grayscale(0.5);
-      }
-
-      @keyframes completePop {
-        from {
-          transform: scale(0.96);
-          opacity: 0;
-        }
-        to {
-          transform: scale(1);
-          opacity: 1;
-        }
-      }
-
-      .quiz-box {
-        margin-top: 8px;
-      }
-
-      .quiz-option {
-        display: block;
-        width: 100%;
-        margin: 8px 0;
-        padding: 8px 10px;
-        border: 3px solid var(--cream);
-        background: var(--ink);
-        box-shadow: 3px 3px 0 #000;
-        color: var(--cream);
-        cursor: pointer;
-        font-family: inherit;
-        font-weight: 900;
-        text-align: left;
-      }
-
-      .quiz-option:hover,
-      .quiz-option:focus-visible {
-        border-color: var(--cyan);
-        color: var(--cyan);
-        box-shadow:
-          3px 3px 0 #000,
-          0 0 12px rgba(95, 255, 214, 0.75);
-        outline: none;
-      }
-
-      .quiz-option.correct {
-        border-color: #74ff9f;
-        color: #74ff9f;
-      }
-
-      .quiz-option.wrong {
-        border-color: #ff7a2f;
-        color: #ffb088;
-      }
-
-      .quiz-option:disabled {
-        cursor: default;
-      }
-
-      .quiz-feedback {
-        margin-top: 12px;
-        color: var(--cyan);
-        font-weight: 900;
-      }
-
-      .reward-modal {
-        position: absolute;
-        inset: 0;
-        z-index: 60;
-        display: grid;
-        place-items: center;
-        background: rgba(15, 23, 42, 0.45);
-      }
-
-      .reward-card {
-        width: min(88%, 520px);
-        padding: 22px;
-        border: 4px solid var(--cream);
-        background: rgba(17, 24, 39, 0.96);
-        box-shadow:
-          8px 8px 0 #000,
-          0 0 24px rgba(95, 255, 214, 0.45);
-        color: var(--cream);
-        text-align: center;
-      }
-
-      .reward-card h2 {
-        margin: 0 0 12px;
-        color: var(--yellow);
-        font-size: clamp(22px, 3vw, 34px);
-        text-shadow: 3px 3px 0 #000;
-      }
-
-      .reward-card p {
-        margin: 0 0 18px;
-        font-size: 15px;
-        font-weight: 900;
-        line-height: 1.45;
-      }
-
-      .reward-key-img {
-        width: clamp(90px, 12vw, 160px);
-        height: auto;
-        display: block;
-        margin: 0 auto 18px;
-        image-rendering: pixelated;
-        image-rendering: crisp-edges;
-        filter:
-          drop-shadow(0 0 8px rgba(255, 215, 106, 0.85))
-          drop-shadow(0 0 16px rgba(95, 255, 214, 0.45));
-        animation: keyFloat 1.4s ease-in-out infinite alternate;
-      }
-
-      @keyframes keyFloat {
-        from {
-          transform: translateY(0);
-        }
-        to {
-          transform: translateY(-8px);
-        }
-      }
-
-      @media (max-width: 900px) {
-        .info-card,
-        .room-stage.is-welcome-room .info-card {
-          left: 50%;
-          right: auto;
-          top: auto;
-          bottom: 90px;
-          width: calc(100% - 32px);
-          max-height: 42vh;
-          overflow-y: auto;
-          transform: translateX(-50%);
-        }
-
-        .room-stage.is-welcome-room .info-card {
-          top: 72px;
-          bottom: auto;
-          width: calc(100% - 32px);
-          max-height: 220px;
-        }
-      }
-
-      @media (max-width: 760px) {
-        .room-layout {
-          grid-template-columns: 1fr;
-          grid-template-rows: auto 1fr;
-        }
-
-        .side-panel {
-          height: auto;
-          max-height: 44vh;
-          overflow: hidden;
-          border-right: 0;
-          border-bottom: 4px solid #000;
-        }
-
-        .side-panel h1 { font-size: 24px; }
-        .room-stage { height: 100%; min-height: 0; }
-        .room-nav { bottom: 18px; gap: 12px; }
-        .pixel-btn { padding: 11px 12px; font-size: 12px; }
-        .info-card { bottom: 86px; max-height: 34vh; }
-        .room-stage.is-welcome-room .info-card { top: 72px; bottom: auto; max-height: 220px; }
-      }
     </style>
   </head>
   <body>
@@ -688,8 +29,8 @@
       </aside>
 
       <section class="room-stage" aria-label="Data Vault rooms">
-        <img class="room-bg" id="roomBg" src="res/rooms_background/Room_1_Data_Vault.webp" alt="" />
-        <a class="return-city-btn" id="topReturn" href="index.html">Return to the City</a>
+        <img class="room-bg" id="roomBg" src="../res/city_1/rooms_background/Room_1_Data_Vault.webp" alt="" />
+        <a class="return-city-btn" id="topReturn" href="index_city_1.html">Return to the City</a>
         <div class="hotspots" id="hotspots">
           <button class="info-marker marker-shelf" type="button" data-info="shelf" data-marker-id="shelf" aria-label="Archive shelf info"></button>
           <button class="info-marker marker-server" type="button" data-info="server" data-marker-id="server" aria-label="Server cabinet info"></button>
@@ -703,14 +44,14 @@
         <div class="room-nav">
           <button class="pixel-btn" id="prevRoom" type="button">Previous Room</button>
           <button class="pixel-btn" id="nextRoom" type="button">Next Room</button>
-          <a class="pixel-btn" id="finalReturn" href="index.html" hidden>Return to the City</a>
+          <a class="pixel-btn" id="finalReturn" href="index_city_1.html" hidden>Return to the City</a>
         </div>
         <article class="info-card" id="infoCard" aria-live="polite">
           <div id="mainLessonContent"></div>
         </article>
         <article class="reward-modal" id="rewardModal" hidden>
           <div class="reward-card">
-            <img src="res/keys/regular-key.webp" class="reward-key-img" alt="Reward key">
+            <img src="../res/city_1/item/regular-key.webp" class="reward-key-img" alt="Reward key">
             <h2 id="rewardTitle">Key Received!</h2>
             <p id="rewardMessage">You received the Table Department Key.</p>
             <button class="pixel-btn" id="rewardContinue" type="button">Continue</button>
@@ -719,6 +60,7 @@
       </section>
     </main>
 
+    <script src="../shared_files/shared-progress.js"></script>
     <script>
       const DEFAULT_PROGRESS = {
         buildings: {
@@ -730,6 +72,7 @@
         badges: { sqlFoundations: false }
       };
       const BUILDING_ID = "dataVault";
+      const QUIZ_ADVANCE_DELAY_MS = 650;
       const NEXT_BUILDING_ID = "tableDepartment";
       const REWARD_TITLE = "Key Received!";
       const REWARD_MESSAGE = "You received the Table Department Key.";
@@ -737,7 +80,7 @@
       const rooms = [
         {
           title: "Welcoming Room",
-          image: "res/rooms_background/Room_1_Data_Vault.webp",
+          image: "../res/city_1/rooms_background/Room_1_Data_Vault.webp",
           type: "welcome",
           summary: "Welcome to the Data Vault. This room introduces where data lives and why SQL helps us use it.",
           points: [
@@ -775,7 +118,7 @@
         },
         {
           title: "What is a database?",
-          image: "res/rooms_background/03_Data_Vault_background.webp",
+          image: "../res/city_1/rooms_background/03_Data_Vault_background.webp",
           type: "lesson",
           summary: "A database is an organized place where data is stored.",
           points: [
@@ -807,7 +150,7 @@
         },
         {
           title: "What is SQL?",
-          image: "res/rooms_background/03_Data_Vault_background.webp",
+          image: "../res/city_1/rooms_background/03_Data_Vault_background.webp",
           type: "lesson",
           summary: "SQL is the language used to communicate with relational databases.",
           points: [
@@ -837,7 +180,7 @@
         },
         {
           title: "Why organize data?",
-          image: "res/rooms_background/03_Data_Vault_background.webp",
+          image: "../res/city_1/rooms_background/03_Data_Vault_background.webp",
           type: "lesson",
           summary: "Organized data is easier to search, connect, and prepare for analysis.",
           points: [
@@ -867,7 +210,7 @@ random notes...</code></pre>
         },
         {
           title: "Databases before Machine Learning",
-          image: "res/rooms_background/03_Data_Vault_background.webp",
+          image: "../res/city_1/rooms_background/03_Data_Vault_background.webp",
           type: "lesson",
           summary: "SQL helps prepare data before training a Machine Learning model.",
           points: [
@@ -892,7 +235,7 @@ random notes...</code></pre>
         },
         {
           title: "Quiz Room",
-          image: "res/rooms_background/03_Data_Vault_background.webp",
+          image: "../res/city_1/rooms_background/03_Data_Vault_background.webp",
           type: "quiz",
           summary: "Answer correctly to unlock the recap room and earn the next key.",
           points: [
@@ -916,7 +259,7 @@ random notes...</code></pre>
         },
         {
           title: "Data Vault Recap",
-          image: "res/rooms_background/03_Data_Vault_background.webp",
+          image: "../res/city_1/rooms_background/03_Data_Vault_background.webp",
           type: "lesson",
           summary: "You now understand databases, SQL, and why they matter before ML.",
           points: [
@@ -986,10 +329,16 @@ random notes...</code></pre>
       const markerTooltipText = document.querySelector("#markerTooltipText");
 
       function createDefaultProgress() {
+        if (window.SQLKingdomProgress) {
+          return window.SQLKingdomProgress.createDefaultProgress();
+        }
         return JSON.parse(JSON.stringify(DEFAULT_PROGRESS));
       }
 
       function getProgress() {
+        if (window.SQLKingdomProgress) {
+          return window.SQLKingdomProgress.getGameProgress();
+        }
         const progress = createDefaultProgress();
         try {
           const saved = JSON.parse(localStorage.getItem("sqlCityProgress"));
@@ -1011,6 +360,10 @@ random notes...</code></pre>
       }
 
       function saveProgress(progress) {
+        if (window.SQLKingdomProgress) {
+          window.SQLKingdomProgress.saveGameProgress(progress);
+          return;
+        }
         localStorage.setItem("sqlCityProgress", JSON.stringify(progress));
       }
 
@@ -1348,8 +701,11 @@ random notes...</code></pre>
 
       function handleQuizAnswer(option) {
         if (option.disabled) return;
+        const quizBox = mainLessonContent.querySelector(".quiz-box");
         const options = mainLessonContent.querySelectorAll(".quiz-option");
         options.forEach((item) => item.classList.remove("wrong"));
+        quizBox?.classList.remove("is-transitioning");
+
         if (option.dataset.correct !== "true") {
           option.classList.add("wrong");
           setQuizFeedback("Not yet. Think about what a database is used for.");
@@ -1361,12 +717,15 @@ random notes...</code></pre>
         building.highestRoomUnlocked = Math.max(building.highestRoomUnlocked, currentRoomIndex + 1);
         saveProgress(progress);
         option.classList.add("correct");
-        options.forEach((item) => {
-          item.disabled = true;
-        });
+        quizBox?.classList.add("is-transitioning");
+        options.forEach((item) => { item.disabled = true; });
         setQuizFeedback("Correct! A database stores organized data that can be searched and used later.");
-        nextRoom.hidden = false;
-        renderRoomList();
+
+        window.setTimeout(() => {
+          quizBox?.classList.remove("is-transitioning");
+          nextRoom.hidden = false;
+          renderRoomList();
+        }, QUIZ_ADVANCE_DELAY_MS);
       }
 
       function renderMarkerSummary(contentHtml) {
@@ -1471,7 +830,7 @@ random notes...</code></pre>
       });
 
       if (!buildingProgress().unlocked) {
-        window.location.href = "index.html";
+        window.location.href = "index_city_1.html";
       } else {
         markBuildingEntered(BUILDING_ID);
         normalizeWelcomeDiscovery();

@@ -3,17 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SQL City</title>
-    <link rel="icon" type="image/webp" href="res/badge.webp">
-    <link rel="shortcut icon" type="image/webp" href="res/badge.webp">
+    <title>SQL Kingdom</title>
+    <link rel="stylesheet" href="shared_files/shared-menu.css" />
     <style>
       :root {
         --cream: #fff4c2;
-        --ink: #111827;
-        --rose: #ff4d6d;
+        --ink: #101827;
+        --panel: rgba(8, 14, 30, 0.8);
+        --cyan: #5fffd6;
         --yellow: #ffd76a;
         --green: #74ff9f;
-        --font-pixel: "Courier New", Courier, monospace;
+        --muted: #a7b5c9;
+        --pixel-font: "Courier New", Courier, monospace;
       }
 
       * {
@@ -22,1126 +23,542 @@
 
       html,
       body {
-        width: 100%;
-        height: 100%;
+        min-height: 100%;
         margin: 0;
-        overflow: hidden;
-        background: #0f172a;
       }
 
       body {
+        min-height: 100vh;
+        overflow-x: hidden;
+        background: var(--ink) url("res/kingdom/kingdom_bg.png") center / cover fixed no-repeat;
         color: white;
-        font-family: var(--font-pixel);
+        font-family: var(--pixel-font);
       }
 
-      .game-home,
-      .game-screen,
-      .city-scene {
+      body::before {
+        content: "";
         position: fixed;
         inset: 0;
-        width: 100vw;
-        height: 100vh;
-        overflow: hidden;
-      }
-
-      /* Each city element is a full 1920x1080 layer exported in place. */
-      .city-layer {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        image-rendering: pixelated;
-        image-rendering: crisp-edges;
+        z-index: 0;
         pointer-events: none;
-        user-select: none;
-        transition: filter 0.18s ease, transform 0.18s ease;
-      }
-
-      .layer-bg {
-        z-index: 1;
-      }
-
-      .layer-red2 {
-        z-index: 3;
-      }
-
-      .layer-red1 {
-        z-index: 2;
-      }
-
-      .layer-yellow {
-        z-index: 4;
-      }
-
-      .layer-green {
-        z-index: 5;
-      }
-
-      .city-layer.locked {
-        filter: brightness(0.45) grayscale(0.35);
-      }
-
-      .city-layer.newly-unlocked {
-        filter:
-          drop-shadow(0 0 8px #5fffd6)
-          drop-shadow(0 0 22px #5fffd6);
-        animation: unlockPulse 1.4s infinite alternate;
-      }
-
-      @keyframes unlockPulse {
-        from {
-          filter:
-            drop-shadow(0 0 6px #5fffd6)
-            drop-shadow(0 0 14px #5fffd6);
-        }
-        to {
-          filter:
-            drop-shadow(0 0 12px #ffd76a)
-            drop-shadow(0 0 30px #5fffd6);
-        }
-      }
-
-      .traffic-layer {
-        position: absolute;
-        inset: 0;
-        z-index: 14;
-        overflow: hidden;
-        pointer-events: none;
-      }
-
-      .car {
-        position: absolute;
-        left: 0;
-        z-index: 15;
-        width: clamp(90px, 11vw, 220px);
-        height: auto;
-        image-rendering: pixelated;
-        image-rendering: crisp-edges;
-        pointer-events: none;
-        user-select: none;
-        will-change: transform;
-      }
-
-      .map-title {
-        position: absolute;
-        z-index: 30;
-        top: 7%;
-        left: 50%;
-        transform: translateX(-50%);
-        margin: 0;
-        color: var(--cream);
-        font-family: var(--font-pixel);
-        font-size: clamp(34px, 5vw, 78px);
-        font-weight: 900;
-        letter-spacing: 4px;
-        line-height: 1;
-        pointer-events: none;
-        text-align: center;
-        text-shadow:
-          4px 4px 0 var(--ink),
-          -2px -2px 0 var(--ink),
-          2px -2px 0 var(--ink),
-          -2px 2px 0 var(--ink),
-          0 0 14px rgba(255, 244, 194, 0.65);
-        white-space: nowrap;
-      }
-
-      /* Transparent click zones sit over visible buildings, not over PNG boxes. */
-      .hotspot {
-        position: absolute;
-        z-index: 15;
-        display: block;
-        background: transparent;
-        cursor: pointer;
-      }
-
-      .hotspot.locked {
-        cursor: not-allowed;
-      }
-
-      .hotspot:focus-visible {
-        outline: 3px solid var(--cream);
-        outline-offset: 4px;
-      }
-
-      .hotspot-red2 {
-        left: 0%;
-        top: 15%;
-        width: 20%;
-        height: 65%;
-      }
-
-      .hotspot-red1 {
-        left: 19%;
-        top: 30%;
-        width: 24%;
-        height: 42%;
-      }
-
-      .hotspot-yellow {
-        left: 52%;
-        top: 15%;
-        width: 25%;
-        height: 68%;
-      }
-
-      .hotspot-green {
-        left: 74%;
-        top: 2%;
-        width: 26%;
-        height: 83%;
-      }
-
-      .city-scene:has(.hotspot-red2:not(.locked):hover) .layer-red2,
-      .city-scene:has(.hotspot-red2:not(.locked):focus-visible) .layer-red2 {
-        filter: drop-shadow(0 0 8px var(--rose)) drop-shadow(0 0 22px var(--rose));
-        transform: translateY(-4px);
-      }
-
-      .city-scene:has(.hotspot-red1:not(.locked):hover) .layer-red1,
-      .city-scene:has(.hotspot-red1:not(.locked):focus-visible) .layer-red1 {
-        filter: drop-shadow(0 0 8px var(--rose)) drop-shadow(0 0 22px var(--rose));
-        transform: translateY(-4px);
-      }
-
-      .city-scene:has(.hotspot-yellow:not(.locked):hover) .layer-yellow,
-      .city-scene:has(.hotspot-yellow:not(.locked):focus-visible) .layer-yellow {
-        filter: drop-shadow(0 0 8px var(--yellow)) drop-shadow(0 0 24px var(--yellow));
-        transform: translateY(-4px);
-      }
-
-      .city-scene:has(.hotspot-green:not(.locked):hover) .layer-green,
-      .city-scene:has(.hotspot-green:not(.locked):focus-visible) .layer-green {
-        filter: drop-shadow(0 0 8px var(--green)) drop-shadow(0 0 24px var(--green));
-        transform: translateY(-4px);
-      }
-
-      .building-lock {
-        position: absolute;
-        z-index: 26;
-        width: clamp(42px, 5vw, 76px);
-        height: auto;
-        image-rendering: pixelated;
-        image-rendering: crisp-edges;
-        pointer-events: none;
-        user-select: none;
-        filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.72));
-      }
-
-      .lock-dataVault {
-        left: 11%;
-        top: 44%;
-      }
-
-      .lock-tableDepartment {
-        left: 31%;
-        top: 45%;
-      }
-
-      .lock-keyBridgeHall {
-        left: 60%;
-        top: 45%;
-      }
-
-      .lock-queryLab {
-        left: 83%;
-        top: 43%;
-      }
-
-      .building-sign {
-        position: absolute;
-        z-index: 27;
-        min-width: 120px;
-        padding: 8px 14px;
-        border: 4px solid #1f2937;
         background:
-          radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-          #111827;
-        background-size: 6px 6px;
-        box-shadow:
-          4px 4px 0 #000,
-          inset 0 0 12px rgba(0, 0, 0, 0.8);
-        color: rgba(180, 210, 220, 0.5);
-        font-family: var(--font-pixel);
-        font-size: clamp(10px, 1.1vw, 16px);
-        font-weight: 900;
-        letter-spacing: 2px;
-        line-height: 1;
-        text-align: center;
-        text-transform: uppercase;
-        transform: skewX(-2deg);
-        pointer-events: none;
-        user-select: none;
-        image-rendering: pixelated;
+          linear-gradient(180deg, rgba(5, 10, 22, 0.08), rgba(5, 10, 22, 0.35)),
+          radial-gradient(circle at 50% 28%, rgba(95, 255, 214, 0.15), transparent 40%);
       }
 
-      .building-sign span {
+      .kingdom-page {
         position: relative;
-        z-index: 2;
-        text-shadow: none;
-      }
-
-      .sign-data-vault {
-        left: 8%;
-        top: 18%;
-      }
-
-      .sign-table-department {
-        left: 27%;
-        top: 30%;
-      }
-
-      .sign-key-bridge {
-        left: 55%;
-        top: 20%;
-      }
-
-      .sign-query-lab {
-        left: 80%;
-        top: 18%;
-      }
-
-      .building-sign.is-unlocked {
-        opacity: 0.9;
-        color: rgba(255, 244, 194, 0.65);
-        border-color: #334155;
-      }
-
-      .building-sign.is-locked {
-        opacity: 0.45;
-        color: rgba(120, 130, 140, 0.45);
-        border-color: #111827;
-        filter: grayscale(0.8) brightness(0.65);
-      }
-
-      .building-sign.is-lit {
-        opacity: 1;
-        color: #5fffd6;
-        border-color: #5fffd6;
-        box-shadow:
-          4px 4px 0 #000,
-          0 0 12px rgba(95, 255, 214, 0.9),
-          0 0 28px rgba(95, 255, 214, 0.55),
-          inset 0 0 14px rgba(95, 255, 214, 0.18);
-        text-shadow:
-          0 0 6px #5fffd6,
-          0 0 12px rgba(95, 255, 214, 0.8);
-      }
-
-      .sign-data-vault.is-lit {
-        color: #5fffd6;
-        border-color: #5fffd6;
-        box-shadow:
-          4px 4px 0 #000,
-          0 0 12px rgba(95, 255, 214, 0.9),
-          0 0 22px rgba(255, 77, 109, 0.45),
-          inset 0 0 14px rgba(95, 255, 214, 0.18);
-      }
-
-      .sign-table-department.is-lit,
-      .sign-key-bridge.is-lit {
-        color: #ffd76a;
-        border-color: #ffd76a;
-        box-shadow:
-          4px 4px 0 #000,
-          0 0 12px rgba(255, 215, 106, 0.95),
-          0 0 26px rgba(95, 255, 214, 0.45),
-          inset 0 0 14px rgba(255, 215, 106, 0.18);
-        text-shadow:
-          0 0 6px #ffd76a,
-          0 0 12px rgba(255, 215, 106, 0.8);
-      }
-
-      .sign-query-lab.is-lit {
-        color: #74ff9f;
-        border-color: #74ff9f;
-        box-shadow:
-          4px 4px 0 #000,
-          0 0 12px rgba(116, 255, 159, 0.95),
-          0 0 26px rgba(95, 255, 214, 0.5),
-          inset 0 0 14px rgba(116, 255, 159, 0.18);
-        text-shadow:
-          0 0 6px #74ff9f,
-          0 0 12px rgba(116, 255, 159, 0.8);
-      }
-
-      .building-sign.is-new {
-        opacity: 1;
-        color: #ffd76a;
-        border-color: #ffd76a;
-        animation: ledPulse 1.1s ease-in-out infinite alternate;
-        box-shadow:
-          4px 4px 0 #000,
-          0 0 16px rgba(255, 215, 106, 0.95),
-          0 0 32px rgba(95, 255, 214, 0.55),
-          inset 0 0 16px rgba(255, 215, 106, 0.18);
-        text-shadow:
-          0 0 7px #ffd76a,
-          0 0 16px rgba(255, 215, 106, 0.9);
-      }
-
-      .sign-query-lab.is-new {
-        color: #74ff9f;
-        border-color: #74ff9f;
-        box-shadow:
-          4px 4px 0 #000,
-          0 0 16px rgba(116, 255, 159, 0.95),
-          0 0 32px rgba(95, 255, 214, 0.55),
-          inset 0 0 16px rgba(116, 255, 159, 0.18);
-        text-shadow:
-          0 0 7px #74ff9f,
-          0 0 16px rgba(116, 255, 159, 0.9);
-      }
-
-      @keyframes ledPulse {
-        from {
-          filter: brightness(1);
-          transform: skewX(-2deg) translateY(0);
-        }
-        to {
-          filter: brightness(1.25);
-          transform: skewX(-2deg) translateY(-2px);
-        }
-      }
-
-      .city-message {
-        position: absolute;
-        left: 50%;
-        bottom: 8%;
-        z-index: 35;
-        max-width: min(90vw, 560px);
-        padding: 12px 16px;
-        border: 3px solid var(--cream);
-        background: rgba(17, 24, 39, 0.92);
-        box-shadow: 4px 4px 0 #000;
-        color: var(--cream);
-        font-size: clamp(12px, 1.8vw, 16px);
-        font-weight: 900;
-        text-align: center;
-        transform: translateX(-50%);
-      }
-
-      .city-message[hidden],
-      .building-lock[hidden] {
-        display: none;
-      }
-
-      .burger-btn {
-        position: fixed;
-        top: 24px;
-        right: 28px;
-        z-index: 100;
+        z-index: 1;
+        min-height: 100vh;
         display: grid;
-        width: 64px;
-        height: 56px;
-        place-items: center;
-        gap: 4px;
-        border: 4px solid #ff7a2f;
-        background: rgba(255, 244, 194, 0.92);
-        box-shadow: 4px 4px 0 var(--ink);
-        cursor: pointer;
+        grid-template-rows: auto 1fr;
+        gap: 24px;
+        width: min(1280px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 34px 0 42px;
       }
 
-      .burger-btn span {
-        display: block;
-        width: 34px;
-        height: 5px;
-        background: #ff7a2f;
-        box-shadow: 2px 2px 0 rgba(17, 24, 39, 0.14);
-      }
-
-      .burger-btn:hover,
-      .burger-btn:focus-visible {
-        transform: translateY(-2px);
-        box-shadow: 6px 6px 0 var(--ink);
-        outline: none;
-      }
-
-      .menu-backdrop {
-        position: fixed;
-        inset: 0;
-        z-index: 90;
-        display: none;
-        background: rgba(0, 0, 0, 0.35);
-      }
-
-      .menu-backdrop.open {
-        display: block;
-      }
-
-      .city-menu {
-        position: fixed;
-        top: 0;
-        right: 0;
-        z-index: 110;
-        width: min(360px, 88vw);
-        height: 100vh;
-        padding: 24px;
-        overflow-y: auto;
-        border-left: 5px solid var(--cream);
-        background: var(--ink);
-        box-shadow: -8px 0 0 #000;
-        color: var(--cream);
-        font-family: var(--font-pixel);
-        transform: translateX(110%);
-        transition: transform 0.2s ease;
-      }
-
-      .city-menu.open {
-        transform: translateX(0);
-      }
-
-      .city-menu h2,
-      .city-menu h3 {
-        margin-top: 0;
-        padding-right: 42px;
+      .kingdom-header {
+        text-align: center;
         text-shadow: 3px 3px 0 #000;
       }
 
-      .city-menu h3 {
-        margin-bottom: 12px;
-      }
-
-      .menu-close {
-        position: absolute;
-        top: 16px;
-        right: 16px;
-        width: 34px;
-        height: 34px;
-        border: 3px solid var(--cream);
-        background: #0f172a;
-        box-shadow: 3px 3px 0 #000;
-        color: var(--cream);
-        cursor: pointer;
-        font: 900 18px/1 var(--font-pixel);
-      }
-
-      .menu-close:hover,
-      .menu-close:focus-visible {
-        background: var(--yellow);
-        color: var(--ink);
-        outline: none;
-      }
-
-      .unlock-all-btn {
-        width: 100%;
+      .kingdom-header h1 {
         margin: 0;
-        padding: 14px 16px;
-        border: 3px solid #5fffd6;
-        background: #0f172a;
-        box-shadow: 4px 4px 0 #000;
-        color: #5fffd6;
-        cursor: pointer;
-        font-family: var(--font-pixel);
+        color: var(--cream);
+        font-size: clamp(42px, 8vw, 108px);
         font-weight: 900;
-        text-transform: uppercase;
+        line-height: 0.9;
+        letter-spacing: 0;
+        text-shadow:
+          5px 5px 0 #050914,
+          -2px -2px 0 #050914,
+          2px -2px 0 #050914,
+          -2px 2px 0 #050914,
+          0 0 18px rgba(255, 244, 194, 0.72);
       }
 
-      .unlock-all-btn:hover,
-      .unlock-all-btn:focus-visible {
-        background: #5fffd6;
-        color: var(--ink);
-        outline: none;
+      .kingdom-header p {
+        max-width: 760px;
+        margin: 14px auto 0;
+        color: white;
+        font-size: clamp(15px, 2vw, 22px);
+        font-weight: 900;
+        line-height: 1.35;
       }
 
-      .reset-all-btn {
+      .world-selector {
+        align-self: center;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: clamp(10px, 2vw, 22px);
         width: 100%;
-        margin: 12px 0 0;
-        padding: 12px 16px;
-        border: 3px solid var(--yellow);
-        background: #0f172a;
-        box-shadow: 4px 4px 0 #000;
-        color: var(--yellow);
+        min-height: 430px;
+      }
+
+      .nav-arrow {
+        width: clamp(44px, 6vw, 66px);
+        aspect-ratio: 1;
+        border: 3px solid var(--cream);
+        background: rgba(8, 14, 30, 0.78);
+        color: var(--cream);
+        font: 900 clamp(26px, 4vw, 42px) / 1 var(--pixel-font);
         cursor: pointer;
-        font-family: var(--font-pixel);
-        font-weight: 900;
-        text-transform: uppercase;
-      }
-
-      .reset-all-btn:hover,
-      .reset-all-btn:focus-visible {
-        background: var(--yellow);
-        color: var(--ink);
-        outline: none;
-      }
-
-      .unlock-everything-card {
-        margin: 22px 0;
-        padding: 16px;
-        border: 3px solid #5fffd6;
-        background: rgba(15, 23, 42, 0.75);
         box-shadow:
           4px 4px 0 #000,
-          0 0 18px rgba(95, 255, 214, 0.35);
+          0 0 16px rgba(95, 255, 214, 0.28);
+      }
+
+      .nav-arrow:hover:not(:disabled),
+      .nav-arrow:focus-visible:not(:disabled) {
+        background: var(--yellow);
+        color: var(--ink);
+        outline: 3px solid var(--cyan);
+        outline-offset: 4px;
+      }
+
+      .nav-arrow:disabled {
+        cursor: not-allowed;
+        opacity: 0.42;
+        filter: grayscale(0.65);
+      }
+
+      .island-window {
+        min-width: 0;
+      }
+
+      .island-track {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: end;
+        gap: clamp(12px, 3vw, 36px);
+      }
+
+      .island-node {
+        position: relative;
+        display: grid;
+        justify-items: center;
+        align-content: end;
+        min-height: clamp(270px, 36vw, 420px);
+        padding: 12px 8px 0;
+        color: white;
         text-align: center;
-      }
-
-      .magic-key-img {
-        width: clamp(100px, 42%, 180px);
-        height: auto;
-        display: block;
-        margin: 0 auto 14px;
-        image-rendering: pixelated;
-        image-rendering: crisp-edges;
-        filter:
-          drop-shadow(0 0 8px rgba(95, 255, 214, 0.9))
-          drop-shadow(0 0 22px rgba(255, 215, 106, 0.65));
-        animation: magicKeyPulse 1.2s ease-in-out infinite alternate;
-      }
-
-      .unlock-confirmation {
-        margin: 12px 0 0;
-        color: var(--yellow);
-        font-size: 12px;
-        font-weight: 900;
-        line-height: 1.4;
-        text-shadow: 2px 2px 0 #000;
-      }
-
-      .unlock-confirmation[hidden] {
-        display: none;
-      }
-
-      .reset-confirmation {
-        margin: 12px 0 0;
-        color: var(--cream);
-        font-size: 12px;
-        font-weight: 900;
-        line-height: 1.4;
-        text-shadow: 2px 2px 0 #000;
-      }
-
-      .reset-confirmation[hidden] {
-        display: none;
-      }
-
-      @keyframes magicKeyPulse {
-        from {
-          transform: translateY(0) scale(1);
-          filter:
-            drop-shadow(0 0 6px rgba(95, 255, 214, 0.75))
-            drop-shadow(0 0 14px rgba(255, 215, 106, 0.5));
-        }
-        to {
-          transform: translateY(-6px) scale(1.04);
-          filter:
-            drop-shadow(0 0 12px rgba(95, 255, 214, 1))
-            drop-shadow(0 0 28px rgba(255, 215, 106, 0.85));
-        }
-      }
-
-      .reference-card {
-        display: block;
-        margin: 16px 0;
-        padding: 10px;
-        border: 3px solid var(--cream);
-        background: #0f172a;
-        box-shadow: 4px 4px 0 #000;
-        color: var(--cream);
-        font-weight: 900;
         text-decoration: none;
       }
 
-      .reference-card:hover,
-      .reference-card:focus-visible {
-        border-color: #5fffd6;
-        box-shadow:
-          4px 4px 0 #000,
-          0 0 16px rgba(95, 255, 214, 0.8);
-        outline: none;
+      .island-node::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: 48px;
+        width: min(72%, 260px);
+        height: 28px;
+        transform: translateX(-50%);
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.35);
+        filter: blur(8px);
+        pointer-events: none;
       }
 
-      .reference-card img {
-        display: block;
+      .island-image-wrap {
+        position: relative;
+        display: grid;
+        place-items: center;
         width: 100%;
+        animation: islandFloat 4.6s ease-in-out infinite;
+        animation-delay: var(--float-delay, 0s);
+      }
+
+      .island-node:nth-child(2) .island-image-wrap {
+        animation-duration: 5.2s;
+      }
+
+      .island-node:nth-child(3) .island-image-wrap {
+        animation-duration: 4.9s;
+      }
+
+      .island-node img {
+        display: block;
+        width: min(100%, 330px);
         height: auto;
+        max-height: clamp(170px, 25vw, 290px);
+        object-fit: contain;
         image-rendering: pixelated;
         image-rendering: crisp-edges;
+        pointer-events: none;
+        user-select: none;
+        filter:
+          drop-shadow(0 18px 0 rgba(0, 0, 0, 0.28))
+          drop-shadow(0 0 14px rgba(95, 255, 214, 0.2));
+        transition:
+          transform 0.18s ease,
+          filter 0.18s ease;
       }
 
-      .reference-card span {
-        display: block;
-        margin-top: 10px;
+      .island-name {
+        position: relative;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        max-width: 100%;
+        margin-top: 14px;
+        padding: 8px 12px;
+        border: 3px solid var(--cream);
+        background: var(--panel);
+        color: var(--cream);
+        font-size: clamp(14px, 1.7vw, 20px);
+        font-weight: 900;
+        line-height: 1.1;
+        text-shadow: 2px 2px 0 #000;
+        box-shadow:
+          4px 4px 0 #000,
+          0 0 12px rgba(95, 255, 214, 0.22);
+      }
+
+      .island-status {
+        color: var(--cyan);
+        font-size: 12px;
+      }
+
+      .island-node.is-unlocked {
+        cursor: pointer;
+      }
+
+      .island-node.is-unlocked:hover img,
+      .island-node.is-unlocked:focus-visible img {
+        transform: scale(1.06);
+        filter:
+          drop-shadow(0 18px 0 rgba(0, 0, 0, 0.28))
+          drop-shadow(0 0 12px rgba(95, 255, 214, 0.95))
+          drop-shadow(0 0 28px rgba(95, 255, 214, 0.65));
+      }
+
+      .island-node.is-unlocked:focus-visible {
+        outline: 3px solid var(--cyan);
+        outline-offset: 8px;
+      }
+
+      .island-node.is-locked-playable,
+      .island-node.is-coming-soon {
+        cursor: not-allowed;
+      }
+
+      .island-node.is-locked-playable img {
+        opacity: 0.72;
+        filter:
+          grayscale(0.55)
+          brightness(0.7)
+          drop-shadow(0 18px 0 rgba(0, 0, 0, 0.3));
+      }
+
+      .island-node.is-coming-soon img {
+        opacity: 0.58;
+        filter:
+          grayscale(0.75)
+          brightness(0.62)
+          drop-shadow(0 18px 0 rgba(0, 0, 0, 0.32));
+      }
+
+      .island-node.is-locked-playable .island-name,
+      .island-node.is-coming-soon .island-name {
+        border-color: rgba(255, 244, 194, 0.62);
+        color: var(--muted);
+      }
+
+      .island-node.is-coming-soon .island-status {
+        color: var(--yellow);
+      }
+
+      .lock-badge {
+        position: absolute;
+        top: clamp(16px, 2vw, 28px);
+        right: clamp(18px, 4vw, 54px);
+        z-index: 3;
+        padding: 6px 8px;
+        border: 2px solid var(--cream);
+        background: rgba(5, 10, 22, 0.88);
+        color: var(--cream);
+        font-size: 12px;
+        font-weight: 900;
+        box-shadow: 3px 3px 0 #000;
+      }
+
+      .carousel-note {
+        min-height: 20px;
+        margin: 20px 0 0;
+        color: var(--cyan);
         font-size: 13px;
-        line-height: 1.3;
+        font-weight: 900;
+        text-align: center;
+        text-shadow: 2px 2px 0 #000;
       }
 
-      .reference-card small {
-        display: block;
-        margin-top: 6px;
-        color: #5fffd6;
-        font-size: 10px;
-        line-height: 1.35;
-        overflow-wrap: anywhere;
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
       }
 
-      @media (max-width: 760px) {
-        .map-title {
-          top: 6%;
-          font-size: clamp(34px, 12vw, 70px);
-          letter-spacing: 2px;
+      @keyframes islandFloat {
+        0%,
+        100% {
+          transform: translateY(0);
         }
 
-        .building-sign {
-          min-width: 88px;
-          padding: 6px 8px;
-          font-size: 9px;
-          letter-spacing: 1px;
+        50% {
+          transform: translateY(calc(var(--float-distance, 12px) * -1));
+        }
+      }
+
+      @media (max-width: 860px) {
+        body {
+          background-attachment: scroll;
         }
 
-        .sign-data-vault {
-          left: 4%;
-          top: 18%;
+        .kingdom-page {
+          width: min(100% - 24px, 760px);
+          padding-top: 26px;
         }
 
-        .sign-table-department {
-          left: 23%;
-          top: 32%;
+        .world-selector {
+          grid-template-columns: 1fr;
+          gap: 16px;
+          min-height: 0;
         }
 
-        .sign-key-bridge {
-          left: 53%;
-          top: 21%;
+        .nav-arrow {
+          width: 58px;
         }
 
-        .sign-query-lab {
-          left: 76%;
-          top: 18%;
+        .nav-arrow.prev {
+          justify-self: start;
+          grid-row: 2;
+        }
+
+        .nav-arrow.next {
+          justify-self: end;
+          grid-row: 2;
+        }
+
+        .island-window {
+          grid-row: 1;
+        }
+
+        .island-track {
+          gap: 8px;
+        }
+
+        .island-node {
+          min-height: 260px;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .kingdom-page {
+          width: min(100% - 18px, 440px);
+        }
+
+        .island-track {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 4px;
+        }
+
+        .island-node {
+          min-height: 205px;
+          padding-inline: 2px;
+        }
+
+        .island-node img {
+          max-height: 132px;
+        }
+
+        .island-name {
+          min-height: 46px;
+          padding: 7px 6px;
+          font-size: 11px;
+        }
+
+        .island-status,
+        .lock-badge {
+          font-size: 10px;
         }
       }
     </style>
   </head>
   <body>
-    <main class="game-home">
-      <section class="game-screen" aria-labelledby="page-title">
-        <div class="city-scene" id="cityScene">
-          <!-- City layers stay stacked exactly on the same fullscreen canvas. -->
-          <img src="res/city_elements/bg.webp" class="city-layer layer-bg" alt="" />
-          <img src="res/city_elements/red2.webp" class="city-layer layer-red2" alt="" />
-          <img src="res/city_elements/red1.webp" class="city-layer layer-red1" alt="" />
-          <img src="res/city_elements/yellow.webp" class="city-layer layer-yellow" alt="" />
-          <img src="res/city_elements/green.webp" class="city-layer layer-green" alt="" />
+    <main class="kingdom-page">
+      <header class="kingdom-header">
+        <h1>SQL Kingdom</h1>
+        <p>Choose your city and continue your SQL learning journey.</p>
+      </header>
 
-          <div class="traffic-layer" id="trafficLayer" aria-hidden="true"></div>
+      <section class="world-selector" aria-label="SQL Kingdom city carousel">
+        <button class="nav-arrow prev" type="button" id="prevIsland" aria-label="Show previous islands">&lt;</button>
 
-          <img src="res/city_elements/lock.webp" class="building-lock lock-dataVault" data-lock="dataVault" alt="Locked" hidden />
-          <img src="res/city_elements/lock.webp" class="building-lock lock-tableDepartment" data-lock="tableDepartment" alt="Locked" hidden />
-          <img src="res/city_elements/lock.webp" class="building-lock lock-keyBridgeHall" data-lock="keyBridgeHall" alt="Locked" hidden />
-          <img src="res/city_elements/lock.webp" class="building-lock lock-queryLab" data-lock="queryLab" alt="Locked" hidden />
-
-          <div class="building-sign sign-data-vault" data-building="dataVault">
-            <span>DATA VAULT</span>
-          </div>
-          <div class="building-sign sign-table-department" data-building="tableDepartment">
-            <span>TABLE DEPT</span>
-          </div>
-          <div class="building-sign sign-key-bridge" data-building="keyBridgeHall">
-            <span>KEY BRIDGE</span>
-          </div>
-          <div class="building-sign sign-query-lab" data-building="queryLab">
-            <span>QUERY LAB</span>
-          </div>
-
-          <a class="hotspot hotspot-red2" href="data-vault.html" data-building="red2" data-building-id="dataVault" aria-label="Enter Data Vault"></a>
-          <a class="hotspot hotspot-red1" href="table-department.html" data-building="red1" data-building-id="tableDepartment" aria-label="Enter Table Department"></a>
-          <a class="hotspot hotspot-yellow" href="key-bridge-hall.html" data-building="yellow" data-building-id="keyBridgeHall" aria-label="Enter Key Bridge Hall"></a>
-          <a class="hotspot hotspot-green" href="query-lab.html" data-building="green" data-building-id="queryLab" aria-label="Enter Query Lab"></a>
-
-          <h1 class="map-title" id="page-title">SQL City</h1>
-          <p class="city-message" id="cityMessage" hidden>Locked. Complete the previous building first.</p>
+        <div class="island-window">
+          <div class="island-track" id="islandTrack"></div>
+          <p class="carousel-note" id="carouselNote" aria-live="polite"></p>
         </div>
+
+        <button class="nav-arrow next" type="button" id="nextIsland" aria-label="Show next islands">&gt;</button>
       </section>
     </main>
 
-    <button class="burger-btn" id="burgerBtn" type="button" aria-label="Open menu" aria-controls="cityMenu" aria-expanded="false">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-
-    <div class="menu-backdrop" id="menuBackdrop"></div>
-
-    <aside class="city-menu" id="cityMenu" aria-hidden="true">
-      <button class="menu-close" id="menuClose" type="button" aria-label="Close menu">X</button>
-      <h2>SQL City Menu</h2>
-      <div class="unlock-everything-card">
-        <img src="res/keys/magic-master-key.webp" class="magic-key-img" alt="Magic master key">
-        <button class="unlock-all-btn" id="unlockAllBtn" type="button">Unlock Everything</button>
-        <p class="unlock-confirmation" id="unlockConfirmation" hidden>Magic Master Key used! All buildings are unlocked.</p>
-        <button class="reset-all-btn" id="resetAllBtn" type="button">Reset Everything</button>
-        <p class="reset-confirmation" id="resetConfirmation" hidden>Progress reset. Data Vault is open again.</p>
-      </div>
-      <h3>References</h3>
-      <a class="reference-card" href="https://www.w3schools.com/sql/default.asp" target="_blank" rel="noopener noreferrer">
-        <img src="res/w3schools.webp" alt="W3Schools SQL Tutorial" />
-        <span>W3Schools SQL Tutorial</span>
-        <small>https://www.w3schools.com/sql/default.asp</small>
-      </a>
-      <a class="reference-card" href="https://www.geeksforgeeks.org/sql/sql-tutorial/" target="_blank" rel="noopener noreferrer">
-        <img src="res/geeksforgeeks.webp" alt="GeeksforGeeks SQL Tutorial" />
-        <span>GeeksforGeeks SQL Tutorial</span>
-        <small>https://www.geeksforgeeks.org/sql/sql-tutorial/</small>
-      </a>
-    </aside>
-
+    <div id="sharedMenuMount" data-menu-page="kingdom" data-menu-title="SQL Kingdom Menu"></div>
+    <script src="shared_files/shared-progress.js"></script>
+    <script src="shared_files/shared-reset-system.js"></script>
+    <script src="shared_files/shared-magic-key.js"></script>
+    <script src="shared_files/shared-menu.js"></script>
     <script>
-      const DEFAULT_PROGRESS = {
-        buildings: {
-          dataVault: {
-            unlocked: true,
-            completed: false,
-            newlyUnlocked: false,
-            entered: false,
-            quizPassed: false,
-            discoveredMarkers: [],
-            highestRoomUnlocked: 0
-          },
-          tableDepartment: {
-            unlocked: false,
-            completed: false,
-            newlyUnlocked: false,
-            entered: false,
-            quizPassed: false,
-            discoveredMarkers: [],
-            highestRoomUnlocked: 0
-          },
-          keyBridgeHall: {
-            unlocked: false,
-            completed: false,
-            newlyUnlocked: false,
-            entered: false,
-            quizPassed: false,
-            discoveredMarkers: [],
-            highestRoomUnlocked: 0
-          },
-          queryLab: {
-            unlocked: false,
-            completed: false,
-            newlyUnlocked: false,
-            entered: false,
-            quizPassed: false,
-            discoveredMarkers: [],
-            highestRoomUnlocked: 0
-          }
+      const islands = [
+        {
+          id: "foundation-city",
+          name: "Foundation City",
+          image: "res/kingdom/city_1.png",
+          alt: "Foundation City island",
+          type: "playable",
+          link: "city_1/index_city_1.html"
         },
-        badges: {
-          sqlFoundations: false
+        {
+          id: "data-prep-city",
+          name: "Data Prep City",
+          image: "res/kingdom/city_2.png",
+          alt: "Data Prep City island",
+          type: "playable",
+          link: "city_2/index_city_2.html",
+          lockedImage: "res/kingdom/shadow_island.png"
         },
-        unlockEverythingUsed: false
-      };
-
-      function createDefaultProgress() {
-        return JSON.parse(JSON.stringify(DEFAULT_PROGRESS));
-      }
-
-      function getProgress() {
-        const progress = createDefaultProgress();
-        try {
-          const saved = JSON.parse(localStorage.getItem("sqlCityProgress"));
-          if (saved && saved.buildings) {
-            Object.keys(progress.buildings).forEach((buildingId) => {
-              if (saved.buildings[buildingId]) {
-                Object.assign(progress.buildings[buildingId], saved.buildings[buildingId]);
-              }
-            });
-          }
-          if (saved && saved.badges) {
-            Object.assign(progress.badges, saved.badges);
-          }
-          if (typeof saved?.unlockEverythingUsed === "boolean") {
-            progress.unlockEverythingUsed = saved.unlockEverythingUsed;
-          }
-        } catch (error) {
-          localStorage.removeItem("sqlCityProgress");
-        }
-        progress.buildings.dataVault.unlocked = true;
-        return progress;
-      }
-
-      function saveProgress(progress) {
-        localStorage.setItem("sqlCityProgress", JSON.stringify(progress));
-      }
-
-      let progress = getProgress();
-
-      function unlockBuilding(buildingId) {
-        const building = progress.buildings[buildingId];
-        if (!building) return;
-        if (!building.unlocked) {
-          building.unlocked = true;
-          building.newlyUnlocked = true;
-        }
-      }
-
-      function completeBuilding(buildingId) {
-        const building = progress.buildings[buildingId];
-        if (!building || building.completed) return false;
-        building.completed = true;
-        return true;
-      }
-
-      function markBuildingEntered(buildingId) {
-        const building = progress.buildings[buildingId];
-        if (!building) return;
-        building.entered = true;
-        building.newlyUnlocked = false;
-        saveProgress(progress);
-      }
-
-      const buildingConfig = {
-        dataVault: {
-          layer: document.querySelector(".layer-red2"),
-          hotspot: document.querySelector(".hotspot-red2"),
-          lock: document.querySelector(".lock-dataVault"),
-          sign: document.querySelector(".sign-data-vault"),
-          href: "data-vault.html"
+        {
+          id: "future-island-1",
+          name: "Coming Soon",
+          image: "res/kingdom/shadow_island.png",
+          alt: "Locked future island",
+          type: "coming-soon",
+          link: null
         },
-        tableDepartment: {
-          layer: document.querySelector(".layer-red1"),
-          hotspot: document.querySelector(".hotspot-red1"),
-          lock: document.querySelector(".lock-tableDepartment"),
-          sign: document.querySelector(".sign-table-department"),
-          href: "table-department.html"
+        {
+          id: "future-island-2",
+          name: "Coming Soon",
+          image: "res/kingdom/shadow_island.png",
+          alt: "Locked future island",
+          type: "coming-soon",
+          link: null
         },
-        keyBridgeHall: {
-          layer: document.querySelector(".layer-yellow"),
-          hotspot: document.querySelector(".hotspot-yellow"),
-          lock: document.querySelector(".lock-keyBridgeHall"),
-          sign: document.querySelector(".sign-key-bridge"),
-          href: "key-bridge-hall.html"
-        },
-        queryLab: {
-          layer: document.querySelector(".layer-green"),
-          hotspot: document.querySelector(".hotspot-green"),
-          lock: document.querySelector(".lock-queryLab"),
-          sign: document.querySelector(".sign-query-lab"),
-          href: "query-lab.html"
+        {
+          id: "future-island-3",
+          name: "Coming Soon",
+          image: "res/kingdom/shadow_island.png",
+          alt: "Locked future island",
+          type: "coming-soon",
+          link: null
         }
-      };
-      const cityMessage = document.querySelector("#cityMessage");
-      let cityMessageTimer;
-
-      function showCityMessage(message) {
-        cityMessage.textContent = message;
-        cityMessage.hidden = false;
-        window.clearTimeout(cityMessageTimer);
-        cityMessageTimer = window.setTimeout(() => {
-          cityMessage.hidden = true;
-        }, 1800);
-      }
-
-      function showLockedMessage() {
-        showCityMessage("Locked. Complete the previous building first.");
-      }
-
-      function applyBuildingStates() {
-        Object.entries(buildingConfig).forEach(([buildingId, config]) => {
-          const building = progress.buildings[buildingId];
-          const isLocked = !building.unlocked;
-          config.layer.classList.toggle("locked", isLocked);
-          config.layer.classList.toggle("newly-unlocked", building.newlyUnlocked && !isLocked);
-          config.hotspot.classList.toggle("locked", isLocked);
-          config.hotspot.setAttribute("aria-disabled", isLocked ? "true" : "false");
-          if (isLocked) {
-            config.hotspot.removeAttribute("href");
-          } else {
-            config.hotspot.href = config.href;
-          }
-          config.lock.hidden = !isLocked;
-          config.sign.classList.remove("is-locked", "is-unlocked", "is-new", "is-lit");
-          if (isLocked) {
-            config.sign.classList.add("is-locked");
-          } else if (building.newlyUnlocked) {
-            config.sign.classList.add("is-new");
-          } else {
-            config.sign.classList.add("is-unlocked");
-          }
-        });
-      }
-
-      Object.entries(buildingConfig).forEach(([buildingId, config]) => {
-        function lightSign() {
-          const building = progress.buildings[buildingId];
-          if (!building.unlocked) return;
-          config.sign.classList.add("is-lit");
-        }
-
-        function dimSign() {
-          const building = progress.buildings[buildingId];
-          if (building.newlyUnlocked) return;
-          config.sign.classList.remove("is-lit");
-        }
-
-        config.hotspot.addEventListener("mouseenter", lightSign);
-        config.hotspot.addEventListener("focus", lightSign);
-        config.hotspot.addEventListener("mouseleave", dimSign);
-        config.hotspot.addEventListener("blur", dimSign);
-
-        config.hotspot.addEventListener("click", (event) => {
-          const building = progress.buildings[buildingId];
-          if (!building.unlocked) {
-            event.preventDefault();
-            showLockedMessage();
-            return;
-          }
-          markBuildingEntered(buildingId);
-        });
-      });
-
-      window.addEventListener("keydown", (event) => {
-        if (event.shiftKey && event.key.toLowerCase() === "r") {
-          resetEverything();
-          return;
-        }
-
-        if (event.key === "Escape") {
-          closeMenu();
-        }
-      });
-
-      applyBuildingStates();
-
-      const burgerBtn = document.querySelector("#burgerBtn");
-      const menuBackdrop = document.querySelector("#menuBackdrop");
-      const cityMenu = document.querySelector("#cityMenu");
-      const menuClose = document.querySelector("#menuClose");
-      const unlockAllBtn = document.querySelector("#unlockAllBtn");
-      const unlockConfirmation = document.querySelector("#unlockConfirmation");
-      const resetAllBtn = document.querySelector("#resetAllBtn");
-      const resetConfirmation = document.querySelector("#resetConfirmation");
-
-      function openMenu() {
-        cityMenu.classList.add("open");
-        menuBackdrop.classList.add("open");
-        cityMenu.setAttribute("aria-hidden", "false");
-        burgerBtn.setAttribute("aria-expanded", "true");
-      }
-
-      function closeMenu() {
-        cityMenu.classList.remove("open");
-        menuBackdrop.classList.remove("open");
-        cityMenu.setAttribute("aria-hidden", "true");
-        burgerBtn.setAttribute("aria-expanded", "false");
-      }
-
-      function unlockEverything() {
-        const roomLastIndexes = {
-          dataVault: 6,
-          tableDepartment: 7,
-          keyBridgeHall: 7,
-          queryLab: 9
-        };
-        const markerIds = {
-          dataVault: ["shelf", "server", "computer", "board"],
-          tableDepartment: ["board", "row", "column", "dataset"],
-          keyBridgeHall: ["primaryBoard", "goldenKey", "bridge", "foreignBoard"],
-          queryLab: ["filter", "console", "sort", "limit", "ml"]
-        };
-
-        Object.entries(roomLastIndexes).forEach(([buildingId, lastIndex]) => {
-          const building = progress.buildings[buildingId];
-          building.unlocked = true;
-          building.entered = true;
-          building.newlyUnlocked = false;
-          building.quizPassed = true;
-          building.discoveredMarkers = [...markerIds[buildingId]];
-          building.highestRoomUnlocked = lastIndex;
-        });
-
-        progress.unlockEverythingUsed = true;
-        saveProgress(progress);
-        applyBuildingStates();
-        unlockConfirmation.hidden = false;
-        resetConfirmation.hidden = true;
-        showCityMessage("All buildings unlocked!");
-      }
-
-      function resetEverything() {
-        localStorage.removeItem("sqlCityProgress");
-        progress = createDefaultProgress();
-        applyBuildingStates();
-        unlockConfirmation.hidden = true;
-        resetConfirmation.hidden = false;
-        showCityMessage("Progress reset.");
-      }
-
-      burgerBtn.addEventListener("click", openMenu);
-      menuClose.addEventListener("click", closeMenu);
-      menuBackdrop.addEventListener("click", closeMenu);
-      unlockAllBtn.addEventListener("click", unlockEverything);
-      resetAllBtn.addEventListener("click", resetEverything);
-
-      const trafficLayer = document.querySelector("#trafficLayer");
-      const carSources = [
-        "res/city_elements/car1.webp",
-        "res/city_elements/car2.webp"
       ];
-      const lanes = ["-3%", "-4%", "-5%"];
-      const maxActiveCars = 2;
-      let activeCars = 0;
 
-      function randomItem(items) {
-        return items[Math.floor(Math.random() * items.length)];
+      const visibleCount = 3;
+      const islandTrack = document.querySelector("#islandTrack");
+      const prevButton = document.querySelector("#prevIsland");
+      const nextButton = document.querySelector("#nextIsland");
+      const carouselNote = document.querySelector("#carouselNote");
+      const maxIndex = Math.max(0, islands.length - visibleCount);
+      let currentIndex = 0;
+      let progress = window.SQLKingdomProgress.getGameProgress({ queueMigrationMessage: true });
+
+      function showUnlockToast(message) {
+        if (!message) return;
+        window.SQLKingdomMenu?.showToast(message);
       }
 
-      function randomBetween(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
+      function consumePendingUnlockMessage() {
+        showUnlockToast(window.SQLKingdomProgress.consumePendingUnlockMessage());
       }
 
-      function scheduleNextCar() {
-        window.setTimeout(spawnCar, randomBetween(1200, 4500));
-      }
+      function renderIslands() {
+        progress = window.SQLKingdomProgress.getGameProgress({ queueMigrationMessage: true });
+        const visibleIslands = islands.slice(currentIndex, currentIndex + visibleCount);
+        islandTrack.replaceChildren();
 
-      function spawnCar() {
-        if (activeCars >= maxActiveCars) {
-          scheduleNextCar();
-          return;
-        }
+        visibleIslands.forEach((island, position) => {
+          const isUnlocked = island.type === "playable" && window.SQLKingdomProgress.isIslandUnlocked(island.id, progress);
+          const islandState = isUnlocked ? "unlocked" : island.type === "playable" ? "locked-playable" : "coming-soon";
+          const element = document.createElement(isUnlocked ? "a" : "article");
+          element.className = `island-node is-${islandState}`;
+          element.style.setProperty("--float-delay", `${position * 0.4}s`);
+          element.style.setProperty("--float-distance", `${10 + position * 2}px`);
 
-        const car = document.createElement("img");
-        const direction = Math.random() < 0.5 ? "left" : "right";
-        const duration = randomBetween(8000, 15000);
+          if (isUnlocked) {
+            element.href = island.link;
+            element.setAttribute("aria-label", `Enter ${island.name}`);
+          } else {
+            element.setAttribute("aria-disabled", "true");
+          }
 
-        car.className = "car";
-        car.src = randomItem(carSources);
-        car.alt = "";
-        car.setAttribute("aria-hidden", "true");
-        car.style.bottom = randomItem(lanes);
+          const imageWrap = document.createElement("div");
+          imageWrap.className = "island-image-wrap";
 
-        trafficLayer.appendChild(car);
-        activeCars += 1;
+          const image = document.createElement("img");
+          image.src = isUnlocked ? island.image : island.lockedImage || "res/kingdom/shadow_island.png";
+          image.alt = isUnlocked ? island.alt : "Locked island";
 
-        const keyframes = direction === "left"
-          ? [
-              { transform: "translateX(110vw)" },
-              { transform: "translateX(-25vw)" }
-            ]
-          : [
-              { transform: "translateX(-25vw) scaleX(-1)" },
-              { transform: "translateX(110vw) scaleX(-1)" }
-            ];
+          imageWrap.appendChild(image);
 
-        const animation = car.animate(keyframes, {
-          duration,
-          easing: "linear",
-          fill: "forwards"
+          if (!isUnlocked) {
+            const lockBadge = document.createElement("span");
+            lockBadge.className = "lock-badge";
+            lockBadge.textContent = islandState === "coming-soon" ? "SOON" : "LOCKED";
+            imageWrap.appendChild(lockBadge);
+          }
+
+          const name = document.createElement("span");
+          name.className = "island-name";
+          if (isUnlocked) {
+            name.textContent = island.name;
+          } else {
+            name.innerHTML = `<span>????</span><span class="island-status">${islandState === "coming-soon" ? "COMING SOON" : "LOCKED"}</span>`;
+          }
+
+          element.append(imageWrap, name);
+          islandTrack.appendChild(element);
         });
 
-        animation.finished
-          .catch(() => {})
-          .finally(() => {
-            car.remove();
-            activeCars = Math.max(0, activeCars - 1);
-          });
-
-        scheduleNextCar();
+        prevButton.disabled = currentIndex === 0;
+        nextButton.disabled = currentIndex === maxIndex;
+        carouselNote.textContent = `Showing islands ${currentIndex + 1}-${currentIndex + visibleIslands.length} of ${islands.length}`;
       }
 
-      window.addEventListener("load", () => {
-        scheduleNextCar();
-        window.setTimeout(spawnCar, randomBetween(400, 1400));
+      prevButton.addEventListener("click", () => {
+        currentIndex = Math.max(0, currentIndex - 1);
+        renderIslands();
       });
+
+      nextButton.addEventListener("click", () => {
+        currentIndex = Math.min(maxIndex, currentIndex + 1);
+        renderIslands();
+      });
+
+      window.addEventListener("sqlKingdom:unlockAll", (event) => {
+        progress = event.detail.progress;
+        showUnlockToast(event.detail.message);
+        renderIslands();
+      });
+
+      window.addEventListener("sqlKingdom:reset", (event) => {
+        progress = event.detail.progress;
+        showUnlockToast(event.detail.message);
+        currentIndex = 0;
+        renderIslands();
+      });
+
+      renderIslands();
+      consumePendingUnlockMessage();
+      showUnlockToast(window.SQLKingdomResetSystem?.consumeGuardMessage());
     </script>
   </body>
 </html>

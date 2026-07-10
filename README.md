@@ -283,46 +283,43 @@ The homepage also includes a **Reset Everything** option.
 
 ```text
 task_html/
-│
-├── index.html
-├── data-vault.html
-├── table-department.html
-├── key-bridge-hall.html
-├── query-lab.html
-├── README.md
-│
-└── res/
-    ├── badge.png
-    ├── w3schools.png
-    ├── geeksforgeeks.png
-    │
-    ├── city_elements/
-    │   ├── bg.png
-    │   ├── red2.png
-    │   ├── red1.png
-    │   ├── yellow.png
-    │   ├── green.png
-    │   ├── car1.png
-    │   ├── car2.png
-    │   └── lock.png
-    │
-    ├── keys/
-    │   ├── regular-key.png
-    │   └── magic-master-key.png
-    │
-    └── rooms_background/
-        ├── Room_1_Data_Vault.png
-        ├── Room_2_Table_Department.png
-        ├── Room_3_Key_Bridge_Hall.png
-        ├── Room_4_Query_Lab.png
-        ├── 03_Data_Vault_background.png
-        ├── 02_Table_Department_background.png
-        ├── 01_Key_Bridge_Hall_background.png
-        └── 04_Query_Lab_background.png
+|-- index.html
+|-- README.md
+|-- city_1/
+|   |-- index_city_1.html
+|   |-- data-vault.html
+|   |-- table-department.html
+|   |-- key-bridge-hall.html
+|   `-- query-lab.html
+|-- city_2/
+|   |-- index_city_2.html
+|   |-- filter-factory.html
+|   |-- summary-tower.html
+|   |-- join-junction.html
+|   |-- subquery-mines.html
+|   `-- cleaning-clinic.html
+|-- shared_files/
+|   |-- shared menu, progress, reset, and magic key files
+|   |-- shared room layout/component styles
+|   `-- shared city board, hover, and lively animation files
+`-- res/
+    |-- w3schools.webp
+    |-- geeksforgeeks.webp
+    |-- magic-master-key.webp
+    |-- kingdom/
+    |-- city_1/
+    |   |-- city_elements/
+    |   |-- item/
+    |   |-- rooms_background/
+    |   `-- png_images_(not_used)/
+    `-- city_2/
+        |-- city_elements/
+        |-- item/
+        |-- rooms_background/
+        `-- png_images_(not_used)/
 ```
 
 ---
-
 ## How to Run Locally
 
 Because this is a static website, no backend is required.
