@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dataworks Citadel | SQL Kingdom</title>
+    <link rel="shortcut icon" href="../res/favicon.ico" type="image/x-icon" />
+    <style>
+      :root {
+        --cream: #fff4c2;
+        --ink: #080d19;
+        --cyan: #5fffd6;
+        --gold: #ffd76a;
+        --font-pixel: "Courier New", Courier, monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: #080d19;
+      }
+
+      body {
+        color: white;
+        font-family: var(--font-pixel);
+      }
+
+      .citadel-home,
+      .citadel-screen,
+      .citadel-scene {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .citadel-scene {
+        background: #79d6ca;
+        isolation: isolate;
+      }
+
+      /* City 3 building exports are full-canvas layers, so each image is stacked on the same scene rectangle. */
+      .city-layer {
+        position: absolute;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        pointer-events: none;
+        user-select: none;
+      }
+
+      .layer-bg {
+        z-index: 1;
+      }
+
+      .layer-ranking-observatory {
+        z-index: 2;
+      }
+
+      .layer-schema-architect-hall {
+        z-index: 3;
+      }
+
+      .layer-feature-pipeline-works {
+        z-index: 4;
+      }
+
+      .layer-sqlalchemy-engine-room {
+        z-index: 5;
+      }
+
+      .city-heading {
+        position: absolute;
+        z-index: 20;
+        top: clamp(24px, 5vh, 54px);
+        left: 50%;
+        width: min(92vw, 980px);
+        transform: translateX(-50%);
+        text-align: center;
+        pointer-events: none;
+      }
+
+      .city-heading h1 {
+        margin: 0;
+        color: var(--cream);
+        font-size: clamp(38px, 6.8vw, 96px);
+        font-weight: 900;
+        line-height: 0.92;
+        letter-spacing: 0;
+        text-shadow:
+          5px 5px 0 var(--ink),
+          -2px -2px 0 var(--ink),
+          2px -2px 0 var(--ink),
+          -2px 2px 0 var(--ink),
+          0 0 20px rgba(255, 244, 194, 0.72),
+          0 0 26px rgba(95, 255, 214, 0.42);
+      }
+
+      .city-heading p {
+        display: inline-block;
+        margin: clamp(10px, 1.8vh, 18px) 0 0;
+        padding: 7px 13px;
+        border: 3px solid rgba(255, 244, 194, 0.92);
+        background: rgba(8, 13, 25, 0.56);
+        box-shadow:
+          4px 4px 0 rgba(0, 0, 0, 0.55),
+          0 0 16px rgba(95, 255, 214, 0.32);
+        color: white;
+        font-size: clamp(12px, 1.55vw, 20px);
+        font-weight: 900;
+        line-height: 1.25;
+        text-shadow: 3px 3px 0 #000;
+      }
+
+      @media (max-width: 760px) {
+        .city-heading {
+          top: 26px;
+          width: 96vw;
+        }
+
+        .city-heading h1 {
+          font-size: clamp(20px, 5.4vw, 26px);
+        }
+
+        .city-heading p {
+          max-width: 78vw;
+          padding: 6px 9px;
+        }
+      }
+
+      @media (max-height: 560px) {
+        .city-heading {
+          top: 16px;
+        }
+
+        .city-heading p {
+          margin-top: 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="citadel-home">
+      <section class="citadel-screen" aria-label="Dataworks Citadel">
+        <div class="citadel-scene">
+          <img class="city-layer layer-bg" src="../res/city_3/city_elements/bg.webp" alt="" />
+          <img class="city-layer layer-ranking-observatory" src="../res/city_3/city_elements/im1.webp" alt="" />
+          <img class="city-layer layer-schema-architect-hall" src="../res/city_3/city_elements/im2.webp" alt="" />
+          <img class="city-layer layer-feature-pipeline-works" src="../res/city_3/city_elements/im3.webp" alt="" />
+          <img class="city-layer layer-sqlalchemy-engine-room" src="../res/city_3/city_elements/im4.webp" alt="" />
+
+          <header class="city-heading">
+            <h1>Dataworks Citadel</h1>
+            <p>The Clockwork Realm of Analytics</p>
+          </header>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
