@@ -1,6 +1,7 @@
 (function () {
   const FOUNDATION_CITY_ID = "foundation-city";
   const DATA_PREP_CITY_ID = "data-prep-city";
+  const DATAWORKS_CITADEL_CITY_ID = "dataworks-citadel";
   const LOCKED_ISLAND_MESSAGE_KEY = "sqlKingdomLockedIslandMessage";
   const LOCKED_BUILDING_MESSAGE_KEY = "sqlKingdomLockedBuildingMessage";
 
@@ -131,6 +132,31 @@
     return false;
   }
 
+  function guardDataworksCitadelBuildingAccess(
+    buildingId,
+    redirectUrl = "index_city_3.html",
+    message = "Complete Ranking Observatory first.",
+    islandRedirectUrl = "../index.html"
+  ) {
+    const progressApi = getProgressApi();
+    if (!progressApi) return true;
+
+    if (!guardIslandAccess(DATAWORKS_CITADEL_CITY_ID, islandRedirectUrl)) return false;
+    if (progressApi.isDataworksCitadelBuildingUnlocked?.(buildingId)) return true;
+
+    try {
+      sessionStorage.setItem(LOCKED_BUILDING_MESSAGE_KEY, message);
+    } catch (error) {
+      // Access protection should still work if session storage is blocked.
+    }
+
+    if (!window.location.pathname.endsWith(redirectUrl)) {
+      window.location.replace(redirectUrl);
+    }
+
+    return false;
+  }
+
   function consumeGuardMessage() {
     try {
       const message = sessionStorage.getItem(LOCKED_BUILDING_MESSAGE_KEY) || sessionStorage.getItem(LOCKED_ISLAND_MESSAGE_KEY) || "";
@@ -145,11 +171,13 @@
   window.SQLKingdomResetSystem = {
     FOUNDATION_CITY_ID,
     DATA_PREP_CITY_ID,
+    DATAWORKS_CITADEL_CITY_ID,
     getCityDefaultProgress,
     resetGlobalProgress,
     resetCityProgress,
     guardIslandAccess,
     guardDataPrepBuildingAccess,
+    guardDataworksCitadelBuildingAccess,
     handleResetByMode,
     consumeGuardMessage
   };

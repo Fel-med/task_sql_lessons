@@ -5,12 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dataworks Citadel | SQL Kingdom</title>
     <link rel="shortcut icon" href="../res/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="../shared_files/shared-menu.css" />
+    <link rel="stylesheet" href="../shared_files/shared-building-boards.css" />
+    <link rel="stylesheet" href="../shared_files/shared-building-effects.css" />
+    <link rel="stylesheet" href="../shared_files/shared-lively-elements.css" />
     <style>
       :root {
         --cream: #fff4c2;
         --ink: #080d19;
         --cyan: #5fffd6;
         --gold: #ffd76a;
+        --violet: #b98cff;
+        --green: #74ff9f;
+        --rose: #ff6d7a;
         --font-pixel: "Courier New", Courier, monospace;
       }
 
@@ -43,11 +50,12 @@
       }
 
       .citadel-scene {
+        --camera-shift-y: 0px;
         background: #79d6ca;
         isolation: isolate;
       }
 
-      /* City 3 building exports are full-canvas layers, so each image is stacked on the same scene rectangle. */
+      /* City 3 exports are full-canvas layers and must remain stacked on one scene rectangle. */
       .city-layer {
         position: absolute;
         inset: 0;
@@ -55,38 +63,25 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+        object-position: center top;
         image-rendering: pixelated;
         image-rendering: crisp-edges;
         pointer-events: none;
         user-select: none;
       }
 
-      .layer-bg {
-        z-index: 1;
-      }
-
-      .layer-ranking-observatory {
-        z-index: 2;
-      }
-
-      .layer-schema-architect-hall {
-        z-index: 3;
-      }
-
-      .layer-feature-pipeline-works {
-        z-index: 4;
-      }
-
-      .layer-sqlalchemy-engine-room {
-        z-index: 5;
-      }
+      .layer-bg { z-index: 1; }
+      .layer-ranking-observatory { z-index: 2; }
+      .layer-schema-architect-hall { z-index: 3; }
+      .layer-feature-pipeline-works { z-index: 4; }
+      .layer-sqlalchemy-engine-room { z-index: 5; }
 
       .city-heading {
         position: absolute;
-        z-index: 20;
+        z-index: 45;
         top: clamp(24px, 5vh, 54px);
         left: 50%;
-        width: min(92vw, 980px);
+        width: min(86vw, 980px);
         transform: translateX(-50%);
         text-align: center;
         pointer-events: none;
@@ -98,7 +93,6 @@
         font-size: clamp(38px, 6.8vw, 96px);
         font-weight: 900;
         line-height: 0.92;
-        letter-spacing: 0;
         text-shadow:
           5px 5px 0 var(--ink),
           -2px -2px 0 var(--ink),
@@ -124,29 +118,440 @@
         text-shadow: 3px 3px 0 #000;
       }
 
+      .city-completion-banner {
+        position: absolute;
+        z-index: 46;
+        left: 50%;
+        bottom: 4.5%;
+        width: min(88vw, 620px);
+        margin: 0;
+        padding: 10px 14px;
+        border: 3px solid var(--cyan);
+        background: rgba(8, 13, 25, 0.9);
+        box-shadow:
+          4px 4px 0 #000,
+          0 0 18px rgba(95, 255, 214, 0.72);
+        color: var(--cream);
+        font-size: clamp(11px, 1.35vw, 16px);
+        font-weight: 900;
+        text-align: center;
+        text-shadow: 2px 2px 0 #000;
+        transform: translateX(-50%);
+        pointer-events: none;
+      }
+
+      .city-completion-banner[hidden] {
+        display: none;
+      }
+
+      .building-hotspot {
+        position: absolute;
+        z-index: 32;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+      }
+
+      .hotspot-ranking-observatory {
+        left: 0;
+        top: 0;
+        width: 27%;
+        height: 48%;
+        clip-path: polygon(8% 0, 86% 0, 100% 44%, 91% 88%, 58% 100%, 14% 82%, 0 36%);
+      }
+
+      .hotspot-schema-architect-hall {
+        right: 0;
+        top: 0;
+        width: 33%;
+        height: 50%;
+        clip-path: polygon(11% 0, 100% 0, 100% 72%, 72% 100%, 19% 88%, 0 45%);
+      }
+
+      .hotspot-feature-pipeline-works {
+        left: 0;
+        top: 23%;
+        width: 36%;
+        height: 50%;
+        clip-path: polygon(0 18%, 30% 0, 86% 9%, 100% 59%, 76% 100%, 14% 94%, 0 69%);
+      }
+
+      .hotspot-sqlalchemy-engine-room {
+        left: 29%;
+        top: 10%;
+        width: 51%;
+        height: 66%;
+        clip-path: polygon(19% 0, 80% 0, 100% 30%, 96% 80%, 65% 100%, 19% 95%, 0 65%, 4% 25%);
+      }
+
+      .city3-sign {
+        min-width: clamp(128px, 13vw, 230px);
+        max-width: min(24vw, 260px);
+        padding-inline: 10px;
+        font-size: clamp(9px, 1vw, 15px);
+        line-height: 1.1;
+      }
+
+      .sign-ranking-observatory {
+        left: 3.5%;
+        top: 25.5%;
+      }
+
+      .sign-schema-architect-hall {
+        right: 2.5%;
+        top: 26%;
+      }
+
+      .sign-feature-pipeline-works {
+        left: 5.5%;
+        top: 49%;
+      }
+
+      .sign-sqlalchemy-engine-room {
+        left: 43%;
+        top: 52%;
+      }
+
+      .sign-ranking-observatory.is-active,
+      .sign-ranking-observatory.is-lit {
+        color: var(--cyan);
+        border-color: var(--cyan);
+      }
+
+      .sign-schema-architect-hall.is-active,
+      .sign-schema-architect-hall.is-lit {
+        color: var(--gold);
+        border-color: var(--gold);
+      }
+
+      .sign-feature-pipeline-works.is-active,
+      .sign-feature-pipeline-works.is-lit {
+        color: var(--violet);
+        border-color: var(--violet);
+      }
+
+      .sign-sqlalchemy-engine-room.is-active,
+      .sign-sqlalchemy-engine-room.is-lit {
+        color: var(--green);
+        border-color: var(--green);
+      }
+
+      .building-lock {
+        position: absolute;
+        z-index: 31;
+        width: clamp(42px, 5vw, 82px);
+        height: auto;
+        transform: translate(-50%, -50%);
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        pointer-events: none;
+        user-select: none;
+        filter:
+          drop-shadow(3px 3px 0 #000)
+          drop-shadow(0 0 12px rgba(95, 255, 214, 0.72));
+      }
+
+      .building-lock[hidden] {
+        display: none;
+      }
+
+      .lock-ranking-observatory {
+        left: 12.5%;
+        top: 31%;
+      }
+
+      .lock-schema-architect-hall {
+        left: 86%;
+        top: 31%;
+      }
+
+      .lock-feature-pipeline-works {
+        left: 19%;
+        top: 54%;
+      }
+
+      .lock-sqlalchemy-engine-room {
+        left: 54%;
+        top: 45%;
+      }
+
+      .glow-ranking-observatory {
+        left: 1%;
+        top: 1%;
+        width: 25%;
+        height: 43%;
+      }
+
+      .glow-schema-architect-hall {
+        left: 69%;
+        top: 1%;
+        width: 30%;
+        height: 44%;
+      }
+
+      .glow-feature-pipeline-works {
+        left: 2%;
+        top: 25%;
+        width: 34%;
+        height: 43%;
+      }
+
+      .glow-sqlalchemy-engine-room {
+        left: 31%;
+        top: 13%;
+        width: 45%;
+        height: 54%;
+      }
+
+      [data-building-layer="rankingObservatory"],
+      [data-building-glow="rankingObservatory"] {
+        --building-glow: var(--cyan);
+        --building-glow-soft: rgba(95, 255, 214, 0.42);
+        --building-glow-size: 24px;
+      }
+
+      [data-building-layer="schemaArchitectHall"],
+      [data-building-glow="schemaArchitectHall"] {
+        --building-glow: var(--gold);
+        --building-glow-soft: rgba(255, 215, 106, 0.42);
+        --building-glow-size: 24px;
+      }
+
+      [data-building-layer="featurePipelineWorks"],
+      [data-building-glow="featurePipelineWorks"] {
+        --building-glow: var(--violet);
+        --building-glow-soft: rgba(185, 140, 255, 0.42);
+        --building-glow-size: 24px;
+      }
+
+      [data-building-layer="sqlalchemyEngineRoom"],
+      [data-building-glow="sqlalchemyEngineRoom"] {
+        --building-glow: var(--green);
+        --building-glow-soft: rgba(116, 255, 159, 0.42);
+        --building-glow-size: 26px;
+      }
+
+
+      /* Keep interaction geometry aligned when the artwork is framed toward the sky. */
+      .city-building-glow,
+      .building-lock,
+      .building-hotspot,
+      .city3-sign {
+        translate: 0 var(--camera-shift-y);
+      }
+
+      /* Local base rules keep City 3 lively assets functional even if shared CSS is cached or missing. */
+      .city3-lively-layer {
+        position: absolute;
+        inset: 0;
+        z-index: 26;
+        display: block;
+        overflow: hidden;
+        pointer-events: none;
+        visibility: visible;
+        opacity: 1;
+        contain: layout paint;
+        isolation: isolate;
+      }
+
+      .city3-lively-layer .city-lively-item {
+        position: absolute;
+        display: block;
+        pointer-events: none;
+        visibility: visible;
+        opacity: 1;
+        will-change: transform;
+        backface-visibility: hidden;
+      }
+
+      .city3-airship,
+      .city3-glider,
+      .city3-robot {
+        left: 0;
+      }
+
+      .city3-lively-img {
+        display: block;
+        width: 100%;
+        height: auto;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        pointer-events: none;
+        user-select: none;
+        backface-visibility: hidden;
+      }
+
+      .city3-airship {
+        top: 27%;
+        width: clamp(150px, 15vw, 260px);
+        animation: city3AirshipToLeft 31s linear infinite;
+        animation-delay: -16s;
+      }
+
+      .city3-airship-img {
+        transform: scaleX(1);
+        filter:
+          drop-shadow(0 8px 0 rgba(0, 0, 0, 0.22))
+          drop-shadow(0 0 10px rgba(95, 255, 214, 0.45));
+      }
+
+      .city3-glider {
+        top: 44%;
+        width: clamp(108px, 10.5vw, 182px);
+        animation: city3GliderToRight 18s ease-in-out infinite;
+        animation-delay: -7s;
+      }
+
+      .city3-glider-img {
+        transform: scaleX(-1);
+        filter:
+          drop-shadow(0 6px 0 rgba(0, 0, 0, 0.2))
+          drop-shadow(0 0 8px rgba(95, 255, 214, 0.5));
+      }
+
+      .city3-robot {
+        bottom: 0.8%;
+        width: clamp(104px, 10vw, 176px);
+        animation: city3RobotToLeft 24s linear infinite;
+        animation-delay: -10s;
+      }
+
+      .city3-robot-img {
+        transform: scaleX(1);
+        filter:
+          drop-shadow(0 7px 0 rgba(0, 0, 0, 0.34))
+          drop-shadow(0 0 8px rgba(95, 255, 214, 0.35));
+      }
+
+      @keyframes city3AirshipToLeft {
+        0% {
+          transform: translate3d(112vw, 4px, 0);
+        }
+
+        35% {
+          transform: translate3d(68vw, -10px, 0);
+        }
+
+        70% {
+          transform: translate3d(24vw, 7px, 0);
+        }
+
+        100% {
+          transform: translate3d(-24vw, -4px, 0);
+        }
+      }
+
+      @keyframes city3GliderToRight {
+        0% {
+          transform: translate3d(-18vw, 8px, 0);
+        }
+
+        40% {
+          transform: translate3d(40vw, -14px, 0);
+        }
+
+        72% {
+          transform: translate3d(78vw, 6px, 0);
+        }
+
+        100% {
+          transform: translate3d(116vw, -7px, 0);
+        }
+      }
+
+      @keyframes city3RobotToLeft {
+        0% {
+          transform: translate3d(112vw, 0, 0);
+        }
+
+        100% {
+          transform: translate3d(-20vw, 0, 0);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .city3-airship,
+        .city3-glider,
+        .city3-robot {
+          animation: none;
+        }
+
+        .city3-airship {
+          transform: translate3d(72vw, 0, 0);
+        }
+
+        .city3-glider {
+          transform: translate3d(18vw, 0, 0);
+        }
+
+        .city3-robot {
+          transform: translate3d(78vw, 0, 0);
+        }
+      }
+
       @media (max-width: 760px) {
+        .city3-airship {
+          top: 28%;
+          width: clamp(118px, 23vw, 166px);
+        }
+
+        .city3-glider {
+          top: 46%;
+          width: clamp(88px, 18vw, 128px);
+        }
+
+        .city3-robot {
+          bottom: 0.5%;
+          width: clamp(86px, 17vw, 120px);
+        }
+
         .city-heading {
-          top: 26px;
-          width: 96vw;
+          top: 20px;
+          left: 42%;
+          width: 68vw;
         }
 
         .city-heading h1 {
-          font-size: clamp(20px, 5.4vw, 26px);
+          font-size: clamp(20px, 5.4vw, 27px);
         }
 
         .city-heading p {
-          max-width: 78vw;
-          padding: 6px 9px;
+          max-width: 64vw;
+          padding: 5px 8px;
+          font-size: 10px;
+        }
+
+        .city3-sign {
+          min-width: 82px;
+          max-width: 24vw;
+          padding: 5px 6px;
+          border-width: 3px;
+          font-size: 8px;
+          letter-spacing: 0.6px;
+        }
+
+        .sign-ranking-observatory { left: 1.5%; }
+        .sign-schema-architect-hall { right: 1%; }
+        .sign-feature-pipeline-works { left: 2.5%; top: 51%; }
+        .sign-sqlalchemy-engine-room { left: 41%; top: 54%; }
+
+        .building-lock {
+          width: clamp(34px, 6vw, 54px);
         }
       }
 
       @media (max-height: 560px) {
         .city-heading {
-          top: 16px;
+          top: 12px;
         }
 
         .city-heading p {
-          margin-top: 8px;
+          margin-top: 6px;
+        }
+
+        .city3-sign {
+          padding-block: 5px;
         }
       }
     </style>
@@ -154,19 +559,212 @@
   <body>
     <main class="citadel-home">
       <section class="citadel-screen" aria-label="Dataworks Citadel">
-        <div class="citadel-scene">
+        <div class="citadel-scene city-scene uses-cheap-building-hover" id="cityScene">
           <img class="city-layer layer-bg" src="../res/city_3/city_elements/bg.webp" alt="" />
-          <img class="city-layer layer-ranking-observatory" src="../res/city_3/city_elements/im1.webp" alt="" />
-          <img class="city-layer layer-schema-architect-hall" src="../res/city_3/city_elements/im2.webp" alt="" />
-          <img class="city-layer layer-feature-pipeline-works" src="../res/city_3/city_elements/im3.webp" alt="" />
-          <img class="city-layer layer-sqlalchemy-engine-room" src="../res/city_3/city_elements/im4.webp" alt="" />
+          <img class="city-layer city-building-layer layer-ranking-observatory" data-building-layer="rankingObservatory" src="../res/city_3/city_elements/im1.webp" alt="" />
+          <img class="city-layer city-building-layer layer-schema-architect-hall" data-building-layer="schemaArchitectHall" src="../res/city_3/city_elements/im2.webp" alt="" />
+          <img class="city-layer city-building-layer layer-feature-pipeline-works" data-building-layer="featurePipelineWorks" src="../res/city_3/city_elements/im3.webp" alt="" />
+          <img class="city-layer city-building-layer layer-sqlalchemy-engine-room" data-building-layer="sqlalchemyEngineRoom" src="../res/city_3/city_elements/im4.webp" alt="" />
+
+          <div class="city-building-glow glow-ranking-observatory" data-building-glow="rankingObservatory"></div>
+          <div class="city-building-glow glow-schema-architect-hall" data-building-glow="schemaArchitectHall"></div>
+          <div class="city-building-glow glow-feature-pipeline-works" data-building-glow="featurePipelineWorks"></div>
+          <div class="city-building-glow glow-sqlalchemy-engine-room" data-building-glow="sqlalchemyEngineRoom"></div>
+
+          <img class="building-lock lock-ranking-observatory" data-building-lock="rankingObservatory" src="../res/city_3/item/lock.webp" alt="Ranking Observatory locked" hidden />
+          <img class="building-lock lock-schema-architect-hall" data-building-lock="schemaArchitectHall" src="../res/city_3/item/lock.webp" alt="Schema Architect Hall locked" hidden />
+          <img class="building-lock lock-feature-pipeline-works" data-building-lock="featurePipelineWorks" src="../res/city_3/item/lock.webp" alt="Feature Pipeline Works locked" hidden />
+          <img class="building-lock lock-sqlalchemy-engine-room" data-building-lock="sqlalchemyEngineRoom" src="../res/city_3/item/lock.webp" alt="SQLAlchemy Engine Room locked" hidden />
+
+          <div class="city-lively-layer city3-lively-layer" aria-hidden="true">
+            <div class="city-lively-item city3-airship">
+              <img
+                class="city-lively-img city3-lively-img city3-airship-img"
+                src="../res/city_3/city_elements/clockwork-airship.webp"
+                alt=""
+              />
+            </div>
+            <div class="city-lively-item city3-glider">
+              <img
+                class="city-lively-img city3-lively-img city3-glider-img"
+                src="../res/city_3/city_elements/data-courier-glider.webp"
+                alt=""
+              />
+            </div>
+            <div class="city-lively-item city3-robot">
+              <img
+                class="city-lively-img city3-lively-img city3-robot-img"
+                src="../res/city_3/city_elements/robot.webp"
+                alt=""
+              />
+            </div>
+          </div>
+
+          <button class="building-hotspot city-building-hotspot hotspot-ranking-observatory" type="button" data-building="rankingObservatory" aria-label="Ranking Observatory"></button>
+          <button class="building-hotspot city-building-hotspot hotspot-schema-architect-hall" type="button" data-building="schemaArchitectHall" aria-label="Schema Architect Hall"></button>
+          <button class="building-hotspot city-building-hotspot hotspot-feature-pipeline-works" type="button" data-building="featurePipelineWorks" aria-label="Feature Pipeline Works"></button>
+          <button class="building-hotspot city-building-hotspot hotspot-sqlalchemy-engine-room" type="button" data-building="sqlalchemyEngineRoom" aria-label="SQLAlchemy Engine Room"></button>
+
+          <div class="building-sign city3-sign sign-ranking-observatory" data-building-sign="rankingObservatory">Ranking Observatory</div>
+          <div class="building-sign city3-sign sign-schema-architect-hall" data-building-sign="schemaArchitectHall">Schema Architect Hall</div>
+          <div class="building-sign city3-sign sign-feature-pipeline-works" data-building-sign="featurePipelineWorks">Feature Pipeline Works</div>
+          <div class="building-sign city3-sign sign-sqlalchemy-engine-room" data-building-sign="sqlalchemyEngineRoom">SQLAlchemy Engine Room</div>
 
           <header class="city-heading">
             <h1>Dataworks Citadel</h1>
             <p>The Clockwork Realm of Analytics</p>
           </header>
+
+          <p class="city-completion-banner" id="cityCompletionBanner" hidden>
+            Dataworks Citadel completed! Future islands are coming soon.
+          </p>
         </div>
       </section>
     </main>
+
+    <div
+      id="sharedMenuMount"
+      data-menu-page="dataworks-citadel"
+      data-menu-title="Dataworks Citadel Menu"
+      data-menu-base="../"
+    ></div>
+
+    <script src="../shared_files/shared-progress.js"></script>
+    <script src="../shared_files/shared-reset-system.js"></script>
+    <script src="../shared_files/shared-magic-key.js"></script>
+    <script src="../shared_files/shared-menu.js"></script>
+    <script src="../shared_files/shared-building-effects.js"></script>
+    <script>
+      const CITY_ART_ASPECT_RATIO = 16 / 9;
+
+      function updateCitadelCameraFraming() {
+        const scene = document.querySelector("#cityScene");
+        if (!scene) return;
+
+        const sceneWidth = scene.clientWidth;
+        const sceneHeight = scene.clientHeight;
+        const renderedHeight = sceneWidth / CITY_ART_ASPECT_RATIO;
+        const centerCropOffset = renderedHeight > sceneHeight
+          ? (renderedHeight - sceneHeight) / 2
+          : 0;
+
+        scene.style.setProperty("--camera-shift-y", `${centerCropOffset}px`);
+      }
+
+      let cameraResizeFrame = 0;
+      function scheduleCitadelCameraUpdate() {
+        window.cancelAnimationFrame(cameraResizeFrame);
+        cameraResizeFrame = window.requestAnimationFrame(updateCitadelCameraFraming);
+      }
+
+      updateCitadelCameraFraming();
+      window.addEventListener("resize", scheduleCitadelCameraUpdate);
+
+      const DATAWORKS_BUILDINGS = {
+        rankingObservatory: {
+          name: "Ranking Observatory",
+          page: "ranking-observatory.html",
+          pageReady: true,
+          lockedMessage: "Ranking Observatory is the first building."
+        },
+        schemaArchitectHall: {
+          name: "Schema Architect Hall",
+          page: "schema-architect-hall.html",
+          pageReady: true,
+          lockedMessage: "Complete Ranking Observatory first."
+        },
+        featurePipelineWorks: {
+          name: "Feature Pipeline Works",
+          page: "feature-pipeline-works.html",
+          pageReady: true,
+          lockedMessage: "Complete Schema Architect Hall first."
+        },
+        sqlalchemyEngineRoom: {
+          name: "SQLAlchemy Engine Room",
+          page: "sqlalchemy-engine-room.html",
+          pageReady: true,
+          lockedMessage: "Complete Feature Pipeline Works first."
+        }
+      };
+
+      const canOpenDataworksCitadel =
+        window.SQLKingdomResetSystem?.guardIslandAccess?.("dataworks-citadel", "../index.html") ?? true;
+
+      if (canOpenDataworksCitadel) {
+        window.SQLCityBuildingEffects?.init({
+          sceneSelector: "#cityScene"
+        });
+
+        function applyDataworksBuildingStates() {
+          document.querySelectorAll(".building-hotspot").forEach((hotspot) => {
+            const buildingId = hotspot.dataset.building;
+            const isUnlocked = Boolean(
+              window.SQLKingdomProgress?.isDataworksCitadelBuildingUnlocked?.(buildingId)
+            );
+            const sign = document.querySelector(`[data-building-sign="${buildingId}"]`);
+            const layer = document.querySelector(`[data-building-layer="${buildingId}"]`);
+            const lock = document.querySelector(`[data-building-lock="${buildingId}"]`);
+
+            hotspot.classList.toggle("locked", !isUnlocked);
+            hotspot.classList.toggle("is-disabled", !isUnlocked);
+            hotspot.setAttribute("aria-disabled", isUnlocked ? "false" : "true");
+
+            sign?.classList.toggle("is-unlocked", isUnlocked);
+            sign?.classList.toggle("is-locked", !isUnlocked);
+            layer?.classList.toggle("is-locked", !isUnlocked);
+
+            if (lock) {
+              lock.hidden = isUnlocked;
+            }
+          });
+
+          const progress = window.SQLKingdomProgress?.getGameProgress?.();
+          const banner = document.querySelector("#cityCompletionBanner");
+          if (banner) {
+            banner.hidden = !progress?.cities?.dataworksCitadel?.completed;
+          }
+        }
+
+        function openDataworksBuilding(buildingId) {
+          const building = DATAWORKS_BUILDINGS[buildingId];
+          if (!building) return;
+
+          const isUnlocked = Boolean(
+            window.SQLKingdomProgress?.isDataworksCitadelBuildingUnlocked?.(buildingId)
+          );
+
+          if (!isUnlocked) {
+            window.SQLKingdomMenu?.showToast?.(building.lockedMessage);
+            return;
+          }
+
+          if (!building.pageReady) {
+            window.SQLKingdomMenu?.showToast?.(`${building.name} is unlocked. Its rooms will be installed in the next step.`);
+            return;
+          }
+
+          window.location.href = building.page;
+        }
+
+        document.querySelectorAll(".building-hotspot").forEach((hotspot) => {
+          hotspot.addEventListener("click", () => openDataworksBuilding(hotspot.dataset.building));
+        });
+
+        applyDataworksBuildingStates();
+        window.addEventListener("sqlKingdom:reset", applyDataworksBuildingStates);
+        window.addEventListener("sqlKingdom:unlockAll", applyDataworksBuildingStates);
+
+        const showGuardMessage = () => {
+          const message = window.SQLKingdomResetSystem?.consumeGuardMessage?.();
+          window.SQLKingdomMenu?.showToast?.(message);
+        };
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", showGuardMessage, { once: true });
+        } else {
+          showGuardMessage();
+        }
+      }
+    </script>
   </body>
 </html>

@@ -7,6 +7,7 @@
     <link rel="shortcut icon" href="../res/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../shared_files/shared-room-layout.css" />
     <link rel="stylesheet" href="../shared_files/shared-room-components.css" />
+    <link rel="stylesheet" href="../shared_files/shared-menu.css" />
     <style>
       .side-panel h1 { font-size: 28px; }
       .marker-screen { left: 12%; top: 33%; }
@@ -62,8 +63,11 @@
       </section>
     </main>
 
+    <div id="sharedMenuMount" data-menu-page="data-prep-city" data-menu-title="Data Prep City Menu" data-menu-base="../"></div>
     <script src="../shared_files/shared-progress.js"></script>
     <script src="../shared_files/shared-reset-system.js"></script>
+    <script src="../shared_files/shared-magic-key.js"></script>
+    <script src="../shared_files/shared-menu.js"></script>
     <script>
       const canOpenSummaryTower = window.SQLKingdomResetSystem?.guardDataPrepBuildingAccess?.("summaryTower", "index_city_2.html", "Complete Filter Factory first.", "../index.html") ?? true;
       const QUIZ_ADVANCE_DELAY_MS = 380;
@@ -301,6 +305,7 @@ GROUP BY customer_id;</code></pre>
       let currentQuizIndex = 0;
       let discoveryCompleteAnimationPlayed = false;
       let progress = getProgress();
+      let suppressAutoCompletion = false;
 
       const roomBg = document.querySelector("#roomBg");
       const roomStage = document.querySelector(".room-stage");
@@ -801,6 +806,7 @@ GROUP BY customer_id;</code></pre>
 
       function completeIfFinalRoom() {
         if (currentRoomIndex !== rooms.length - 1) return;
+        if (suppressAutoCompletion) return;
         const template = templateProgress();
         if (template.completed) return;
         template.completed = true;
@@ -825,6 +831,16 @@ GROUP BY customer_id;</code></pre>
         currentQuizIndex = 0;
         discoveryCompleteAnimationPlayed = false;
         renderRoom();
+      });
+
+      window.addEventListener("sqlKingdom:unlockAll", () => {
+        progress = getProgress();
+        suppressAutoCompletion = true;
+        try {
+          renderRoom();
+        } finally {
+          suppressAutoCompletion = false;
+        }
       });
 
       if (canOpenSummaryTower) {

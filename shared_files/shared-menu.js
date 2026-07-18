@@ -1,6 +1,111 @@
 (function () {
   let toastTimer;
 
+  const REFERENCE_GROUPS = [
+    {
+      title: "SQL & Databases",
+      items: [
+        {
+          title: "W3Schools SQL Tutorial",
+          description: "Beginner SQL syntax and examples",
+          href: "https://www.w3schools.com/sql/default.asp",
+          image: "res/w3schools.webp",
+          fallback: "W3"
+        },
+        {
+          title: "GeeksforGeeks SQL Tutorial",
+          description: "SQL explanations and practice topics",
+          href: "https://www.geeksforgeeks.org/sql/sql-tutorial/",
+          image: "res/geeksforgeeks.webp",
+          fallback: "GFG"
+        },
+        {
+          title: "PostgreSQL Official Tutorial",
+          description: "Relational databases and SQL with PostgreSQL",
+          href: "https://www.postgresql.org/docs/current/tutorial.html",
+          image: "res/postgresql.webp",
+          fallback: "PG"
+        }
+      ]
+    },
+    {
+      title: "Machine Learning & Python",
+      items: [
+        {
+          title: "Google ML Crash Course",
+          description: "Practical introduction to machine learning",
+          href: "https://developers.google.com/machine-learning/crash-course",
+          image: "res/google-ml.webp",
+          fallback: "ML"
+        },
+        {
+          title: "scikit-learn User Guide",
+          description: "ML models, preprocessing, and evaluation",
+          href: "https://scikit-learn.org/stable/user_guide.html",
+          image: "res/scikit-learn.webp",
+          fallback: "SK"
+        },
+        {
+          title: "SQLAlchemy ORM Quick Start",
+          description: "Python ORM models, sessions, and queries",
+          href: "https://docs.sqlalchemy.org/en/21/orm/quickstart.html",
+          image: "res/sqlalchemy.webp",
+          fallback: "SA"
+        }
+      ]
+    }
+  ];
+
+  function escapeHtml(value) {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function renderReferenceCard(reference, basePath) {
+    const title = escapeHtml(reference.title);
+    const description = escapeHtml(reference.description);
+    const href = escapeHtml(reference.href);
+    const image = escapeHtml(`${basePath}${reference.image}`);
+    const fallback = escapeHtml(reference.fallback);
+
+    return `
+      <a
+        class="shared-menu-reference-card"
+        href="${href}"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="${title}: ${description}"
+      >
+        <span class="shared-menu-reference-media" aria-hidden="true">
+          <img
+            class="shared-menu-reference-icon"
+            src="${image}"
+            alt=""
+            onerror="this.hidden=true; this.nextElementSibling.hidden=false"
+          >
+          <span class="shared-menu-reference-fallback" hidden>${fallback}</span>
+        </span>
+        <span class="shared-menu-reference-copy">
+          <span class="shared-menu-reference-title">${title}</span>
+          <span class="shared-menu-reference-description">${description}</span>
+        </span>
+      </a>
+    `;
+  }
+
+  function renderReferences(basePath) {
+    return REFERENCE_GROUPS.map((group) => `
+      <div class="shared-menu-reference-group">
+        <h4 class="shared-menu-reference-group-title">${escapeHtml(group.title)}</h4>
+        ${group.items.map((reference) => renderReferenceCard(reference, basePath)).join("")}
+      </div>
+    `).join("");
+  }
+
   function showToast(message) {
     if (!message) return;
     let toast = document.querySelector("#sharedToast");
@@ -27,6 +132,8 @@
   };
 
   function createMenu(options = {}) {
+    if (document.querySelector("#sharedBurgerBtn") || document.querySelector("#sharedCityMenu")) return;
+
     const page = options.page || document.querySelector("[data-menu-page]")?.dataset.menuPage || "kingdom";
     const title = options.title || document.querySelector("[data-menu-title]")?.dataset.menuTitle || "SQL Kingdom Menu";
     const includeReturn = page !== "kingdom";
@@ -56,7 +163,7 @@
 
     menu.innerHTML = `
       <button class="menu-close" id="sharedMenuClose" type="button" aria-label="Close menu">X</button>
-      <h2>${title}</h2>
+      <h2>${escapeHtml(title)}</h2>
       ${includeReturn ? `<a class="return-kingdom-btn" href="${basePath}index.html">Return to SQL Kingdom</a>` : ""}
       <div class="unlock-everything-card">
         <img src="${basePath}res/magic-master-key.webp" class="magic-key-img" alt="Magic master key">
@@ -64,16 +171,9 @@
         <button class="reset-all-btn" id="sharedResetAllBtn" type="button">${resetLabel}</button>
       </div>
       ${includeReferences ? `
-        <section class="shared-menu-references" aria-label="SQL references">
+        <section class="shared-menu-references" aria-label="Learning references">
           <h3 class="shared-menu-references__title">References</h3>
-          <a class="shared-menu-reference-card" href="https://www.w3schools.com/sql/default.asp" target="_blank" rel="noopener noreferrer">
-            <img class="shared-menu-reference-icon" src="${basePath}res/w3schools.webp" alt="" aria-hidden="true">
-            <span class="shared-menu-reference-title">W3Schools SQL Tutorial</span>
-          </a>
-          <a class="shared-menu-reference-card" href="https://www.geeksforgeeks.org/sql/sql-tutorial/" target="_blank" rel="noopener noreferrer">
-            <img class="shared-menu-reference-icon" src="${basePath}res/geeksforgeeks.webp" alt="" aria-hidden="true">
-            <span class="shared-menu-reference-title">GeeksforGeeks SQL Tutorial</span>
-          </a>
+          ${renderReferences(basePath)}
         </section>
       ` : ""}
     `;

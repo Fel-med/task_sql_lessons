@@ -3,30 +3,104 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Subquery Mines | Data Prep City</title>
-    <link rel="shortcut icon" href="../res/favicon.ico" type="image/x-icon">
+    <title>SQLAlchemy Engine Room | Dataworks Citadel</title>
+    <link rel="shortcut icon" href="../res/favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="../shared_files/shared-room-layout.css" />
     <link rel="stylesheet" href="../shared_files/shared-room-components.css" />
     <link rel="stylesheet" href="../shared_files/shared-menu.css" />
     <style>
-      .side-panel h1 { font-size: 28px; }
-      .marker-tunnel { left: 81%; top: 27%; }
-      .marker-crystal { left: 25%; top: 78%; }
-      .marker-scanner { left: 45%; top: 55%; }
+      .side-panel {
+        display: flex;
+        flex-direction: column;
+      }
 
-      .room-stage.is-welcome-room .info-card {
-        top: 72px;
+      .side-panel h1 {
+        flex: 0 0 auto;
+        font-size: 27px;
+      }
+
+      .room-counter,
+      .path-title,
+      .lesson-card {
+        flex: 0 0 auto;
+      }
+
+      .lesson-list {
+        flex: 1 1 auto;
+        min-height: 0;
+        padding: 2px 6px 6px 2px;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-color: var(--cyan) rgba(2, 6, 23, 0.72);
+        scrollbar-width: thin;
+      }
+
+      .lesson-card {
+        max-height: 28vh;
+        overflow-y: auto;
+      }
+
+      .marker-database-portal { left: 8.5%; top: 21%; }
+      .marker-orm-blueprint { left: 31.5%; top: 45%; }
+      .marker-session-core { left: 49.6%; top: 56%; }
+      .marker-crud-console { left: 89.5%; top: 75%; }
+
+      .concept-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        margin: 10px 0;
+      }
+
+      .concept-grid .pixel-box {
+        margin: 0;
+        min-width: 0;
+      }
+
+      .formula-line {
+        margin: 10px 0;
+        padding: 9px 12px;
+        border-left: 5px solid var(--yellow);
+        background: rgba(255, 215, 106, 0.08);
+        color: var(--cream);
+        font-weight: 900;
+      }
+
+      .reward-modal {
+        z-index: 140;
+      }
+
+      .reward-badge-img {
+        display: block;
+        height: auto;
+        margin: 0 auto 18px;
+      }
+
+      @media (max-width: 900px) {
+        .concept-grid {
+          grid-template-columns: 1fr;
+        }
       }
 
       @media (max-width: 760px) {
-        .side-panel h1 { font-size: 24px; }
+        .side-panel h1 {
+          font-size: 22px;
+        }
+
+        .lesson-list {
+          max-height: 120px;
+        }
+
+        .lesson-card {
+          display: none;
+        }
       }
     </style>
   </head>
   <body>
     <main class="room-layout">
       <aside class="side-panel">
-        <h1>Subquery Mines</h1>
+        <h1>SQLAlchemy Engine Room</h1>
         <p class="room-counter" id="roomCounter">Current Room: 0 / 8</p>
         <p class="path-title">Learning Path</p>
         <div class="lesson-list" id="roomList"></div>
@@ -36,261 +110,326 @@
         </article>
       </aside>
 
-      <section class="room-stage" aria-label="Subquery Mines rooms">
-        <img class="room-bg" id="roomBg" src="../res/city_2/rooms_background/Subquery_Mines.webp" alt="" />
-        <a class="return-city-btn" id="topReturn" href="index_city_2.html">Back to Data Prep City</a>
+      <section class="room-stage" aria-label="SQLAlchemy Engine Room rooms">
+        <img
+          class="room-bg"
+          id="roomBg"
+          src="../res/city_3/rooms_background/sqlalchemy-engine-room-welcome.webp"
+          alt=""
+        />
+        <a class="return-city-btn" id="topReturn" href="index_city_3.html">Back to Dataworks Citadel</a>
+
         <div class="hotspots" id="hotspots">
-          <button class="info-marker marker-tunnel" type="button" data-marker-id="tunnel" aria-label="Nested tunnel info"></button>
-          <button class="info-marker marker-crystal" type="button" data-marker-id="crystal" aria-label="Inner query crystal info"></button>
-          <button class="info-marker marker-scanner" type="button" data-marker-id="scanner" aria-label="Data depth scanner info"></button>
+          <button
+            class="info-marker marker-database-portal"
+            type="button"
+            data-marker-id="databasePortal"
+            aria-label="Database portal information"
+          ></button>
+          <button
+            class="info-marker marker-orm-blueprint"
+            type="button"
+            data-marker-id="ormBlueprint"
+            aria-label="ORM blueprint information"
+          ></button>
+          <button
+            class="info-marker marker-session-core"
+            type="button"
+            data-marker-id="sessionCore"
+            aria-label="Session core information"
+          ></button>
+          <button
+            class="info-marker marker-crud-console"
+            type="button"
+            data-marker-id="crudConsole"
+            aria-label="CRUD console information"
+          ></button>
         </div>
+
         <div class="marker-tooltip" id="markerTooltip" aria-hidden="true">
           <h3 id="markerTooltipTitle"></h3>
           <p id="markerTooltipText"></p>
         </div>
+
         <div class="room-nav">
           <button class="pixel-btn" id="prevRoom" type="button">Previous</button>
           <button class="pixel-btn" id="nextRoom" type="button">Next</button>
-          <a class="pixel-btn" id="finalReturn" href="index_city_2.html" hidden>Back to Data Prep City</a>
+          <a class="pixel-btn" id="finalReturn" href="index_city_3.html" hidden>Back to Dataworks Citadel</a>
         </div>
+
         <article class="info-card" id="infoCard" aria-live="polite">
           <div id="mainLessonContent"></div>
         </article>
+
         <article class="reward-modal" id="rewardModal" hidden>
           <div class="reward-card">
-            <img src="../res/city_2/item/regular-key.webp" class="reward-key-img" alt="Cleaning Clinic Key">
-            <h2 id="rewardTitle">Cleaning Clinic Key</h2>
-            <p id="rewardMessage">You received the Cleaning Clinic Key.</p>
+            <img
+              src="../res/city_3/item/badge.webp"
+              class="reward-badge-img"
+              alt="Dataworks Citadel Badge"
+            />
+            <h2 id="rewardTitle">Dataworks Citadel Badge</h2>
+            <p id="rewardMessage">You earned the Dataworks Citadel Badge. The city is complete!</p>
             <button class="pixel-btn" id="rewardContinue" type="button">Continue</button>
           </div>
         </article>
       </section>
     </main>
 
-    <div id="sharedMenuMount" data-menu-page="data-prep-city" data-menu-title="Data Prep City Menu" data-menu-base="../"></div>
+    <div id="sharedMenuMount" data-menu-page="dataworks-citadel" data-menu-title="Dataworks Citadel Menu" data-menu-base="../"></div>
     <script src="../shared_files/shared-progress.js"></script>
     <script src="../shared_files/shared-reset-system.js"></script>
     <script src="../shared_files/shared-magic-key.js"></script>
     <script src="../shared_files/shared-menu.js"></script>
     <script>
-      const canOpenSubqueryMines = window.SQLKingdomResetSystem?.guardDataPrepBuildingAccess?.("subqueryMines", "index_city_2.html", "Complete Join Junction first.", "../index.html") ?? true;
-      const QUIZ_ADVANCE_DELAY_MS = 380;
+      const canOpenSqlalchemyEngineRoom =
+        window.SQLKingdomResetSystem?.guardDataworksCitadelBuildingAccess?.(
+          "sqlalchemyEngineRoom",
+          "index_city_3.html",
+          "Complete Feature Pipeline Works first.",
+          "../index.html"
+        ) ?? true;
 
-      // Data Prep City examples use international neutral sample data.
+      const QUIZ_ADVANCE_DELAY_MS = 420;
+      const TEMPLATE_KEY = "sqlalchemyEngineRoom";
+      const BUILDING_ID = "sqlalchemyEngineRoom";
+      const REWARD_NAME = "Dataworks Citadel Badge";
+
       const rooms = [
         {
           title: "Welcoming Room",
-          image: "../res/city_2/rooms_background/Subquery_Mines.webp",
+          image: "../res/city_3/rooms_background/sqlalchemy-engine-room-welcome.webp",
           type: "welcome",
-          summary: "Subqueries are queries inside other queries.",
-          points: ["Nested Tunnel", "Inner Query Crystal", "Data Depth Scanner"],
+          summary: "SQLAlchemy connects Python objects and application code to relational databases.",
+          points: ["Database Portal", "ORM Blueprint", "Session Core", "CRUD Console"],
           contentHtml: `
-            <h2>Welcome to Subquery Mines</h2>
-            <p>Subqueries are SQL queries placed inside other SQL queries.</p>
-            <p>Explore the glowing markers to inspect the mine tools before starting the lesson path.</p>
+            <h2>Welcome to SQLAlchemy Engine Room</h2>
+            <p>This engine room connects Python applications to relational databases.</p>
+            <p>Explore every glowing marker before starting the integration rooms.</p>
             <ul>
-              <li>The inner query finds a useful value or list.</li>
-              <li>The outer query uses that result.</li>
-              <li>Nested queries help answer deeper data questions.</li>
+              <li>Understand what an ORM does.</li>
+              <li>Create a SQLAlchemy Engine.</li>
+              <li>Use Sessions and transactions safely.</li>
+              <li>Map Python classes to database tables.</li>
+              <li>Perform Create, Read, Update, and Delete operations.</li>
             </ul>
           `
         },
         {
-          title: "What is a Subquery?",
-          image: "../res/city_2/rooms_background/Subquery_Mines_room.webp",
+          title: "What Is an ORM?",
+          image: "../res/city_3/rooms_background/sqlalchemy-engine-room-empty.webp",
           type: "lesson",
-          summary: "A subquery is a query inside another query.",
-          points: ["Inner query runs first", "Outer query uses the result", "Useful for two-step questions"],
+          summary: "An ORM maps Python classes and objects to relational tables and rows.",
+          points: ["Class ↔ table", "Object ↔ row", "Attribute ↔ column"],
           contentHtml: `
-            <h2>What is a Subquery?</h2>
-            <p>A <strong>subquery</strong> is a query inside another query.</p>
-            <p>The inner query usually runs first. Then the outer query uses the result of the inner query.</p>
-            <pre class="sql-code"><code>SELECT name, price
-FROM products
-WHERE price &gt; (
-  SELECT AVG(price)
-  FROM products
-);</code></pre>
-            <p>The inner query finds the average product price.</p>
-            <p>The outer query finds products with a price above that average.</p>
-            <div class="pixel-box">This is useful when the filter depends on data, not a fixed number.</div>
+            <h2>What Is an ORM?</h2>
+            <p><strong>ORM</strong> means Object-Relational Mapping. It provides a bridge between object-oriented Python code and relational database structures.</p>
+            <div class="concept-grid">
+              <div class="pixel-box"><strong>Python class</strong><br>Maps to a database table.</div>
+              <div class="pixel-box"><strong>Python object</strong><br>Maps to one table row.</div>
+              <div class="pixel-box"><strong>Object attribute</strong><br>Maps to one table column.</div>
+            </div>
+            <div class="flow-line">Python objects ↔ SQLAlchemy ORM ↔ SQL statements ↔ Database</div>
+            <p>An ORM does not remove the need to understand SQL. It gives applications a structured Python interface while still using a relational database underneath.</p>
+            <div class="pixel-box">For analytics and ML systems, SQLAlchemy can help Python services load prepared datasets, store predictions, and manage experiment records.</div>
           `
         },
         {
-          title: "Subqueries in WHERE",
-          image: "../res/city_2/rooms_background/Subquery_Mines_room.webp",
+          title: "Engine and Connections",
+          image: "../res/city_3/rooms_background/sqlalchemy-engine-room-empty.webp",
           type: "lesson",
-          summary: "Subqueries in WHERE compare a value with another query result.",
-          points: ["Dynamic filters", "Average can change", "Outer query uses the inner result"],
+          summary: "The Engine stores database configuration and manages access to database connections.",
+          points: ["Create the Engine", "Use a database URL", "Reuse connection management"],
           contentHtml: `
-            <h2>Subqueries in WHERE</h2>
-            <p>Subqueries are often used inside <strong>WHERE</strong> to compare a value with a result from another query.</p>
-            <pre class="sql-code"><code>SELECT name, salary
-FROM employees
-WHERE salary &gt; (
-  SELECT AVG(salary)
-  FROM employees
-);</code></pre>
-            <p>The inner query calculates the average salary. The outer query returns employees with salary above the average.</p>
-            <p>This is a dynamic filter because the average can change when data changes.</p>
-            <h3>employees</h3>
+            <h2>SQLAlchemy Engine</h2>
+            <p>The <strong>Engine</strong> is the main connection interface. It knows which database to use and manages database connections for the application.</p>
+            <pre class="sql-code"><code>from sqlalchemy import create_engine
+
+engine = create_engine("sqlite:///training.db")</code></pre>
+            <p>The database URL identifies the database system and connection details. This example uses a local SQLite file named <code>training.db</code>.</p>
+            <pre class="sql-code"><code># PostgreSQL URL shape
+engine = create_engine(
+    "postgresql+psycopg://user:password@localhost/ml_db"
+)</code></pre>
+            <div class="pixel-box">Keep passwords and production connection strings in environment variables, not directly inside source code.</div>
+            <p>The Engine can be shared by the application, while each unit of database work should use its own short-lived Session.</p>
+          `
+        },
+        {
+          title: "Sessions and Transactions",
+          image: "../res/city_3/rooms_background/sqlalchemy-engine-room-empty.webp",
+          type: "lesson",
+          summary: "A Session tracks ORM objects and groups database work into a transaction.",
+          points: ["Open a Session", "Commit successful work", "Rollback failed work"],
+          contentHtml: `
+            <h2>Sessions and Transactions</h2>
+            <p>A <strong>Session</strong> is the working area used to load, add, modify, and delete ORM objects.</p>
+            <pre class="sql-code"><code>from sqlalchemy.orm import Session
+
+with Session(engine) as session:
+    # Database work goes here
+    session.commit()</code></pre>
+            <p><code>commit()</code> permanently saves successful changes. If an operation fails, <code>rollback()</code> cancels the current transaction before the Session is reused or closed.</p>
+            <pre class="sql-code"><code>with Session(engine) as session:
+    try:
+        # Add or modify objects
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise</code></pre>
+            <div class="formula-line">Open Session → Perform related work → Commit or rollback → Close Session</div>
+            <p>Short, clearly bounded Sessions make application behavior easier to understand and test.</p>
+          `
+        },
+        {
+          title: "ORM Models",
+          image: "../res/city_3/rooms_background/sqlalchemy-engine-room-empty.webp",
+          type: "lesson",
+          summary: "An ORM model describes how a Python class maps to a database table.",
+          points: ["Declarative base", "Mapped columns", "Primary key"],
+          contentHtml: `
+            <h2>ORM Models</h2>
+            <p>A model class defines a table name and its mapped columns.</p>
+            <pre class="sql-code"><code>from sqlalchemy import String
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+class Base(DeclarativeBase):
+    pass
+
+class Customer(Base):
+    __tablename__ = "customers"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))
+    city: Mapped[str] = mapped_column(String(80))</code></pre>
             <table class="result-table">
-              <thead><tr><th>employee_id</th><th>name</th><th>department</th><th>salary</th></tr></thead>
+              <thead><tr><th>Python model</th><th>Database structure</th></tr></thead>
               <tbody>
-                <tr><td>1</td><td>Emma</td><td>Sales</td><td>50000</td></tr>
-                <tr><td>2</td><td>Noah</td><td>IT</td><td>65000</td></tr>
-                <tr><td>3</td><td>Sofia</td><td>Sales</td><td>70000</td></tr>
-                <tr><td>4</td><td>Liam</td><td>HR</td><td>45000</td></tr>
+                <tr><td>Customer</td><td>customers table</td></tr>
+                <tr><td>id</td><td>Primary-key column</td></tr>
+                <tr><td>name</td><td>VARCHAR-like column</td></tr>
+                <tr><td>city</td><td>VARCHAR-like column</td></tr>
               </tbody>
             </table>
+            <pre class="sql-code"><code>Base.metadata.create_all(engine)</code></pre>
+            <p>This creates missing mapped tables for a small learning project. Production schema changes are normally managed through migrations.</p>
           `
         },
         {
-          title: "Subqueries with IN",
-          image: "../res/city_2/rooms_background/Subquery_Mines_room.webp",
+          title: "Create and Read",
+          image: "../res/city_3/rooms_background/sqlalchemy-engine-room-empty.webp",
           type: "lesson",
-          summary: "Use IN when the inner query returns a list of values.",
-          points: ["Inner query returns IDs", "Outer query matches the list", "Cleaner than manually writing IDs"],
+          summary: "Create adds objects to a Session; Read uses select() or primary-key lookup.",
+          points: ["Create an object", "Add and commit", "Read with select()"],
           contentHtml: `
-            <h2>Subqueries with IN</h2>
-            <p>Use <strong>IN</strong> with a subquery when the inner query returns a list of values.</p>
-            <pre class="sql-code"><code>SELECT name
-FROM customers
-WHERE customer_id IN (
-  SELECT customer_id
-  FROM orders
-  WHERE price &gt; 100
-);</code></pre>
-            <p>The inner query finds customer IDs from orders above 100.</p>
-            <p>The outer query returns the names of those customers.</p>
-            <div class="pixel-box">This is cleaner than manually writing many IDs.</div>
+            <h2>Create and Read</h2>
+            <h3>Create</h3>
+            <pre class="sql-code"><code>from sqlalchemy.orm import Session
+
+with Session(engine) as session:
+    customer = Customer(name="Emma", city="Berlin")
+    session.add(customer)
+    session.commit()</code></pre>
+            <p><code>add()</code> places the object in the Session. <code>commit()</code> writes the new row.</p>
+            <h3>Read</h3>
+            <pre class="sql-code"><code>from sqlalchemy import select
+
+with Session(engine) as session:
+    statement = select(Customer).where(Customer.city == "Berlin")
+    customers = session.scalars(statement).all()</code></pre>
+            <p><code>select(Customer)</code> builds a query for model objects. <code>scalars()</code> returns the mapped <code>Customer</code> objects.</p>
+            <pre class="sql-code"><code>customer = session.get(Customer, 1)</code></pre>
+            <p><code>get()</code> is useful when the primary-key value is already known.</p>
           `
         },
         {
-          title: "Subqueries in SELECT",
-          image: "../res/city_2/rooms_background/Subquery_Mines_room.webp",
+          title: "Update and Delete",
+          image: "../res/city_3/rooms_background/sqlalchemy-engine-room-empty.webp",
           type: "lesson",
-          summary: "A subquery in SELECT can add a calculated value.",
-          points: ["Adds a summary column", "Compares each row to a summary", "No window functions yet"],
+          summary: "Loaded ORM objects can be changed or removed, then committed through the Session.",
+          points: ["Load the object", "Change or delete", "Commit the transaction"],
           contentHtml: `
-            <h2>Subqueries in SELECT</h2>
-            <p>A subquery can also appear in the <strong>SELECT</strong> part to calculate an extra value.</p>
-            <pre class="sql-code"><code>SELECT name,
-       price,
-       (SELECT AVG(price) FROM products) AS average_price
-FROM products;</code></pre>
-            <p>Each product row is displayed. The average product price is added as a new column.</p>
-            <p>This helps compare each row with a summary value.</p>
-          `
-        },
-        {
-          title: "Correlated Subqueries",
-          image: "../res/city_2/rooms_background/Subquery_Mines_room.webp",
-          type: "lesson",
-          summary: "A correlated subquery uses a value from the outer query.",
-          points: ["Inner query depends on outer row", "Useful for group comparisons", "Can be slower on large datasets"],
-          contentHtml: `
-            <h2>Correlated Subqueries</h2>
-            <p>A correlated subquery uses a value from the outer query.</p>
-            <pre class="sql-code"><code>SELECT e.name,
-       e.department,
-       e.salary
-FROM employees e
-WHERE e.salary &gt; (
-  SELECT AVG(e2.salary)
-  FROM employees e2
-  WHERE e2.department = e.department
-);</code></pre>
-            <p>The outer query looks at one employee. The inner query calculates the average salary for that employee's department.</p>
-            <p>The query returns employees earning more than their department average.</p>
-            <div class="pixel-box">This is called correlated because the inner query depends on the outer query. It can be powerful, but it may be slower on large datasets.</div>
-          `
-        },
-        {
-          title: "Subqueries for Data Preparation",
-          image: "../res/city_2/rooms_background/Subquery_Mines_room.webp",
-          type: "lesson",
-          summary: "Subqueries create smarter filters for useful datasets.",
-          points: ["Filter with dynamic values", "Compare records to averages", "Find high-value customers"],
-          contentHtml: `
-            <h2>Subqueries for Data Preparation</h2>
-            <p>Subqueries help before analysis or machine learning because they can create dynamic filters and smarter datasets.</p>
-            <ul>
-              <li>Filter rows using dynamic values.</li>
-              <li>Compare each record to an average.</li>
-              <li>Select customers with important activity.</li>
-              <li>Find products above category averages.</li>
-              <li>Create useful flags or features.</li>
-              <li>Prepare smarter datasets before modeling.</li>
-            </ul>
-            <pre class="sql-code"><code>SELECT customer_id,
-       total_spent
-FROM customer_summary
-WHERE total_spent &gt; (
-  SELECT AVG(total_spent)
-  FROM customer_summary
-);</code></pre>
-            <p>The inner query finds the average total spending. The outer query keeps customers who spent more than average.</p>
-            <div class="pixel-box">This can help identify high-value customers for analysis.</div>
+            <h2>Update and Delete</h2>
+            <h3>Update</h3>
+            <pre class="sql-code"><code>with Session(engine) as session:
+    customer = session.get(Customer, 1)
+
+    if customer is not None:
+        customer.city = "Paris"
+        session.commit()</code></pre>
+            <p>SQLAlchemy tracks the changed attribute and produces the required update when the Session is flushed and committed.</p>
+            <h3>Delete</h3>
+            <pre class="sql-code"><code>with Session(engine) as session:
+    customer = session.get(Customer, 1)
+
+    if customer is not None:
+        session.delete(customer)
+        session.commit()</code></pre>
+            <div class="concept-grid">
+              <div class="pixel-box"><strong>Create</strong><br><code>session.add()</code></div>
+              <div class="pixel-box"><strong>Read</strong><br><code>select()</code> or <code>session.get()</code></div>
+              <div class="pixel-box"><strong>Update</strong><br>Change mapped attributes</div>
+              <div class="pixel-box"><strong>Delete</strong><br><code>session.delete()</code></div>
+            </div>
           `
         },
         {
           title: "Quiz Room",
-          image: "../res/city_2/rooms_background/Subquery_Mines_room.webp",
+          image: "../res/city_3/rooms_background/sqlalchemy-engine-room-empty.webp",
           type: "quiz",
-          summary: "Test nested query ideas before unlocking the recap.",
+          summary: "Test ORM, Engine, Session, model, and CRUD concepts before earning the city badge.",
           points: ["Six questions", "Randomized answer order", "Correct answers unlock the recap"],
           contentHtml: `
             <h2>Quiz Room</h2>
-            <p>Answer every question correctly to unlock the recap room.</p>
+            <p>Answer every question correctly to unlock the final recap.</p>
             <div class="quiz-box">
-              <article class="quiz-question" data-question-id="definition">
+              <article class="quiz-question" data-question-id="orm">
                 <h3>Question 1</h3>
-                <p>What is a subquery?</p>
-                <button class="quiz-option" type="button" data-correct="true">A query inside another query</button>
-                <button class="quiz-option" type="button">A table with no columns</button>
-                <button class="quiz-option" type="button">A command that only sorts rows</button>
-                <button class="quiz-option" type="button">A chart made from SQL results</button>
+                <p>What does an ORM primarily map?</p>
+                <button class="quiz-option" type="button" data-correct="true">Python classes and objects to relational tables and rows</button>
+                <button class="quiz-option" type="button">Images to CSS animations</button>
+                <button class="quiz-option" type="button">Passwords to public URLs</button>
+                <button class="quiz-option" type="button">HTML pages to browser tabs</button>
               </article>
-              <article class="quiz-question" data-question-id="inner-first">
+              <article class="quiz-question" data-question-id="engine">
                 <h3>Question 2</h3>
-                <p>Which query usually runs first in a subquery?</p>
-                <button class="quiz-option" type="button" data-correct="true">The inner query</button>
-                <button class="quiz-option" type="button">The outer query always runs first</button>
-                <button class="quiz-option" type="button">The ORDER BY query</button>
-                <button class="quiz-option" type="button">No query runs first</button>
+                <p>What is the main role of a SQLAlchemy Engine?</p>
+                <button class="quiz-option" type="button" data-correct="true">Store database configuration and manage access to connections</button>
+                <button class="quiz-option" type="button">Train a neural network automatically</button>
+                <button class="quiz-option" type="button">Replace every database table with a Python list</button>
+                <button class="quiz-option" type="button">Display the website menu</button>
               </article>
-              <article class="quiz-question" data-question-id="in">
+              <article class="quiz-question" data-question-id="session">
                 <h3>Question 3</h3>
-                <p>Which operator is useful when a subquery returns a list?</p>
-                <button class="quiz-option" type="button" data-correct="true">IN</button>
-                <button class="quiz-option" type="button">MAX</button>
-                <button class="quiz-option" type="button">ORDER BY</button>
-                <button class="quiz-option" type="button">RIGHT JOIN</button>
+                <p>What does a Session provide for ORM work?</p>
+                <button class="quiz-option" type="button" data-correct="true">A transaction-aware working area for loaded and changed objects</button>
+                <button class="quiz-option" type="button">A permanent global cache that should never close</button>
+                <button class="quiz-option" type="button">A CSS stylesheet for database tables</button>
+                <button class="quiz-option" type="button">A replacement for primary keys</button>
               </article>
-              <article class="quiz-question" data-question-id="above-average">
+              <article class="quiz-question" data-question-id="model">
                 <h3>Question 4</h3>
-                <p>What does this condition find? <code>WHERE price &gt; (SELECT AVG(price) FROM products)</code></p>
-                <button class="quiz-option" type="button" data-correct="true">Products with price above the average</button>
-                <button class="quiz-option" type="button">Products with price below zero</button>
-                <button class="quiz-option" type="button">Products sorted by name</button>
-                <button class="quiz-option" type="button">Products with no price column</button>
+                <p>In an ORM model, what does <code>__tablename__</code> identify?</p>
+                <button class="quiz-option" type="button" data-correct="true">The database table mapped by the class</button>
+                <button class="quiz-option" type="button">The Python installation folder</button>
+                <button class="quiz-option" type="button">The current quiz question</button>
+                <button class="quiz-option" type="button">The database password</button>
               </article>
-              <article class="quiz-question" data-question-id="correlated">
+              <article class="quiz-question" data-question-id="read">
                 <h3>Question 5</h3>
-                <p>What is a correlated subquery?</p>
-                <button class="quiz-option" type="button" data-correct="true">A subquery that uses a value from the outer query</button>
-                <button class="quiz-option" type="button">A query that only uses COUNT()</button>
-                <button class="quiz-option" type="button">A table with duplicated rows</button>
-                <button class="quiz-option" type="button">A query that cannot use WHERE</button>
+                <p>Which SQLAlchemy construct is used to build an ORM read query?</p>
+                <button class="quiz-option" type="button" data-correct="true">select(Customer)</button>
+                <button class="quiz-option" type="button">session.delete(Customer)</button>
+                <button class="quiz-option" type="button">create_engine(Customer)</button>
+                <button class="quiz-option" type="button">mapped_column(session)</button>
               </article>
-              <article class="quiz-question" data-question-id="prep">
+              <article class="quiz-question" data-question-id="commit">
                 <h3>Question 6</h3>
-                <p>Why are subqueries useful in data preparation?</p>
-                <button class="quiz-option" type="button" data-correct="true">They help create dynamic filters and smarter datasets</button>
-                <button class="quiz-option" type="button">They remove all need for tables</button>
-                <button class="quiz-option" type="button">They only change text colors</button>
-                <button class="quiz-option" type="button">They automatically train a model</button>
+                <p>After successfully creating, updating, or deleting data, what saves the transaction?</p>
+                <button class="quiz-option" type="button" data-correct="true">session.commit()</button>
+                <button class="quiz-option" type="button">session.rollback()</button>
+                <button class="quiz-option" type="button">session.delete()</button>
+                <button class="quiz-option" type="button">Base.metadata.clear()</button>
               </article>
             </div>
             <p class="quiz-feedback"></p>
@@ -298,34 +437,50 @@ WHERE total_spent &gt; (
         },
         {
           title: "Recap Room",
-          image: "../res/city_2/rooms_background/Subquery_Mines_room.webp",
+          image: "../res/city_3/rooms_background/sqlalchemy-engine-room-empty.webp",
           type: "lesson",
-          summary: "You learned how SQL uses nested queries.",
-          points: ["Subquery types reviewed", "Dynamic filters understood", "Cleaning Clinic Key reward"],
+          summary: "You connected Python and relational databases through SQLAlchemy's ORM workflow.",
+          points: ["ORM and Engine", "Sessions and models", "CRUD operations", "Dataworks Citadel Badge"],
           contentHtml: `
             <h2>Recap Room</h2>
-            <p>You finished Subquery Mines. You can now use nested queries to answer deeper data questions.</p>
+            <p>You completed SQLAlchemy Engine Room and the full Dataworks Citadel learning path.</p>
             <ul>
-              <li>A subquery is a query inside another query.</li>
-              <li>The inner query usually runs first.</li>
-              <li>Subqueries in WHERE can create dynamic filters.</li>
-              <li>IN works well with subqueries that return lists.</li>
-              <li>Subqueries in SELECT can add calculated values.</li>
-              <li>Correlated subqueries depend on the outer query.</li>
-              <li>Subqueries help prepare smarter datasets for analysis and machine learning.</li>
+              <li>An ORM maps Python classes and objects to relational tables and rows.</li>
+              <li>The Engine stores connection configuration and manages database connections.</li>
+              <li>A Session tracks ORM objects and groups database work into transactions.</li>
+              <li>Declarative model classes describe tables and mapped columns.</li>
+              <li>Create, Read, Update, and Delete operations are performed through the Session.</li>
+              <li>SQLAlchemy connects Python applications to the SQL datasets used in ML workflows.</li>
             </ul>
-            <p class="reward-note">Reward unlocked: Cleaning Clinic Key.</p>
+            <p class="reward-note">Reward unlocked: Dataworks Citadel Badge.</p>
+            <div class="pixel-box">City completed! Future islands are coming soon.</div>
           `
         }
       ];
 
       const welcomeMarkers = [
-        { id: "tunnel", title: "Nested Tunnel", text: "A subquery is a query placed inside another SQL query." },
-        { id: "crystal", title: "Inner Query Crystal", text: "The inner query finds a value or list that the outer query can use." },
-        { id: "scanner", title: "Data Depth Scanner", text: "Subqueries help answer deeper questions from your data." }
+        {
+          id: "databasePortal",
+          title: "Database Portal",
+          text: "The Engine knows how the Python application reaches its relational database."
+        },
+        {
+          id: "ormBlueprint",
+          title: "ORM Blueprint",
+          text: "Mapped model classes connect Python attributes to table columns."
+        },
+        {
+          id: "sessionCore",
+          title: "Session Core",
+          text: "A Session tracks objects and coordinates one transaction of database work."
+        },
+        {
+          id: "crudConsole",
+          title: "CRUD Console",
+          text: "Create, Read, Update, and Delete operations move application data through the database lifecycle."
+        }
       ];
 
-      const TEMPLATE_KEY = "subqueryMines";
       let currentRoomIndex = 0;
       let currentQuizIndex = 0;
       let discoveryCompleteAnimationPlayed = false;
@@ -355,26 +510,30 @@ WHERE total_spent &gt; (
       }
 
       function saveProgress(progressToSave) {
-        window.SQLKingdomProgress.saveGameProgress(progressToSave);
+        return window.SQLKingdomProgress.saveGameProgress(progressToSave);
       }
 
       function templateProgress() {
         progress.cities = progress.cities || {};
-        progress.cities.dataPrepCity = progress.cities.dataPrepCity || {};
-        progress.cities.dataPrepCity[TEMPLATE_KEY] = progress.cities.dataPrepCity[TEMPLATE_KEY] || {
+        progress.cities.dataworksCitadel = progress.cities.dataworksCitadel || {};
+        progress.cities.dataworksCitadel[TEMPLATE_KEY] = progress.cities.dataworksCitadel[TEMPLATE_KEY] || {
           discoveredMarkers: [],
           highestRoomUnlocked: 0,
           quizPassed: false,
           completed: false,
-          correctQuizAnswers: []
+          correctQuizAnswers: [],
+          reward: ""
         };
-        if (!Array.isArray(progress.cities.dataPrepCity[TEMPLATE_KEY].discoveredMarkers)) {
-          progress.cities.dataPrepCity[TEMPLATE_KEY].discoveredMarkers = [];
+
+        const template = progress.cities.dataworksCitadel[TEMPLATE_KEY];
+        if (!Array.isArray(template.discoveredMarkers)) template.discoveredMarkers = [];
+        if (!Array.isArray(template.correctQuizAnswers)) template.correctQuizAnswers = [];
+        if (!Number.isInteger(template.highestRoomUnlocked) || template.highestRoomUnlocked < 0) {
+          template.highestRoomUnlocked = 0;
         }
-        if (!Array.isArray(progress.cities.dataPrepCity[TEMPLATE_KEY].correctQuizAnswers)) {
-          progress.cities.dataPrepCity[TEMPLATE_KEY].correctQuizAnswers = [];
-        }
-        return progress.cities.dataPrepCity[TEMPLATE_KEY];
+        template.quizPassed = Boolean(template.quizPassed);
+        template.completed = Boolean(template.completed);
+        return template;
       }
 
       function markerIds() {
@@ -382,9 +541,7 @@ WHERE total_spent &gt; (
       }
 
       function discoveredMarkers() {
-        const template = templateProgress();
-        if (!Array.isArray(template.discoveredMarkers)) template.discoveredMarkers = [];
-        return template.discoveredMarkers;
+        return templateProgress().discoveredMarkers;
       }
 
       function discoveryCount() {
@@ -408,14 +565,19 @@ WHERE total_spent &gt; (
       function renderWelcomeContent(message = "", animateComplete = false) {
         const complete = allWelcomeMarkersDiscovered();
         const shouldAnimate = complete && animateComplete && !discoveryCompleteAnimationPlayed;
-        const statusClass = complete ? `discovery-complete${shouldAnimate ? " animate-complete" : ""}` : "discovery-status";
-        const statusText = complete ? "All mine objects discovered! You can enter the next room." : `Objects discovered: ${discoveryCount()} / ${welcomeMarkers.length}`;
+        const statusClass = complete
+          ? `discovery-complete${shouldAnimate ? " animate-complete" : ""}`
+          : "discovery-status";
+        const statusText = complete
+          ? "All engine stations discovered! You can enter the next room."
+          : `Objects discovered: ${discoveryCount()} / ${welcomeMarkers.length}`;
         const warning = message ? `<p class="discovery-warning">${message}</p>` : "";
+
         return `
-          <h2>Welcome to Subquery Mines</h2>
-          <p>Explore every glowing object marker before starting the subquery path.</p>
+          <h2>Welcome to SQLAlchemy Engine Room</h2>
+          <p>Explore every glowing engine station before starting the Python integration path.</p>
           <p class="${statusClass}">${statusText}</p>
-          ${complete ? "" : `<p class="discovery-hint">Hover or click each marker to discover it.</p>`}
+          ${complete ? "" : `<p class="discovery-hint">Hover, focus, or click each marker to discover it.</p>`}
           ${warning}
         `;
       }
@@ -427,7 +589,7 @@ WHERE total_spent &gt; (
           <p>${rooms[0].summary}</p>
           <ul>
             <li>Objects discovered: ${discoveryCount()} / ${welcomeMarkers.length}</li>
-            <li>${complete ? "Next Room unlocked." : "Discover all mine objects to unlock Room 1."}</li>
+            <li>${complete ? "Room 1 unlocked." : "Discover all engine stations to unlock Room 1."}</li>
           </ul>
         `;
       }
@@ -438,7 +600,12 @@ WHERE total_spent &gt; (
           const markerData = getWelcomeMarker(markerElement.dataset.markerId);
           const isDiscovered = discovered.includes(markerElement.dataset.markerId);
           markerElement.classList.toggle("is-discovered", isDiscovered);
-          if (markerData) markerElement.setAttribute("aria-label", `${markerData.title} ${isDiscovered ? "discovered" : "not discovered"}`);
+          if (markerData) {
+            markerElement.setAttribute(
+              "aria-label",
+              `${markerData.title} ${isDiscovered ? "discovered" : "not discovered"}`
+            );
+          }
         });
       }
 
@@ -454,15 +621,18 @@ WHERE total_spent &gt; (
       function markWelcomeMarkerDiscovered(markerId) {
         const markerData = getWelcomeMarker(markerId);
         if (!markerData) return;
+
         const wasComplete = allWelcomeMarkersDiscovered();
         const discovered = discoveredMarkers();
         if (!discovered.includes(markerId)) {
           discovered.push(markerId);
           saveProgress(progress);
         }
+
         const isComplete = allWelcomeMarkersDiscovered();
         if (isComplete) unlockFirstLessonIfReady();
         updateMarkerStates();
+
         if (currentRoomIndex === 0) {
           const shouldAnimateComplete = isComplete && !wasComplete && !discoveryCompleteAnimationPlayed;
           renderWelcomeSidebarSummary();
@@ -478,11 +648,13 @@ WHERE total_spent &gt; (
         markerTooltipText.textContent = markerData.text;
         markerTooltip.classList.add("is-visible");
         markerTooltip.setAttribute("aria-hidden", "false");
+
         const stageRect = roomStage.getBoundingClientRect();
         const markerRect = markerElement.getBoundingClientRect();
         const tooltipRect = markerTooltip.getBoundingClientRect();
         let left = markerRect.left - stageRect.left + markerRect.width / 2 - tooltipRect.width / 2;
         let top = markerRect.top - stageRect.top - tooltipRect.height - 14;
+
         if (top < 10) top = markerRect.bottom - stageRect.top + 14;
         left = Math.max(10, Math.min(left, stageRect.width - tooltipRect.width - 10));
         top = Math.max(10, Math.min(top, stageRect.height - tooltipRect.height - 10));
@@ -529,9 +701,13 @@ WHERE total_spent &gt; (
       }
 
       function roomLockedMessage(index) {
-        if (index === 1 && !allWelcomeMarkersDiscovered()) return "Discover all welcome-room mine objects first.";
-        if (isRecapRoom(index) && !templateProgress().quizPassed) return "Complete the quiz first to unlock the recap room.";
-        return "Explore previous rooms first to unlock this room.";
+        if (index === 1 && !allWelcomeMarkersDiscovered()) {
+          return "Discover all welcome-room engine stations first.";
+        }
+        if (isRecapRoom(index) && !templateProgress().quizPassed) {
+          return "Complete the quiz first to unlock the recap room.";
+        }
+        return "Explore the previous rooms first to unlock this room.";
       }
 
       function renderRoomList() {
@@ -544,8 +720,9 @@ WHERE total_spent &gt; (
           const isUnlocked = canEnterRoom(index);
           if (!isUnlocked) tab.classList.add("locked");
           if (index === currentRoomIndex) tab.classList.add("active");
+
           tab.addEventListener("click", () => {
-            if (!isUnlocked) {
+            if (!canEnterRoom(index)) {
               const message = roomLockedMessage(index);
               lessonTitle.textContent = "Room locked";
               lessonText.innerHTML = `<p>${message}</p>`;
@@ -561,7 +738,10 @@ WHERE total_spent &gt; (
 
       function renderSidebarSummary(room) {
         lessonTitle.textContent = room.title;
-        lessonText.innerHTML = `<p>${room.summary}</p><ul>${room.points.map((point) => `<li>${point}</li>`).join("")}</ul>`;
+        lessonText.innerHTML = `
+          <p>${room.summary}</p>
+          <ul>${room.points.map((point) => `<li>${point}</li>`).join("")}</ul>
+        `;
       }
 
       function setQuizFeedback(message) {
@@ -641,7 +821,9 @@ WHERE total_spent &gt; (
       function goToNextUnansweredQuizQuestion() {
         const template = templateProgress();
         const questions = quizQuestions();
-        const nextIndex = questions.findIndex((question) => !template.correctQuizAnswers.includes(question.dataset.questionId));
+        const nextIndex = questions.findIndex(
+          (question) => !template.correctQuizAnswers.includes(question.dataset.questionId)
+        );
         if (nextIndex !== -1) currentQuizIndex = nextIndex;
       }
 
@@ -681,7 +863,10 @@ WHERE total_spent &gt; (
         shuffleQuizOptions();
         const template = templateProgress();
         renderQuizTabs();
-        const allQuestionsAlreadyCorrect = quizQuestionIds().every((id) => template.correctQuizAnswers.includes(id));
+
+        const allQuestionsAlreadyCorrect = quizQuestionIds().every((id) =>
+          template.correctQuizAnswers.includes(id)
+        );
         if (allQuestionsAlreadyCorrect && !template.quizPassed) {
           template.quizPassed = true;
           template.highestRoomUnlocked = Math.max(template.highestRoomUnlocked, currentRoomIndex + 1);
@@ -726,9 +911,14 @@ WHERE total_spent &gt; (
 
         question.classList.add("is-complete", "is-transitioning");
         option.classList.add("correct");
-        questionOptions.forEach((item) => { item.disabled = true; });
+        questionOptions.forEach((item) => {
+          item.disabled = true;
+        });
 
-        const allCorrect = quizQuestionIds().every((id) => template.correctQuizAnswers.includes(id));
+        const allCorrect = quizQuestionIds().every((id) =>
+          template.correctQuizAnswers.includes(id)
+        );
+
         if (allCorrect) {
           template.quizPassed = true;
           template.highestRoomUnlocked = Math.max(template.highestRoomUnlocked, currentRoomIndex + 1);
@@ -757,9 +947,9 @@ WHERE total_spent &gt; (
         const room = rooms[currentRoomIndex];
         const template = templateProgress();
         const isFinalRoom = currentRoomIndex === rooms.length - 1;
+
         roomBg.src = room.image;
         roomStage.classList.toggle("is-welcome-room", currentRoomIndex === 0);
-        roomCounter.textContent = `Current Room: ${currentRoomIndex} / ${rooms.length - 1}`;
         hotspots.hidden = currentRoomIndex !== 0;
         prevRoom.hidden = currentRoomIndex === 0;
         nextRoom.hidden = isFinalRoom || (room.type === "quiz" && !template.quizPassed);
@@ -790,7 +980,7 @@ WHERE total_spent &gt; (
 
       nextRoom.addEventListener("click", () => {
         if (currentRoomIndex === 0 && !allWelcomeMarkersDiscovered()) {
-          renderMainContent(renderWelcomeContent("Discover all mine objects first."));
+          renderMainContent(renderWelcomeContent("Discover all engine stations first."));
           updateNextButtonState();
           return;
         }
@@ -834,10 +1024,15 @@ WHERE total_spent &gt; (
         if (suppressAutoCompletion) return;
         const template = templateProgress();
         if (template.completed) return;
+
         template.completed = true;
-        template.reward = "Cleaning Clinic Key";
-        window.SQLKingdomProgress?.markDataPrepBuildingComplete?.(progress, "subqueryMines", "Cleaning Clinic Key");
-        saveProgress(progress);
+        template.reward = REWARD_NAME;
+        window.SQLKingdomProgress?.markDataworksCitadelBuildingComplete?.(
+          progress,
+          BUILDING_ID,
+          REWARD_NAME
+        );
+        progress = saveProgress(progress);
         rewardModal.hidden = false;
       }
 
@@ -850,11 +1045,12 @@ WHERE total_spent &gt; (
       });
 
       window.addEventListener("sqlKingdom:reset", (event) => {
-        if (event.detail.resetMode !== "local" || event.detail.cityId !== "data-prep-city") return;
+        if (event.detail.resetMode !== "local" || event.detail.cityId !== "dataworks-citadel") return;
         progress = getProgress();
         currentRoomIndex = 0;
         currentQuizIndex = 0;
         discoveryCompleteAnimationPlayed = false;
+        rewardModal.hidden = true;
         renderRoom();
       });
 
@@ -868,9 +1064,9 @@ WHERE total_spent &gt; (
         }
       });
 
-      if (canOpenSubqueryMines) {
+      if (canOpenSqlalchemyEngineRoom) {
         templateProgress();
-        saveProgress(progress);
+        progress = saveProgress(progress);
         renderRoom();
       }
     </script>

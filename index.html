@@ -115,6 +115,8 @@
       }
 
       .nav-arrow {
+        position: relative;
+        z-index: 5;
         width: clamp(44px, 6vw, 66px);
         aspect-ratio: 1;
         border: 3px solid var(--cream);
@@ -142,8 +144,11 @@
       }
 
       .island-window {
+        position: relative;
+        z-index: 1;
         min-width: 0;
-        overflow: hidden;
+        /* Island hover glows may extend beyond the center grid cell. */
+        overflow: visible;
       }
 
       .island-track {
@@ -313,6 +318,306 @@
         text-shadow: 2px 2px 0 #000;
       }
 
+
+
+      .badge-collection-btn {
+        position: fixed;
+        top: 24px;
+        left: 28px;
+        z-index: 100;
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        min-height: 56px;
+        padding: 9px 13px;
+        border: 4px solid var(--cyan);
+        background: rgba(8, 14, 30, 0.92);
+        box-shadow:
+          4px 4px 0 #000,
+          0 0 18px rgba(95, 255, 214, 0.34);
+        color: var(--cream);
+        cursor: pointer;
+        font: 900 13px/1.1 var(--pixel-font);
+        text-transform: uppercase;
+      }
+
+      .badge-collection-btn:hover,
+      .badge-collection-btn:focus-visible {
+        background: var(--yellow);
+        border-color: var(--cream);
+        color: var(--ink);
+        outline: none;
+        transform: translateY(-2px);
+        box-shadow:
+          6px 6px 0 #000,
+          0 0 24px rgba(255, 215, 106, 0.5);
+      }
+
+      .badge-collection-btn__symbol {
+        display: grid;
+        width: 30px;
+        height: 30px;
+        place-items: center;
+        border: 2px solid currentColor;
+        background: rgba(95, 255, 214, 0.12);
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      .badge-collection-btn__text {
+        display: grid;
+        gap: 2px;
+        text-align: left;
+      }
+
+      .badge-collection-count {
+        color: var(--cyan);
+        font-size: 11px;
+      }
+
+      .badge-collection-btn:hover .badge-collection-count,
+      .badge-collection-btn:focus-visible .badge-collection-count {
+        color: var(--ink);
+      }
+
+      .badge-collection-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 190;
+        display: none;
+        background: rgba(0, 0, 0, 0.58);
+        backdrop-filter: blur(2px);
+      }
+
+      .badge-collection-backdrop.open {
+        display: block;
+      }
+
+      .badge-collection-panel {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 210;
+        width: min(780px, 94vw);
+        height: 100dvh;
+        padding: 26px;
+        overflow-y: auto;
+        border-right: 5px solid var(--cream);
+        background:
+          radial-gradient(circle at 20% 8%, rgba(95, 255, 214, 0.12), transparent 30%),
+          #0a1222;
+        box-shadow:
+          10px 0 0 #000,
+          0 0 34px rgba(95, 255, 214, 0.26);
+        color: var(--cream);
+        transform: translateX(-110%);
+        transition: transform 0.22s ease;
+      }
+
+      .badge-collection-panel.open {
+        transform: translateX(0);
+      }
+
+      .badge-collection-close {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        width: 38px;
+        height: 38px;
+        border: 3px solid var(--cream);
+        background: #111827;
+        box-shadow: 3px 3px 0 #000;
+        color: var(--cream);
+        cursor: pointer;
+        font: 900 18px/1 var(--pixel-font);
+      }
+
+      .badge-collection-close:hover,
+      .badge-collection-close:focus-visible {
+        background: var(--yellow);
+        color: var(--ink);
+        outline: none;
+      }
+
+      .badge-collection-heading {
+        margin: 0;
+        padding-right: 52px;
+        color: var(--cream);
+        font-size: clamp(28px, 4vw, 46px);
+        line-height: 1;
+        text-shadow: 4px 4px 0 #000;
+      }
+
+      .badge-collection-summary {
+        margin: 12px 0 0;
+        color: var(--cyan);
+        font-size: 14px;
+        font-weight: 900;
+        text-shadow: 2px 2px 0 #000;
+      }
+
+      .badge-magic-note {
+        margin: 14px 0 0;
+        padding: 10px 12px;
+        border: 2px solid var(--yellow);
+        background: rgba(255, 215, 106, 0.08);
+        color: var(--yellow);
+        font-size: 12px;
+        font-weight: 900;
+        line-height: 1.4;
+        box-shadow: 3px 3px 0 #000;
+      }
+
+      .badge-magic-note[hidden] {
+        display: none;
+      }
+
+      .badge-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        margin-top: 22px;
+      }
+
+      .badge-card {
+        position: relative;
+        display: grid;
+        grid-template-rows: minmax(150px, 1fr) auto;
+        min-width: 0;
+        padding: 14px;
+        border: 3px solid #334155;
+        background: rgba(15, 23, 42, 0.88);
+        box-shadow: 5px 5px 0 #000;
+        text-align: center;
+        overflow: hidden;
+      }
+
+      .badge-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), transparent 45%);
+      }
+
+      .badge-card.is-collected {
+        border-color: var(--cyan);
+        box-shadow:
+          5px 5px 0 #000,
+          0 0 18px rgba(95, 255, 214, 0.58),
+          inset 0 0 18px rgba(95, 255, 214, 0.1);
+      }
+
+      .badge-card.is-magic {
+        border-color: var(--yellow);
+        box-shadow:
+          5px 5px 0 #000,
+          0 0 18px rgba(255, 215, 106, 0.55),
+          inset 0 0 18px rgba(255, 215, 106, 0.08);
+      }
+
+      .badge-card__image-wrap {
+        position: relative;
+        display: grid;
+        min-height: 150px;
+        place-items: center;
+      }
+
+      .badge-card__image {
+        display: block;
+        width: min(100%, 170px);
+        max-height: 190px;
+        object-fit: contain;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        user-select: none;
+        filter: grayscale(1) brightness(0.36) opacity(0.62);
+        transition:
+          transform 0.2s ease,
+          filter 0.2s ease;
+      }
+
+      .badge-card.is-collected .badge-card__image,
+      .badge-card.is-magic .badge-card__image {
+        filter:
+          drop-shadow(0 0 8px rgba(95, 255, 214, 0.9))
+          drop-shadow(0 0 20px rgba(255, 215, 106, 0.48));
+        animation: badgeFloat 1.8s ease-in-out infinite alternate;
+      }
+
+      .badge-card__lock {
+        position: absolute;
+        display: grid;
+        width: 72px;
+        height: 34px;
+        place-items: center;
+        border: 2px solid var(--cream);
+        background: rgba(5, 10, 22, 0.9);
+        box-shadow: 3px 3px 0 #000;
+        color: var(--cream);
+        font-size: 11px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .badge-card.is-collected .badge-card__lock,
+      .badge-card.is-magic .badge-card__lock {
+        display: none;
+      }
+
+      .badge-card__body {
+        position: relative;
+        z-index: 1;
+      }
+
+      .badge-card__name {
+        margin: 0;
+        color: var(--cream);
+        font-size: 15px;
+        line-height: 1.25;
+        text-shadow: 2px 2px 0 #000;
+      }
+
+      .badge-card__city {
+        margin: 7px 0 0;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 900;
+        line-height: 1.3;
+        text-transform: uppercase;
+      }
+
+      .badge-card__state {
+        display: inline-flex;
+        margin-top: 10px;
+        padding: 5px 7px;
+        border: 2px solid #64748b;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .badge-card.is-collected .badge-card__state {
+        border-color: var(--green);
+        color: var(--green);
+      }
+
+      .badge-card.is-magic .badge-card__state {
+        border-color: var(--yellow);
+        color: var(--yellow);
+      }
+
+      @keyframes badgeFloat {
+        from {
+          transform: translateY(0) scale(1);
+        }
+
+        to {
+          transform: translateY(-6px) scale(1.025);
+        }
+      }
+
       .sr-only {
         position: absolute;
         width: 1px;
@@ -377,6 +682,33 @@
         .island-node {
           min-height: 260px;
         }
+
+        .badge-collection-btn {
+          top: auto;
+          left: 18px;
+          bottom: 18px;
+          min-height: 50px;
+          padding: 8px 10px;
+        }
+
+        .badge-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .badge-card {
+          grid-template-columns: 150px 1fr;
+          grid-template-rows: auto;
+          align-items: center;
+          text-align: left;
+        }
+
+        .badge-card__image-wrap {
+          min-height: 132px;
+        }
+
+        .badge-card__image {
+          max-height: 140px;
+        }
       }
 
       @media (max-width: 560px) {
@@ -408,6 +740,24 @@
         .lock-badge {
           font-size: 10px;
         }
+
+        .badge-collection-panel {
+          width: 100vw;
+          padding: 22px 16px;
+        }
+
+        .badge-card {
+          grid-template-columns: 112px 1fr;
+          padding: 10px;
+        }
+
+        .badge-card__image-wrap {
+          min-height: 108px;
+        }
+
+        .badge-card__image {
+          max-height: 112px;
+        }
       }
     </style>
   </head>
@@ -429,6 +779,25 @@
         <button class="nav-arrow next" type="button" id="nextIsland" aria-label="Show next islands">&gt;</button>
       </section>
     </main>
+
+
+    <button class="badge-collection-btn" id="badgeCollectionBtn" type="button" aria-controls="badgeCollectionPanel" aria-expanded="false">
+      <span class="badge-collection-btn__symbol" aria-hidden="true">★</span>
+      <span class="badge-collection-btn__text">
+        <span>Badges</span>
+        <span class="badge-collection-count" id="badgeCollectionCount">0 / 3</span>
+      </span>
+    </button>
+
+    <div class="badge-collection-backdrop" id="badgeCollectionBackdrop"></div>
+
+    <aside class="badge-collection-panel" id="badgeCollectionPanel" role="dialog" aria-modal="true" aria-labelledby="badgeCollectionHeading" aria-hidden="true">
+      <button class="badge-collection-close" id="badgeCollectionClose" type="button" aria-label="Close badge collection">X</button>
+      <h2 class="badge-collection-heading" id="badgeCollectionHeading">Badge Collection</h2>
+      <p class="badge-collection-summary" id="badgeCollectionSummary">Collected 0 of 3 playable badges.</p>
+      <p class="badge-magic-note" id="badgeMagicNote" hidden>The Magic Master Key is active. Unfinished playable badges are shown as magically unlocked.</p>
+      <div class="badge-grid" id="badgeGrid"></div>
+    </aside>
 
     <div id="sharedMenuMount" data-menu-page="kingdom" data-menu-title="SQL Kingdom Menu"></div>
     <script src="shared_files/shared-progress.js"></script>
@@ -455,12 +824,13 @@
           lockedImage: "res/kingdom/shadow_island.png"
         },
         {
-          id: "future-island-1",
-          name: "Coming Soon",
-          image: "res/kingdom/shadow_island.png",
-          alt: "Locked future island",
-          type: "coming-soon",
-          link: null
+          id: "dataworks-citadel",
+          name: "Dataworks Citadel",
+          image: "res/kingdom/city_3.png",
+          alt: "Dataworks Citadel floating clockwork islands",
+          type: "playable",
+          link: "city_3/index_city_3.html",
+          lockedImage: "res/kingdom/shadow_island.png"
         },
         {
           id: "future-island-2",
@@ -485,9 +855,150 @@
       const prevButton = document.querySelector("#prevIsland");
       const nextButton = document.querySelector("#nextIsland");
       const carouselNote = document.querySelector("#carouselNote");
+      const badgeCollectionBtn = document.querySelector("#badgeCollectionBtn");
+      const badgeCollectionCount = document.querySelector("#badgeCollectionCount");
+      const badgeCollectionBackdrop = document.querySelector("#badgeCollectionBackdrop");
+      const badgeCollectionPanel = document.querySelector("#badgeCollectionPanel");
+      const badgeCollectionClose = document.querySelector("#badgeCollectionClose");
+      const badgeCollectionSummary = document.querySelector("#badgeCollectionSummary");
+      const badgeMagicNote = document.querySelector("#badgeMagicNote");
+      const badgeGrid = document.querySelector("#badgeGrid");
       const maxIndex = Math.max(0, islands.length - visibleCount);
       let currentIndex = 0;
       let progress = window.SQLKingdomProgress.getGameProgress({ queueMigrationMessage: true });
+
+      const badgeDefinitions = [
+        {
+          id: "sql-foundations",
+          name: "SQL Foundations Badge",
+          city: "Foundation City",
+          image: "res/city_1/item/badge.webp",
+          earned(progressState) {
+            return Boolean(
+              progressState?.badges?.sqlFoundations ||
+              progressState?.buildings?.queryLab?.completed
+            );
+          }
+        },
+        {
+          id: "data-prep-city",
+          name: "Data Prep City Badge",
+          city: "Data Prep City",
+          image: "res/city_2/item/badge.webp",
+          earned(progressState) {
+            return Boolean(
+              progressState?.cities?.dataPrepCity?.completed ||
+              progressState?.cities?.dataPrepCity?.badge ||
+              progressState?.cities?.dataPrepCity?.buildings?.cleaningClinic?.completed
+            );
+          }
+        },
+        {
+          id: "dataworks-citadel",
+          name: "Dataworks Citadel Badge",
+          city: "Dataworks Citadel",
+          image: "res/city_3/item/badge.webp",
+          earned(progressState) {
+            return Boolean(
+              progressState?.cities?.dataworksCitadel?.completed ||
+              progressState?.cities?.dataworksCitadel?.badge ||
+              progressState?.cities?.dataworksCitadel?.buildings?.sqlalchemyEngineRoom?.completed
+            );
+          }
+        }
+      ];
+
+      function badgeDisplayState(definition, progressState) {
+        const earned = definition.earned(progressState);
+        const magicUnlocked = !earned && progressState?.unlockEverythingUsed === true;
+        return {
+          collected: earned || magicUnlocked,
+          earned,
+          magicUnlocked
+        };
+      }
+
+      function renderBadges(progressState = progress) {
+        const states = badgeDefinitions.map((definition) => ({
+          definition,
+          ...badgeDisplayState(definition, progressState)
+        }));
+        const collectedCount = states.filter((state) => state.collected).length;
+
+        badgeCollectionCount.textContent = `${collectedCount} / ${badgeDefinitions.length}`;
+        badgeCollectionBtn.setAttribute(
+          "aria-label",
+          `Open badge collection, ${collectedCount} of ${badgeDefinitions.length} collected`
+        );
+        badgeCollectionSummary.textContent = `Collected ${collectedCount} of ${badgeDefinitions.length} playable badges.`;
+        badgeMagicNote.hidden = progressState?.unlockEverythingUsed !== true;
+        badgeGrid.replaceChildren();
+
+        states.forEach(({ definition, collected, magicUnlocked }) => {
+          const card = document.createElement("article");
+          card.className = "badge-card";
+          card.classList.toggle("is-collected", collected && !magicUnlocked);
+          card.classList.toggle("is-magic", magicUnlocked);
+          card.dataset.badgeId = definition.id;
+
+          const imageWrap = document.createElement("div");
+          imageWrap.className = "badge-card__image-wrap";
+
+          const image = document.createElement("img");
+          image.className = "badge-card__image";
+          image.src = definition.image;
+          image.alt = "";
+          image.setAttribute("aria-hidden", "true");
+
+          const lock = document.createElement("span");
+          lock.className = "badge-card__lock";
+          lock.textContent = "Locked";
+
+          const body = document.createElement("div");
+          body.className = "badge-card__body";
+
+          const name = document.createElement("h3");
+          name.className = "badge-card__name";
+          name.textContent = definition.name;
+
+          const city = document.createElement("p");
+          city.className = "badge-card__city";
+          city.textContent = definition.city;
+
+          const stateLabel = document.createElement("span");
+          stateLabel.className = "badge-card__state";
+          stateLabel.textContent = magicUnlocked ? "Magic Unlocked" : collected ? "Collected" : "Locked";
+
+          imageWrap.append(image, lock);
+          body.append(name, city, stateLabel);
+          card.append(imageWrap, body);
+          badgeGrid.appendChild(card);
+        });
+      }
+
+      function openBadgeCollection() {
+        window.SQLKingdomMenu?.closeMenu?.();
+        badgeCollectionPanel.classList.add("open");
+        badgeCollectionBackdrop.classList.add("open");
+        badgeCollectionPanel.setAttribute("aria-hidden", "false");
+        badgeCollectionBtn.setAttribute("aria-expanded", "true");
+        badgeCollectionClose.focus();
+      }
+
+      function closeBadgeCollection() {
+        const wasOpen = badgeCollectionPanel.classList.contains("open");
+        badgeCollectionPanel.classList.remove("open");
+        badgeCollectionBackdrop.classList.remove("open");
+        badgeCollectionPanel.setAttribute("aria-hidden", "true");
+        badgeCollectionBtn.setAttribute("aria-expanded", "false");
+        if (wasOpen) badgeCollectionBtn.focus();
+      }
+
+      function refreshKingdomFromStorage() {
+        progress = window.SQLKingdomProgress.getGameProgress({ queueMigrationMessage: true });
+        renderIslands();
+        renderBadges(progress);
+      }
 
       function showUnlockToast(message) {
         if (!message) return;
@@ -565,6 +1076,7 @@
         progress = event.detail.progress;
         showUnlockToast(event.detail.message);
         renderIslands();
+        renderBadges(progress);
       });
 
       window.addEventListener("sqlKingdom:reset", (event) => {
@@ -572,9 +1084,27 @@
         showUnlockToast(event.detail.message);
         currentIndex = 0;
         renderIslands();
+        renderBadges(progress);
+      });
+
+      badgeCollectionBtn.addEventListener("click", openBadgeCollection);
+      badgeCollectionClose.addEventListener("click", closeBadgeCollection);
+      badgeCollectionBackdrop.addEventListener("click", closeBadgeCollection);
+      document.querySelector("#sharedBurgerBtn")?.addEventListener("click", closeBadgeCollection);
+
+      window.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeBadgeCollection();
+      });
+
+      window.addEventListener("pageshow", refreshKingdomFromStorage);
+      window.addEventListener("storage", (event) => {
+        if (event.key === window.SQLKingdomProgress.STORAGE_KEY) {
+          refreshKingdomFromStorage();
+        }
       });
 
       renderIslands();
+      renderBadges(progress);
       consumePendingUnlockMessage();
       showUnlockToast(window.SQLKingdomResetSystem?.consumeGuardMessage());
     </script>

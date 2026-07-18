@@ -7,6 +7,7 @@
     <link rel="shortcut icon" href="../res/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../shared_files/shared-room-layout.css" />
     <link rel="stylesheet" href="../shared_files/shared-room-components.css" />
+    <link rel="stylesheet" href="../shared_files/shared-menu.css" />
     <style>
       .marker-shelf { left: 12%; top: 37%; }
       .marker-server { left: 28.5%; top: 48%; }
@@ -59,7 +60,11 @@
       </section>
     </main>
 
+    <div id="sharedMenuMount" data-menu-page="foundation-city" data-menu-title="Foundation City Menu" data-menu-base="../"></div>
     <script src="../shared_files/shared-progress.js"></script>
+    <script src="../shared_files/shared-reset-system.js"></script>
+    <script src="../shared_files/shared-magic-key.js"></script>
+    <script src="../shared_files/shared-menu.js"></script>
     <script>
       const DEFAULT_PROGRESS = {
         buildings: {
@@ -306,6 +311,7 @@ random notes...</code></pre>
       let currentRoomIndex = 0;
       let discoveryCompleteAnimationPlayed = false;
       let progress = getProgress();
+      let suppressAutoCompletion = false;
       const roomBg = document.querySelector("#roomBg");
       const roomStage = document.querySelector(".room-stage");
       const roomCounter = document.querySelector("#roomCounter");
@@ -814,6 +820,7 @@ random notes...</code></pre>
 
       function completeIfFinalRoom() {
         if (currentRoomIndex !== rooms.length - 1) return;
+        if (suppressAutoCompletion) return;
         const building = buildingProgress();
         if (building.completed) return;
         building.highestRoomUnlocked = Math.max(building.highestRoomUnlocked, currentRoomIndex);
@@ -835,6 +842,16 @@ random notes...</code></pre>
         normalizeWelcomeDiscovery();
         renderRoom();
       }
+
+      window.addEventListener("sqlKingdom:unlockAll", () => {
+        progress = getProgress();
+        suppressAutoCompletion = true;
+        try {
+          renderRoom();
+        } finally {
+          suppressAutoCompletion = false;
+        }
+      });
     </script>
   </body>
 </html>

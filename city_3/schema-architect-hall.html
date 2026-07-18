@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Schema Architect Hall | Dataworks Citadel</title>
+  <link rel="shortcut icon" href="../res/favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="../shared_files/shared-room-layout.css" />
+  <link rel="stylesheet" href="../shared_files/shared-room-components.css" />
+  <link rel="stylesheet" href="../shared_files/shared-menu.css" />
+  <style>
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .side-panel h1 {
+      flex: 0 0 auto;
+      font-size: 27px;
+    }
+
+    .room-counter,
+    .path-title,
+    .lesson-card {
+      flex: 0 0 auto;
+    }
+
+    .lesson-list {
+      flex: 1 1 auto;
+      min-height: 0;
+      padding: 2px 6px 6px 2px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-color: var(--cyan) rgba(2, 6, 23, 0.72);
+      scrollbar-width: thin;
+    }
+
+    .lesson-card {
+      max-height: 28vh;
+      overflow-y: auto;
+    }
+
+    .marker-schema-map {
+      left: 8.4%;
+      top: 28%;
+    }
+
+    .marker-blueprint-table {
+      left: 51%;
+      top: 66%;
+    }
+
+    .marker-relationship-board {
+      left: 83%;
+      top: 29%;
+    }
+
+    .marker-integrity-key {
+      left: 87.5%;
+      top: 65%;
+    }
+
+    .concept-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    .concept-grid .pixel-box {
+      margin: 0;
+      min-width: 0;
+    }
+
+    .formula-line {
+      margin: 10px 0;
+      padding: 9px 12px;
+      border-left: 5px solid var(--yellow);
+      background: rgba(255, 215, 106, 0.08);
+      color: var(--cream);
+      font-weight: 900;
+    }
+
+    .reward-modal {
+      z-index: 140;
+    }
+
+    @media (max-width: 900px) {
+      .concept-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .side-panel h1 {
+        font-size: 22px;
+      }
+
+      .lesson-list {
+        max-height: 120px;
+      }
+
+      .lesson-card {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="room-layout">
+    <aside class="side-panel">
+      <h1>Schema Architect Hall</h1>
+      <p class="room-counter" id="roomCounter">Current Room: 0 / 8</p>
+      <p class="path-title">Learning Path</p>
+      <div class="lesson-list" id="roomList"></div>
+      <article class="lesson-card" id="lessonCard">
+        <h2 id="lessonTitle">Welcoming Room</h2>
+        <div class="room-summary" id="lessonText"></div>
+      </article>
+    </aside>
+
+    <section class="room-stage" aria-label="Schema Architect Hall rooms">
+      <img class="room-bg" id="roomBg" src="../res/city_3/rooms_background/schema-architect-hall-welcome.webp" alt="" />
+      <a class="return-city-btn" id="topReturn" href="index_city_3.html">Back to Dataworks Citadel</a>
+
+      <div class="hotspots" id="hotspots">
+        <button class="info-marker marker-schema-map" type="button" data-marker-id="schemaMap"
+          aria-label="Schema map information"></button>
+        <button class="info-marker marker-blueprint-table" type="button" data-marker-id="blueprintTable"
+          aria-label="Schema blueprint table information"></button>
+        <button class="info-marker marker-relationship-board" type="button" data-marker-id="relationshipBoard"
+          aria-label="Table relationship board information"></button>
+        <button class="info-marker marker-integrity-key" type="button" data-marker-id="integrityKey"
+          aria-label="Data integrity key information"></button>
+      </div>
+
+      <div class="marker-tooltip" id="markerTooltip" aria-hidden="true">
+        <h3 id="markerTooltipTitle"></h3>
+        <p id="markerTooltipText"></p>
+      </div>
+
+      <div class="room-nav">
+        <button class="pixel-btn" id="prevRoom" type="button">Previous</button>
+        <button class="pixel-btn" id="nextRoom" type="button">Next</button>
+        <a class="pixel-btn" id="finalReturn" href="index_city_3.html" hidden>Back to Dataworks Citadel</a>
+      </div>
+
+      <article class="info-card" id="infoCard" aria-live="polite">
+        <div id="mainLessonContent"></div>
+      </article>
+
+      <article class="reward-modal" id="rewardModal" hidden>
+        <div class="reward-card">
+          <img src="../res/city_3/item/regular-key.webp" class="reward-key-img" alt="Feature Pipeline Works Key" />
+          <h2 id="rewardTitle">Feature Pipeline Works Key</h2>
+          <p id="rewardMessage">You received the Feature Pipeline Works Key.</p>
+          <button class="pixel-btn" id="rewardContinue" type="button">Continue</button>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <div id="sharedMenuMount" data-menu-page="dataworks-citadel" data-menu-title="Dataworks Citadel Menu" data-menu-base="../"></div>
+  <script src="../shared_files/shared-progress.js"></script>
+  <script src="../shared_files/shared-reset-system.js"></script>
+  <script src="../shared_files/shared-magic-key.js"></script>
+  <script src="../shared_files/shared-menu.js"></script>
+  <script>
+    const canOpenSchemaArchitectHall =
+      window.SQLKingdomResetSystem?.guardDataworksCitadelBuildingAccess?.(
+        "schemaArchitectHall",
+        "index_city_3.html",
+        "Complete Ranking Observatory first.",
+        "../index.html"
+      ) ?? true;
+
+    const QUIZ_ADVANCE_DELAY_MS = 420;
+    const TEMPLATE_KEY = "schemaArchitectHall";
+    const BUILDING_ID = "schemaArchitectHall";
+    const REWARD_NAME = "Feature Pipeline Works Key";
+
+    const rooms = [
+      {
+        title: "Welcoming Room",
+        image: "../res/city_3/rooms_background/schema-architect-hall-welcome.webp",
+        type: "welcome",
+        summary: "Data modeling organizes tables, relationships, and rules into a reliable production schema.",
+        points: ["Schema Map", "Blueprint Table", "Relationship Board", "Integrity Key"],
+        contentHtml: `
+            <h2>Welcome to Schema Architect Hall</h2>
+            <p>This hall turns scattered data into a clear relational design.</p>
+            <p>Explore every glowing marker before entering the modeling rooms.</p>
+            <ul>
+              <li>Organize attributes into focused tables.</li>
+              <li>Connect tables with meaningful relationships.</li>
+              <li>Protect data with keys and integrity constraints.</li>
+            </ul>
+          `
+      },
+      {
+        title: "Data Modeling and Schema Design",
+        image: "../res/city_3/rooms_background/schema-architect-hall-empty.webp",
+        type: "lesson",
+        summary: "A schema is the blueprint that defines tables, columns, keys, relationships, and rules.",
+        points: ["Model real entities", "Choose stable keys", "Design for clear queries"],
+        contentHtml: `
+            <h2>Data Modeling and Schema Design</h2>
+            <p>A relational schema describes how data is organized before records are inserted.</p>
+            <div class="concept-grid">
+              <div class="pixel-box"><strong>Entity</strong><br>Something stored, such as a customer or product.</div>
+              <div class="pixel-box"><strong>Attribute</strong><br>A property, such as customer_name or price.</div>
+              <div class="pixel-box"><strong>Relationship</strong><br>How one entity connects to another.</div>
+            </div>
+            <pre class="sql-code"><code>CREATE TABLE customers (
+  customer_id INTEGER PRIMARY KEY,
+  customer_name VARCHAR(100) NOT NULL,
+  email VARCHAR(160) UNIQUE
+);
+
+CREATE TABLE orders (
+  order_id INTEGER PRIMARY KEY,
+  customer_id INTEGER NOT NULL,
+  order_date DATE NOT NULL,
+  FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);</code></pre>
+            <p>The tables represent separate entities. The foreign key records which customer owns each order.</p>
+            <div class="formula-line">Good schemas make valid data easy to store and invalid data difficult to create.</div>
+          `
+      },
+      {
+        title: "First Normal Form (1NF)",
+        image: "../res/city_3/rooms_background/schema-architect-hall-empty.webp",
+        type: "lesson",
+        summary: "1NF requires atomic values, consistent columns, and no repeating groups inside a row.",
+        points: ["One value per cell", "No repeating columns", "Rows remain identifiable"],
+        contentHtml: `
+            <h2>First Normal Form (1NF)</h2>
+            <p>A table is in <strong>1NF</strong> when each cell contains one value and repeated groups are moved into rows or another table.</p>
+            <h3>Problem: several phone numbers in one cell</h3>
+            <table class="result-table">
+              <thead><tr><th>customer_id</th><th>name</th><th>phone_numbers</th></tr></thead>
+              <tbody><tr><td>7</td><td>Emma</td><td>+44-100, +44-200</td></tr></tbody>
+            </table>
+            <p>The phone_numbers value is not atomic. Searching or validating one number becomes difficult.</p>
+            <h3>1NF design</h3>
+            <pre class="sql-code"><code>CREATE TABLE customer_phones (
+  customer_id INTEGER NOT NULL,
+  phone_number VARCHAR(30) NOT NULL,
+  PRIMARY KEY (customer_id, phone_number),
+  FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);</code></pre>
+            <table class="result-table">
+              <thead><tr><th>customer_id</th><th>phone_number</th></tr></thead>
+              <tbody>
+                <tr><td>7</td><td>+44-100</td></tr>
+                <tr><td>7</td><td>+44-200</td></tr>
+              </tbody>
+            </table>
+            <div class="formula-line">1NF: one column stores one kind of value, and one cell stores one value.</div>
+          `
+      },
+      {
+        title: "Second Normal Form (2NF)",
+        image: "../res/city_3/rooms_background/schema-architect-hall-empty.webp",
+        type: "lesson",
+        summary: "2NF removes attributes that depend on only part of a composite key.",
+        points: ["Start from 1NF", "Remove partial dependencies", "Separate reusable entity data"],
+        contentHtml: `
+            <h2>Second Normal Form (2NF)</h2>
+            <p><strong>2NF</strong> applies when a table has a composite key. Every non-key column must depend on the whole key.</p>
+            <h3>Problem table</h3>
+            <pre class="sql-code"><code>order_items(
+  order_id,
+  product_id,
+  product_name,
+  quantity,
+  PRIMARY KEY (order_id, product_id)
+)</code></pre>
+            <p><code>quantity</code> depends on the complete pair: order_id and product_id. However, <code>product_name</code> depends only on product_id. That is a partial dependency.</p>
+            <h3>2NF design</h3>
+            <pre class="sql-code"><code>CREATE TABLE products (
+  product_id INTEGER PRIMARY KEY,
+  product_name VARCHAR(120) NOT NULL
+);
+
+CREATE TABLE order_items (
+  order_id INTEGER NOT NULL,
+  product_id INTEGER NOT NULL,
+  quantity INTEGER NOT NULL,
+  PRIMARY KEY (order_id, product_id),
+  FOREIGN KEY (product_id) REFERENCES products(product_id)
+);</code></pre>
+            <div class="formula-line">2NF: every non-key attribute depends on the complete primary key.</div>
+          `
+      },
+      {
+        title: "Third Normal Form (3NF)",
+        image: "../res/city_3/rooms_background/schema-architect-hall-empty.webp",
+        type: "lesson",
+        summary: "3NF removes transitive dependencies between non-key attributes.",
+        points: ["Start from 2NF", "Remove indirect dependencies", "Store each fact once"],
+        contentHtml: `
+            <h2>Third Normal Form (3NF)</h2>
+            <p>In <strong>3NF</strong>, non-key columns depend on the key and not on other non-key columns.</p>
+            <h3>Problem table</h3>
+            <pre class="sql-code"><code>employees(
+  employee_id PRIMARY KEY,
+  employee_name,
+  department_id,
+  department_name
+)</code></pre>
+            <p>department_name depends on department_id, not directly on employee_id. Repeating it for every employee can create update inconsistencies.</p>
+            <h3>3NF design</h3>
+            <pre class="sql-code"><code>CREATE TABLE departments (
+  department_id INTEGER PRIMARY KEY,
+  department_name VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE employees (
+  employee_id INTEGER PRIMARY KEY,
+  employee_name VARCHAR(100) NOT NULL,
+  department_id INTEGER NOT NULL,
+  FOREIGN KEY (department_id) REFERENCES departments(department_id)
+);</code></pre>
+            <p>Department facts now have one authoritative location.</p>
+            <div class="formula-line">3NF: non-key columns should not describe other non-key columns.</div>
+          `
+      },
+      {
+        title: "Relationships Between Tables",
+        image: "../res/city_3/rooms_background/schema-architect-hall-empty.webp",
+        type: "lesson",
+        summary: "Primary and foreign keys express one-to-one, one-to-many, and many-to-many relationships.",
+        points: ["One-to-one", "One-to-many", "Many-to-many bridge tables"],
+        contentHtml: `
+            <h2>Relationships Between Tables</h2>
+            <div class="concept-grid">
+              <div class="pixel-box"><strong>One-to-one</strong><br>One user has at most one profile.</div>
+              <div class="pixel-box"><strong>One-to-many</strong><br>One customer can place many orders.</div>
+              <div class="pixel-box"><strong>Many-to-many</strong><br>Many students can join many courses.</div>
+            </div>
+            <h3>One customer to many orders</h3>
+            <pre class="sql-code"><code>customers.customer_id
+        1
+        |
+        | many
+orders.customer_id</code></pre>
+            <h3>Many-to-many through a bridge table</h3>
+            <pre class="sql-code"><code>CREATE TABLE enrollments (
+  student_id INTEGER NOT NULL,
+  course_id INTEGER NOT NULL,
+  enrolled_at DATE NOT NULL,
+  PRIMARY KEY (student_id, course_id),
+  FOREIGN KEY (student_id) REFERENCES students(student_id),
+  FOREIGN KEY (course_id) REFERENCES courses(course_id)
+);</code></pre>
+            <p>The bridge table converts one many-to-many relationship into two one-to-many relationships.</p>
+          `
+      },
+      {
+        title: "Data Integrity Rules",
+        image: "../res/city_3/rooms_background/schema-architect-hall-empty.webp",
+        type: "lesson",
+        summary: "Constraints protect identity, required values, uniqueness, valid ranges, and references.",
+        points: ["Entity integrity", "Domain integrity", "Referential integrity"],
+        contentHtml: `
+            <h2>Data Integrity Rules</h2>
+            <table class="result-table">
+              <thead><tr><th>Constraint</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr><td>PRIMARY KEY</td><td>Uniquely identifies each row.</td></tr>
+                <tr><td>FOREIGN KEY</td><td>Requires a valid referenced parent row.</td></tr>
+                <tr><td>NOT NULL</td><td>Requires a value.</td></tr>
+                <tr><td>UNIQUE</td><td>Prevents duplicate values.</td></tr>
+                <tr><td>CHECK</td><td>Enforces a business rule or valid range.</td></tr>
+              </tbody>
+            </table>
+            <pre class="sql-code"><code>CREATE TABLE course_sessions (
+  session_id INTEGER PRIMARY KEY,
+  course_id INTEGER NOT NULL,
+  starts_at TIMESTAMP NOT NULL,
+  capacity INTEGER NOT NULL CHECK (capacity &gt; 0),
+  status VARCHAR(20) NOT NULL
+    CHECK (status IN ('planned', 'open', 'closed')),
+  FOREIGN KEY (course_id) REFERENCES courses(course_id)
+);</code></pre>
+            <p>Application validation improves feedback, but database constraints remain the final protection for stored data.</p>
+            <div class="formula-line">Integrity rules turn design decisions into enforceable guarantees.</div>
+          `
+      },
+      {
+        title: "Quiz Room",
+        image: "../res/city_3/rooms_background/schema-architect-hall-empty.webp",
+        type: "quiz",
+        summary: "Test normalization, relationships, schema design, and integrity rules.",
+        points: ["Six questions", "Randomized answer order", "Correct answers unlock the recap"],
+        contentHtml: `
+            <h2>Quiz Room</h2>
+            <p>Answer every question correctly to unlock the recap room.</p>
+            <div class="quiz-box">
+              <article class="quiz-question" data-question-id="first-normal-form">
+                <h3>Question 1</h3>
+                <p>Which change helps a table satisfy First Normal Form?</p>
+                <button class="quiz-option" type="button" data-correct="true">Store one atomic value in each cell</button>
+                <button class="quiz-option" type="button">Store several phone numbers in one text field</button>
+                <button class="quiz-option" type="button">Repeat phone_1, phone_2, and phone_3 columns</button>
+                <button class="quiz-option" type="button">Remove every primary key</button>
+              </article>
+              <article class="quiz-question" data-question-id="second-normal-form">
+                <h3>Question 2</h3>
+                <p>What does Second Normal Form remove?</p>
+                <button class="quiz-option" type="button" data-correct="true">Partial dependencies on part of a composite key</button>
+                <button class="quiz-option" type="button">All foreign keys</button>
+                <button class="quiz-option" type="button">Every relationship between tables</button>
+                <button class="quiz-option" type="button">All numeric columns</button>
+              </article>
+              <article class="quiz-question" data-question-id="third-normal-form">
+                <h3>Question 3</h3>
+                <p>Which dependency should be removed to reach Third Normal Form?</p>
+                <button class="quiz-option" type="button" data-correct="true">A non-key column depending on another non-key column</button>
+                <button class="quiz-option" type="button">A primary key identifying its row</button>
+                <button class="quiz-option" type="button">A foreign key referencing a parent table</button>
+                <button class="quiz-option" type="button">A required column using NOT NULL</button>
+              </article>
+              <article class="quiz-question" data-question-id="many-to-many">
+                <h3>Question 4</h3>
+                <p>How is a many-to-many relationship normally represented?</p>
+                <button class="quiz-option" type="button" data-correct="true">With a bridge table containing foreign keys to both tables</button>
+                <button class="quiz-option" type="button">By storing every related ID in one comma-separated field</button>
+                <button class="quiz-option" type="button">By removing both primary keys</button>
+                <button class="quiz-option" type="button">With an ORDER BY clause</button>
+              </article>
+              <article class="quiz-question" data-question-id="foreign-key">
+                <h3>Question 5</h3>
+                <p>What is the main purpose of a foreign key?</p>
+                <button class="quiz-option" type="button" data-correct="true">To require a valid relationship with a referenced row</button>
+                <button class="quiz-option" type="button">To automatically sort every query</button>
+                <button class="quiz-option" type="button">To replace all indexes</button>
+                <button class="quiz-option" type="button">To store several values in one column</button>
+              </article>
+              <article class="quiz-question" data-question-id="check-constraint">
+                <h3>Question 6</h3>
+                <p>Which constraint can require capacity to be greater than zero?</p>
+                <button class="quiz-option" type="button" data-correct="true">CHECK</button>
+                <button class="quiz-option" type="button">ORDER BY</button>
+                <button class="quiz-option" type="button">DISTINCT</button>
+                <button class="quiz-option" type="button">GROUP BY</button>
+              </article>
+            </div>
+            <p class="quiz-feedback"></p>
+          `
+      },
+      {
+        title: "Recap Room",
+        image: "../res/city_3/rooms_background/schema-architect-hall-empty.webp",
+        type: "lesson",
+        summary: "You can now structure production datasets with normalized tables, relationships, and integrity rules.",
+        points: ["1NF, 2NF, and 3NF reviewed", "Relationships and constraints reviewed", "Feature Pipeline Works Key reward"],
+        contentHtml: `
+            <h2>Recap Room</h2>
+            <p>You completed Schema Architect Hall and learned how reliable relational datasets are designed.</p>
+            <ul>
+              <li><strong>1NF</strong> keeps values atomic and removes repeating groups.</li>
+              <li><strong>2NF</strong> removes dependencies on only part of a composite key.</li>
+              <li><strong>3NF</strong> removes dependencies between non-key columns.</li>
+              <li>Primary and foreign keys connect related entities.</li>
+              <li>Bridge tables represent many-to-many relationships.</li>
+              <li>Constraints enforce identity, required values, uniqueness, ranges, and valid references.</li>
+              <li>A clear schema creates dependable data for analytics and ML pipelines.</li>
+            </ul>
+            <p class="reward-note">Reward unlocked: Feature Pipeline Works Key.</p>
+          `
+      }
+    ];
+
+    const welcomeMarkers = [
+      {
+        id: "schemaMap",
+        title: "Schema Map",
+        text: "The map separates real-world entities into focused tables with clearly named attributes."
+      },
+      {
+        id: "blueprintTable",
+        title: "Blueprint Table",
+        text: "The central blueprint represents the complete schema: tables, columns, keys, constraints, and relationships."
+      },
+      {
+        id: "relationshipBoard",
+        title: "Relationship Board",
+        text: "The linked tables show how primary and foreign keys form one-to-one, one-to-many, and many-to-many relationships."
+      },
+      {
+        id: "integrityKey",
+        title: "Integrity Key",
+        text: "Keys and constraints protect identity, uniqueness, required values, valid ranges, and references."
+      }
+    ];
+
+    let currentRoomIndex = 0;
+    let currentQuizIndex = 0;
+    let discoveryCompleteAnimationPlayed = false;
+    let progress = getProgress();
+    let suppressAutoCompletion = false;
+
+    const roomBg = document.querySelector("#roomBg");
+    const roomStage = document.querySelector(".room-stage");
+    const roomCounter = document.querySelector("#roomCounter");
+    const hotspots = document.querySelector("#hotspots");
+    const prevRoom = document.querySelector("#prevRoom");
+    const nextRoom = document.querySelector("#nextRoom");
+    const topReturn = document.querySelector("#topReturn");
+    const finalReturn = document.querySelector("#finalReturn");
+    const roomList = document.querySelector("#roomList");
+    const lessonTitle = document.querySelector("#lessonTitle");
+    const lessonText = document.querySelector("#lessonText");
+    const mainLessonContent = document.querySelector("#mainLessonContent");
+    const rewardModal = document.querySelector("#rewardModal");
+    const rewardContinue = document.querySelector("#rewardContinue");
+    const markerTooltip = document.querySelector("#markerTooltip");
+    const markerTooltipTitle = document.querySelector("#markerTooltipTitle");
+    const markerTooltipText = document.querySelector("#markerTooltipText");
+
+    function getProgress() {
+      return window.SQLKingdomProgress.getGameProgress();
+    }
+
+    function saveProgress(progressToSave) {
+      return window.SQLKingdomProgress.saveGameProgress(progressToSave);
+    }
+
+    function templateProgress() {
+      progress.cities = progress.cities || {};
+      progress.cities.dataworksCitadel = progress.cities.dataworksCitadel || {};
+      progress.cities.dataworksCitadel[TEMPLATE_KEY] = progress.cities.dataworksCitadel[TEMPLATE_KEY] || {
+        discoveredMarkers: [],
+        highestRoomUnlocked: 0,
+        quizPassed: false,
+        completed: false,
+        correctQuizAnswers: [],
+        reward: ""
+      };
+
+      const template = progress.cities.dataworksCitadel[TEMPLATE_KEY];
+      if (!Array.isArray(template.discoveredMarkers)) template.discoveredMarkers = [];
+      if (!Array.isArray(template.correctQuizAnswers)) template.correctQuizAnswers = [];
+      if (!Number.isInteger(template.highestRoomUnlocked) || template.highestRoomUnlocked < 0) {
+        template.highestRoomUnlocked = 0;
+      }
+      template.quizPassed = Boolean(template.quizPassed);
+      template.completed = Boolean(template.completed);
+      return template;
+    }
+
+    function markerIds() {
+      return welcomeMarkers.map((marker) => marker.id);
+    }
+
+    function discoveredMarkers() {
+      return templateProgress().discoveredMarkers;
+    }
+
+    function discoveryCount() {
+      const validMarkerIds = markerIds();
+      return discoveredMarkers().filter((id) => validMarkerIds.includes(id)).length;
+    }
+
+    function allWelcomeMarkersDiscovered() {
+      const discovered = discoveredMarkers();
+      return welcomeMarkers.every((marker) => discovered.includes(marker.id));
+    }
+
+    function getWelcomeMarker(markerId) {
+      return welcomeMarkers.find((marker) => marker.id === markerId);
+    }
+
+    function renderMainContent(contentHtml) {
+      mainLessonContent.innerHTML = contentHtml;
+    }
+
+    function renderWelcomeContent(message = "", animateComplete = false) {
+      const complete = allWelcomeMarkersDiscovered();
+      const shouldAnimate = complete && animateComplete && !discoveryCompleteAnimationPlayed;
+      const statusClass = complete
+        ? `discovery-complete${shouldAnimate ? " animate-complete" : ""}`
+        : "discovery-status";
+      const statusText = complete
+        ? "All architecture tools discovered! You can enter the next room."
+        : `Objects discovered: ${discoveryCount()} / ${welcomeMarkers.length}`;
+      const warning = message ? `<p class="discovery-warning">${message}</p>` : "";
+
+      return `
+          <h2>Welcome to Schema Architect Hall</h2>
+          <p>Explore every glowing architecture tool before starting the modeling path.</p>
+          <p class="${statusClass}">${statusText}</p>
+          ${complete ? "" : `<p class="discovery-hint">Hover, focus, or click each marker to discover it.</p>`}
+          ${warning}
+        `;
+    }
+
+    function renderWelcomeSidebarSummary() {
+      const complete = allWelcomeMarkersDiscovered();
+      lessonTitle.textContent = rooms[0].title;
+      lessonText.innerHTML = `
+          <p>${rooms[0].summary}</p>
+          <ul>
+            <li>Objects discovered: ${discoveryCount()} / ${welcomeMarkers.length}</li>
+            <li>${complete ? "Room 1 unlocked." : "Discover all architecture tools to unlock Room 1."}</li>
+          </ul>
+        `;
+    }
+
+    function updateMarkerStates() {
+      const discovered = discoveredMarkers();
+      document.querySelectorAll(".info-marker").forEach((markerElement) => {
+        const markerData = getWelcomeMarker(markerElement.dataset.markerId);
+        const isDiscovered = discovered.includes(markerElement.dataset.markerId);
+        markerElement.classList.toggle("is-discovered", isDiscovered);
+        if (markerData) {
+          markerElement.setAttribute(
+            "aria-label",
+            `${markerData.title} ${isDiscovered ? "discovered" : "not discovered"}`
+          );
+        }
+      });
+    }
+
+    function unlockFirstLessonIfReady() {
+      if (!allWelcomeMarkersDiscovered()) return false;
+      const template = templateProgress();
+      const unlockedNow = template.highestRoomUnlocked < 1;
+      template.highestRoomUnlocked = Math.max(template.highestRoomUnlocked, 1);
+      saveProgress(progress);
+      return unlockedNow;
+    }
+
+    function markWelcomeMarkerDiscovered(markerId) {
+      const markerData = getWelcomeMarker(markerId);
+      if (!markerData) return;
+
+      const wasComplete = allWelcomeMarkersDiscovered();
+      const discovered = discoveredMarkers();
+      if (!discovered.includes(markerId)) {
+        discovered.push(markerId);
+        saveProgress(progress);
+      }
+
+      const isComplete = allWelcomeMarkersDiscovered();
+      if (isComplete) unlockFirstLessonIfReady();
+      updateMarkerStates();
+
+      if (currentRoomIndex === 0) {
+        const shouldAnimateComplete = isComplete && !wasComplete && !discoveryCompleteAnimationPlayed;
+        renderWelcomeSidebarSummary();
+        renderMainContent(renderWelcomeContent("", shouldAnimateComplete));
+        if (shouldAnimateComplete) discoveryCompleteAnimationPlayed = true;
+        renderRoomList();
+        updateNextButtonState();
+      }
+    }
+
+    function showMarkerTooltip(markerElement, markerData) {
+      markerTooltipTitle.textContent = markerData.title;
+      markerTooltipText.textContent = markerData.text;
+      markerTooltip.classList.add("is-visible");
+      markerTooltip.setAttribute("aria-hidden", "false");
+
+      const stageRect = roomStage.getBoundingClientRect();
+      const markerRect = markerElement.getBoundingClientRect();
+      const tooltipRect = markerTooltip.getBoundingClientRect();
+      let left = markerRect.left - stageRect.left + markerRect.width / 2 - tooltipRect.width / 2;
+      let top = markerRect.top - stageRect.top - tooltipRect.height - 14;
+
+      if (top < 10) top = markerRect.bottom - stageRect.top + 14;
+      left = Math.max(10, Math.min(left, stageRect.width - tooltipRect.width - 10));
+      top = Math.max(10, Math.min(top, stageRect.height - tooltipRect.height - 10));
+      markerTooltip.style.left = `${left}px`;
+      markerTooltip.style.top = `${top}px`;
+    }
+
+    function hideMarkerTooltip() {
+      markerTooltip.classList.remove("is-visible");
+      markerTooltip.setAttribute("aria-hidden", "true");
+    }
+
+    function handleMarkerEnter(markerElement) {
+      if (currentRoomIndex !== 0) return;
+      const markerData = getWelcomeMarker(markerElement.dataset.markerId);
+      if (!markerData) return;
+      markWelcomeMarkerDiscovered(markerData.id);
+      showMarkerTooltip(markerElement, markerData);
+    }
+
+    function updateNextButtonState() {
+      const locked = currentRoomIndex === 0 && !allWelcomeMarkersDiscovered();
+      nextRoom.classList.toggle("is-disabled", locked);
+      nextRoom.setAttribute("aria-disabled", locked ? "true" : "false");
+    }
+
+    function updateCounter() {
+      roomCounter.textContent = `Current Room: ${currentRoomIndex} / ${rooms.length - 1}`;
+    }
+
+    function formatRoomTitle(room, index) {
+      return index === 0 ? "0. Welcoming Room" : `${String(index).padStart(2, "0")}. ${room.title}`;
+    }
+
+    function isRecapRoom(index) {
+      return index === rooms.length - 1;
+    }
+
+    function canEnterRoom(index) {
+      const template = templateProgress();
+      if (index === 1 && !allWelcomeMarkersDiscovered()) return false;
+      if (isRecapRoom(index) && !template.quizPassed) return false;
+      return index <= template.highestRoomUnlocked;
+    }
+
+    function roomLockedMessage(index) {
+      if (index === 1 && !allWelcomeMarkersDiscovered()) {
+        return "Discover all welcome-room architecture tools first.";
+      }
+      if (isRecapRoom(index) && !templateProgress().quizPassed) {
+        return "Complete the quiz first to unlock the recap room.";
+      }
+      return "Explore the previous rooms first to unlock this room.";
+    }
+
+    function renderRoomList() {
+      roomList.innerHTML = "";
+      rooms.forEach((room, index) => {
+        const tab = document.createElement("button");
+        tab.type = "button";
+        tab.className = "room-tab";
+        tab.textContent = formatRoomTitle(room, index);
+        const isUnlocked = canEnterRoom(index);
+        if (!isUnlocked) tab.classList.add("locked");
+        if (index === currentRoomIndex) tab.classList.add("active");
+
+        tab.addEventListener("click", () => {
+          if (!canEnterRoom(index)) {
+            const message = roomLockedMessage(index);
+            lessonTitle.textContent = "Room locked";
+            lessonText.innerHTML = `<p>${message}</p>`;
+            renderMainContent(`<h2>Room locked</h2><p>${message}</p>`);
+            return;
+          }
+          currentRoomIndex = index;
+          renderRoom();
+        });
+        roomList.appendChild(tab);
+      });
+    }
+
+    function renderSidebarSummary(room) {
+      lessonTitle.textContent = room.title;
+      lessonText.innerHTML = `
+          <p>${room.summary}</p>
+          <ul>${room.points.map((point) => `<li>${point}</li>`).join("")}</ul>
+        `;
+    }
+
+    function setQuizFeedback(message) {
+      const feedback = mainLessonContent.querySelector(".quiz-feedback");
+      if (feedback) feedback.textContent = message;
+    }
+
+    function shuffleArray(array) {
+      const copy = [...array];
+      for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function optionTextWithoutLetter(text) {
+      return text.replace(/^[A-D]\.\s*/, "");
+    }
+
+    function quizQuestions() {
+      return Array.from(mainLessonContent.querySelectorAll(".quiz-question"));
+    }
+
+    function quizQuestionIds() {
+      return quizQuestions().map((question) => question.dataset.questionId);
+    }
+
+    function completedQuizQuestionCount() {
+      const template = templateProgress();
+      return quizQuestionIds().filter((id) => template.correctQuizAnswers.includes(id)).length;
+    }
+
+    function renderQuizTabs() {
+      const quizBox = mainLessonContent.querySelector(".quiz-box");
+      const questions = quizQuestions();
+      if (!quizBox || questions.length <= 1) return;
+
+      let tabs = mainLessonContent.querySelector(".quiz-tabs");
+      if (!tabs) {
+        tabs = document.createElement("div");
+        tabs.className = "quiz-tabs";
+        tabs.setAttribute("role", "tablist");
+        tabs.setAttribute("aria-label", "Quiz questions");
+        quizBox.insertBefore(tabs, quizBox.firstElementChild);
+      }
+
+      const template = templateProgress();
+      currentQuizIndex = Math.max(0, Math.min(currentQuizIndex, questions.length - 1));
+      tabs.innerHTML = "";
+
+      questions.forEach((question, index) => {
+        const questionId = question.dataset.questionId;
+        const isActive = index === currentQuizIndex;
+        const isComplete = template.correctQuizAnswers.includes(questionId);
+        question.classList.add("quiz-question-panel");
+        question.hidden = !isActive;
+        question.classList.toggle("is-active", isActive);
+
+        const tab = document.createElement("button");
+        tab.type = "button";
+        tab.className = "quiz-tab";
+        tab.textContent = `Quiz ${index + 1}`;
+        tab.setAttribute("role", "tab");
+        tab.setAttribute("aria-selected", isActive ? "true" : "false");
+        tab.classList.toggle("is-active", isActive);
+        tab.classList.toggle("is-complete", isComplete);
+        tab.addEventListener("click", () => {
+          currentQuizIndex = index;
+          renderQuizTabs();
+          updateQuizFeedback();
+        });
+        tabs.appendChild(tab);
+      });
+    }
+
+    function goToNextUnansweredQuizQuestion() {
+      const template = templateProgress();
+      const questions = quizQuestions();
+      const nextIndex = questions.findIndex(
+        (question) => !template.correctQuizAnswers.includes(question.dataset.questionId)
+      );
+      if (nextIndex !== -1) currentQuizIndex = nextIndex;
+    }
+
+    function shuffleQuizOptions() {
+      quizQuestions().forEach((question) => {
+        if (question.dataset.shuffled === "true") return;
+        const options = Array.from(question.querySelectorAll(".quiz-option"));
+        const optionData = options.map((option) => ({
+          text: optionTextWithoutLetter(option.textContent),
+          correct: option.dataset.correct === "true"
+        }));
+
+        shuffleArray(optionData).forEach((data, index) => {
+          const option = options[index];
+          option.textContent = `${String.fromCharCode(65 + index)}. ${data.text}`;
+          if (data.correct) option.dataset.correct = "true";
+          else delete option.dataset.correct;
+          question.appendChild(option);
+        });
+        question.dataset.shuffled = "true";
+      });
+    }
+
+    function updateQuizFeedback() {
+      const template = templateProgress();
+      const total = quizQuestionIds().length;
+      const correct = completedQuizQuestionCount();
+      if (template.quizPassed) {
+        setQuizFeedback("Correct! The recap room is unlocked.");
+        return;
+      }
+      setQuizFeedback(`Answer all quiz questions correctly to continue. Progress: ${correct} / ${total}.`);
+    }
+
+    function bindQuizOptions() {
+      if (rooms[currentRoomIndex].type !== "quiz") return;
+      shuffleQuizOptions();
+      const template = templateProgress();
+      renderQuizTabs();
+
+      const allQuestionsAlreadyCorrect = quizQuestionIds().every((id) =>
+        template.correctQuizAnswers.includes(id)
+      );
+      if (allQuestionsAlreadyCorrect && !template.quizPassed) {
+        template.quizPassed = true;
+        template.highestRoomUnlocked = Math.max(template.highestRoomUnlocked, currentRoomIndex + 1);
+        saveProgress(progress);
+      }
+
+      quizQuestions().forEach((question) => {
+        const questionId = question.dataset.questionId;
+        const isComplete = template.correctQuizAnswers.includes(questionId);
+        question.classList.toggle("is-complete", isComplete);
+        question.querySelectorAll(".quiz-option").forEach((option) => {
+          const isCorrect = option.dataset.correct === "true";
+          option.classList.toggle("correct", isComplete && isCorrect);
+          option.disabled = isComplete || template.quizPassed;
+          option.addEventListener("click", () => handleQuizAnswer(option));
+        });
+      });
+
+      updateQuizFeedback();
+    }
+
+    function handleQuizAnswer(option) {
+      if (option.disabled) return;
+      const question = option.closest(".quiz-question");
+      if (!question) return;
+
+      const questionId = question.dataset.questionId;
+      const questionOptions = question.querySelectorAll(".quiz-option");
+      questionOptions.forEach((item) => item.classList.remove("wrong"));
+      question.classList.remove("is-transitioning");
+
+      if (option.dataset.correct !== "true") {
+        option.classList.add("wrong");
+        setQuizFeedback("Not yet. Review the concept and try that question again.");
+        return;
+      }
+
+      const template = templateProgress();
+      if (!template.correctQuizAnswers.includes(questionId)) {
+        template.correctQuizAnswers.push(questionId);
+      }
+
+      question.classList.add("is-complete", "is-transitioning");
+      option.classList.add("correct");
+      questionOptions.forEach((item) => {
+        item.disabled = true;
+      });
+
+      const allCorrect = quizQuestionIds().every((id) =>
+        template.correctQuizAnswers.includes(id)
+      );
+
+      if (allCorrect) {
+        template.quizPassed = true;
+        template.highestRoomUnlocked = Math.max(template.highestRoomUnlocked, currentRoomIndex + 1);
+        setQuizFeedback("Correct! The recap room is unlocked.");
+        saveProgress(progress);
+        window.setTimeout(() => {
+          question.classList.remove("is-transitioning");
+          nextRoom.hidden = false;
+          renderQuizTabs();
+          renderRoomList();
+        }, QUIZ_ADVANCE_DELAY_MS);
+        return;
+      }
+
+      setQuizFeedback("Correct! Loading the next question...");
+      saveProgress(progress);
+      window.setTimeout(() => {
+        question.classList.remove("is-transitioning");
+        goToNextUnansweredQuizQuestion();
+        renderQuizTabs();
+        updateQuizFeedback();
+      }, QUIZ_ADVANCE_DELAY_MS);
+    }
+
+    function renderRoom() {
+      const room = rooms[currentRoomIndex];
+      const template = templateProgress();
+      const isFinalRoom = currentRoomIndex === rooms.length - 1;
+
+      roomBg.src = room.image;
+      roomStage.classList.toggle("is-welcome-room", currentRoomIndex === 0);
+      hotspots.hidden = currentRoomIndex !== 0;
+      prevRoom.hidden = currentRoomIndex === 0;
+      nextRoom.hidden = isFinalRoom || (room.type === "quiz" && !template.quizPassed);
+      topReturn.hidden = isFinalRoom;
+      finalReturn.hidden = !isFinalRoom;
+      hideMarkerTooltip();
+
+      if (currentRoomIndex === 0) {
+        renderWelcomeSidebarSummary();
+        renderMainContent(renderWelcomeContent());
+      } else {
+        renderSidebarSummary(room);
+        renderMainContent(room.contentHtml);
+      }
+
+      bindQuizOptions();
+      updateMarkerStates();
+      updateNextButtonState();
+      renderRoomList();
+      updateCounter();
+      completeIfFinalRoom();
+    }
+
+    prevRoom.addEventListener("click", () => {
+      currentRoomIndex = Math.max(0, currentRoomIndex - 1);
+      renderRoom();
+    });
+
+    nextRoom.addEventListener("click", () => {
+      if (currentRoomIndex === 0 && !allWelcomeMarkersDiscovered()) {
+        renderMainContent(renderWelcomeContent("Discover all architecture tools first."));
+        updateNextButtonState();
+        return;
+      }
+
+      const room = rooms[currentRoomIndex];
+      if (room.type === "quiz" && !templateProgress().quizPassed) {
+        setQuizFeedback("Answer every quiz question correctly to continue.");
+        return;
+      }
+
+      if (currentRoomIndex < rooms.length - 1) {
+        currentRoomIndex += 1;
+        const template = templateProgress();
+        if (currentRoomIndex > template.highestRoomUnlocked) {
+          template.highestRoomUnlocked = currentRoomIndex;
+          saveProgress(progress);
+        }
+      }
+      renderRoom();
+    });
+
+    document.querySelectorAll(".info-marker").forEach((spot) => {
+      spot.addEventListener("mouseenter", () => handleMarkerEnter(spot));
+      spot.addEventListener("focus", () => handleMarkerEnter(spot));
+      spot.addEventListener("click", (event) => {
+        event.preventDefault();
+        handleMarkerEnter(spot);
+      });
+      spot.addEventListener("mouseleave", () => {
+        hideMarkerTooltip();
+        if (currentRoomIndex === 0) renderWelcomeSidebarSummary();
+      });
+      spot.addEventListener("blur", () => {
+        hideMarkerTooltip();
+        if (currentRoomIndex === 0) renderWelcomeSidebarSummary();
+      });
+    });
+
+    function completeIfFinalRoom() {
+      if (currentRoomIndex !== rooms.length - 1) return;
+      if (suppressAutoCompletion) return;
+      const template = templateProgress();
+      if (template.completed) return;
+
+      template.completed = true;
+      template.reward = REWARD_NAME;
+      window.SQLKingdomProgress?.markDataworksCitadelBuildingComplete?.(
+        progress,
+        BUILDING_ID,
+        REWARD_NAME
+      );
+      progress = saveProgress(progress);
+      rewardModal.hidden = false;
+    }
+
+    finalReturn.addEventListener("click", () => {
+      completeIfFinalRoom();
+    });
+
+    rewardContinue.addEventListener("click", () => {
+      rewardModal.hidden = true;
+    });
+
+    window.addEventListener("sqlKingdom:reset", (event) => {
+      if (event.detail.resetMode !== "local" || event.detail.cityId !== "dataworks-citadel") return;
+      progress = getProgress();
+      currentRoomIndex = 0;
+      currentQuizIndex = 0;
+      discoveryCompleteAnimationPlayed = false;
+      rewardModal.hidden = true;
+      renderRoom();
+    });
+
+    window.addEventListener("sqlKingdom:unlockAll", () => {
+      progress = getProgress();
+      suppressAutoCompletion = true;
+      try {
+        renderRoom();
+      } finally {
+        suppressAutoCompletion = false;
+      }
+    });
+
+    if (canOpenSchemaArchitectHall) {
+      templateProgress();
+      progress = saveProgress(progress);
+      renderRoom();
+    }
+  </script>
+</body>
+
+</html>

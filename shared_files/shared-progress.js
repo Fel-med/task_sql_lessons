@@ -2,7 +2,12 @@
   const STORAGE_KEY = "sqlCityProgress";
   const FOUNDATION_ISLAND_ID = "foundation-city";
   const DATA_PREP_ISLAND_ID = "data-prep-city";
-  const PLAYABLE_ISLAND_IDS = [FOUNDATION_ISLAND_ID, DATA_PREP_ISLAND_ID];
+  const DATAWORKS_CITADEL_ISLAND_ID = "dataworks-citadel";
+  const PLAYABLE_ISLAND_IDS = [
+    FOUNDATION_ISLAND_ID,
+    DATA_PREP_ISLAND_ID,
+    DATAWORKS_CITADEL_ISLAND_ID
+  ];
   const DATA_PREP_BUILDING_ORDER = [
     "filterFactory",
     "summaryTower",
@@ -11,8 +16,16 @@
     "cleaningClinic"
   ];
   const PLAYABLE_DATA_PREP_BUILDING_IDS = ["filterFactory", "summaryTower", "joinJunction", "subqueryMines", "cleaningClinic"];
+  const DATAWORKS_CITADEL_BUILDING_ORDER = [
+    "rankingObservatory",
+    "schemaArchitectHall",
+    "featurePipelineWorks",
+    "sqlalchemyEngineRoom"
+  ];
+  const PLAYABLE_DATAWORKS_CITADEL_BUILDING_IDS = [...DATAWORKS_CITADEL_BUILDING_ORDER];
   const UNLOCK_MESSAGES = {
-    [DATA_PREP_ISLAND_ID]: "New island unlocked: Data Prep City!"
+    [DATA_PREP_ISLAND_ID]: "New island unlocked: Data Prep City!",
+    [DATAWORKS_CITADEL_ISLAND_ID]: "New island unlocked: Dataworks Citadel!"
   };
 
   const BUILDING_DEFAULTS = {
@@ -89,13 +102,51 @@
     badge: ""
   };
 
+  const DATAWORKS_CITADEL_BUILDING_DEFAULTS = {
+    rankingObservatory: {
+      unlocked: true,
+      completed: false,
+      reward: ""
+    },
+    schemaArchitectHall: {
+      unlocked: false,
+      completed: false,
+      reward: ""
+    },
+    featurePipelineWorks: {
+      unlocked: false,
+      completed: false,
+      reward: ""
+    },
+    sqlalchemyEngineRoom: {
+      unlocked: false,
+      completed: false,
+      reward: ""
+    }
+  };
+
+  const DATAWORKS_CITADEL_DEFAULT_REWARDS = {
+    rankingObservatory: "Schema Architect Hall Key",
+    schemaArchitectHall: "Feature Pipeline Works Key",
+    featurePipelineWorks: "SQLAlchemy Engine Room Key",
+    sqlalchemyEngineRoom: "Dataworks Citadel Badge"
+  };
+
+  const DATAWORKS_CITADEL_DEFAULTS = {
+    buildings: DATAWORKS_CITADEL_BUILDING_DEFAULTS,
+    rewards: [],
+    completed: false,
+    badge: ""
+  };
+
   const DEFAULT_PROGRESS = {
     buildings: BUILDING_DEFAULTS,
     badges: {
       sqlFoundations: false
     },
     cities: {
-      dataPrepCity: DATA_PREP_CITY_DEFAULTS
+      dataPrepCity: DATA_PREP_CITY_DEFAULTS,
+      dataworksCitadel: DATAWORKS_CITADEL_DEFAULTS
     },
     unlockEverythingUsed: false,
     kingdom: {
@@ -257,10 +308,84 @@
     return dataPrepCity;
   }
 
+  function ensureDataworksCitadelProgress(progress) {
+    progress.cities = progress.cities || {};
+    const dataworksCitadel = progress.cities.dataworksCitadel && typeof progress.cities.dataworksCitadel === "object"
+      ? progress.cities.dataworksCitadel
+      : {};
+
+    dataworksCitadel.buildings = dataworksCitadel.buildings && typeof dataworksCitadel.buildings === "object"
+      ? dataworksCitadel.buildings
+      : {};
+
+    DATAWORKS_CITADEL_BUILDING_ORDER.forEach((buildingId) => {
+      dataworksCitadel.buildings[buildingId] = {
+        ...clone(DATAWORKS_CITADEL_BUILDING_DEFAULTS[buildingId]),
+        ...(dataworksCitadel.buildings[buildingId] || {})
+      };
+
+      if (!PLAYABLE_DATAWORKS_CITADEL_BUILDING_IDS.includes(buildingId)) {
+        dataworksCitadel.buildings[buildingId].unlocked = false;
+      }
+
+      const legacyBuilding = dataworksCitadel[buildingId];
+      if (legacyBuilding?.completed) {
+        dataworksCitadel.buildings[buildingId].completed = true;
+        dataworksCitadel.buildings[buildingId].reward =
+          dataworksCitadel.buildings[buildingId].reward ||
+          legacyBuilding.reward ||
+          DATAWORKS_CITADEL_DEFAULT_REWARDS[buildingId];
+      }
+    });
+
+    dataworksCitadel.buildings.rankingObservatory.unlocked = true;
+
+    DATAWORKS_CITADEL_BUILDING_ORDER.forEach((buildingId, index) => {
+      if (!dataworksCitadel.buildings[buildingId].completed) return;
+      const nextBuildingId = DATAWORKS_CITADEL_BUILDING_ORDER[index + 1];
+      if (nextBuildingId && PLAYABLE_DATAWORKS_CITADEL_BUILDING_IDS.includes(nextBuildingId)) {
+        dataworksCitadel.buildings[nextBuildingId].unlocked = true;
+      }
+    });
+
+    dataworksCitadel.rewards = Array.isArray(dataworksCitadel.rewards) ? dataworksCitadel.rewards : [];
+    DATAWORKS_CITADEL_BUILDING_ORDER.forEach((buildingId) => {
+      const reward = dataworksCitadel.buildings[buildingId].reward;
+      if (reward && !dataworksCitadel.rewards.includes(reward)) {
+        dataworksCitadel.rewards.push(reward);
+      }
+    });
+
+    if (dataworksCitadel.buildings.sqlalchemyEngineRoom.completed) {
+      dataworksCitadel.completed = true;
+      dataworksCitadel.badge = dataworksCitadel.badge || "Dataworks Citadel Badge";
+      if (!dataworksCitadel.rewards.includes(dataworksCitadel.badge)) {
+        dataworksCitadel.rewards.push(dataworksCitadel.badge);
+      }
+    } else {
+      dataworksCitadel.completed = Boolean(dataworksCitadel.completed && dataworksCitadel.badge);
+      dataworksCitadel.badge = dataworksCitadel.completed
+        ? (dataworksCitadel.badge || "Dataworks Citadel Badge")
+        : "";
+    }
+
+    progress.cities.dataworksCitadel = dataworksCitadel;
+    return dataworksCitadel;
+  }
+
   function isFoundationCityComplete(progress) {
     return Boolean(
       progress?.badges?.sqlFoundations ||
       progress?.buildings?.queryLab?.completed
+    );
+  }
+
+  function isDataPrepCityComplete(progress) {
+    return Boolean(
+      progress?.cities?.dataPrepCity?.completed ||
+      progress?.cities?.dataPrepCity?.badge ||
+      progress?.cities?.dataPrepCity?.buildings?.cleaningClinic?.completed ||
+      progress?.cities?.dataPrepCity?.cleaningClinic?.completed
     );
   }
 
@@ -294,9 +419,16 @@
   function ensureKingdomProgress(progress, options = {}) {
     ensureKingdomShape(progress);
     ensureDataPrepCityProgress(progress);
+    ensureDataworksCitadelProgress(progress);
 
     if (isFoundationCityComplete(progress)) {
       unlockIslandInProgress(progress, DATA_PREP_ISLAND_ID, {
+        queueMessage: Boolean(options.queueMigrationMessage)
+      });
+    }
+
+    if (isDataPrepCityComplete(progress)) {
+      unlockIslandInProgress(progress, DATAWORKS_CITADEL_ISLAND_ID, {
         queueMessage: Boolean(options.queueMigrationMessage)
       });
     }
@@ -386,6 +518,7 @@
       if (!dataPrepCity.rewards.includes(dataPrepCity.badge)) {
         dataPrepCity.rewards.push(dataPrepCity.badge);
       }
+      unlockIslandInProgress(progress, DATAWORKS_CITADEL_ISLAND_ID, { queueMessage: true });
     }
 
     return progress;
@@ -398,6 +531,56 @@
 
   function isDataPrepBuildingUnlocked(buildingId, progress = getGameProgress()) {
     return Boolean(getDataPrepBuildingProgress(buildingId, progress)?.unlocked);
+  }
+
+  function unlockDataworksCitadelBuildingInProgress(progress, buildingId) {
+    if (!PLAYABLE_DATAWORKS_CITADEL_BUILDING_IDS.includes(buildingId)) return false;
+    const dataworksCitadel = ensureDataworksCitadelProgress(progress);
+    const building = dataworksCitadel.buildings[buildingId];
+    const alreadyUnlocked = Boolean(building.unlocked);
+    building.unlocked = true;
+    return !alreadyUnlocked;
+  }
+
+  function markDataworksCitadelBuildingComplete(progress, buildingId, reward = "") {
+    const dataworksCitadel = ensureDataworksCitadelProgress(progress);
+    const building = dataworksCitadel.buildings[buildingId];
+    if (!building) return progress;
+
+    building.unlocked = true;
+    building.completed = true;
+    if (reward) {
+      building.reward = reward;
+      if (!dataworksCitadel.rewards.includes(reward)) {
+        dataworksCitadel.rewards.push(reward);
+      }
+    }
+
+    const nextBuildingId = DATAWORKS_CITADEL_BUILDING_ORDER[
+      DATAWORKS_CITADEL_BUILDING_ORDER.indexOf(buildingId) + 1
+    ];
+    if (nextBuildingId && PLAYABLE_DATAWORKS_CITADEL_BUILDING_IDS.includes(nextBuildingId)) {
+      dataworksCitadel.buildings[nextBuildingId].unlocked = true;
+    }
+
+    if (buildingId === "sqlalchemyEngineRoom") {
+      dataworksCitadel.completed = true;
+      dataworksCitadel.badge = reward || "Dataworks Citadel Badge";
+      if (!dataworksCitadel.rewards.includes(dataworksCitadel.badge)) {
+        dataworksCitadel.rewards.push(dataworksCitadel.badge);
+      }
+    }
+
+    return progress;
+  }
+
+  function getDataworksCitadelBuildingProgress(buildingId, progress = getGameProgress()) {
+    const dataworksCitadel = ensureDataworksCitadelProgress(progress);
+    return dataworksCitadel.buildings[buildingId] || null;
+  }
+
+  function isDataworksCitadelBuildingUnlocked(buildingId, progress = getGameProgress()) {
+    return Boolean(getDataworksCitadelBuildingProgress(buildingId, progress)?.unlocked);
   }
 
   function resetAllProgress() {
@@ -421,14 +604,18 @@
     STORAGE_KEY,
     FOUNDATION_ISLAND_ID,
     DATA_PREP_ISLAND_ID,
+    DATAWORKS_CITADEL_ISLAND_ID,
     PLAYABLE_ISLAND_IDS: [...PLAYABLE_ISLAND_IDS],
     DATA_PREP_BUILDING_ORDER: [...DATA_PREP_BUILDING_ORDER],
     PLAYABLE_DATA_PREP_BUILDING_IDS: [...PLAYABLE_DATA_PREP_BUILDING_IDS],
+    DATAWORKS_CITADEL_BUILDING_ORDER: [...DATAWORKS_CITADEL_BUILDING_ORDER],
+    PLAYABLE_DATAWORKS_CITADEL_BUILDING_IDS: [...PLAYABLE_DATAWORKS_CITADEL_BUILDING_IDS],
     createDefaultProgress,
     getGameProgress,
     saveGameProgress,
     ensureKingdomProgress,
     ensureDataPrepCityProgress,
+    ensureDataworksCitadelProgress,
     isIslandUnlocked,
     unlockIsland,
     unlockIslandInProgress,
@@ -436,6 +623,10 @@
     markDataPrepBuildingComplete,
     getDataPrepBuildingProgress,
     isDataPrepBuildingUnlocked,
+    unlockDataworksCitadelBuildingInProgress,
+    markDataworksCitadelBuildingComplete,
+    getDataworksCitadelBuildingProgress,
+    isDataworksCitadelBuildingUnlocked,
     resetAllProgress,
     markFoundationComplete,
     consumePendingUnlockMessage

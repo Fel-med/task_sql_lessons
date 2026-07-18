@@ -7,6 +7,7 @@
     <link rel="shortcut icon" href="../res/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../shared_files/shared-room-layout.css" />
     <link rel="stylesheet" href="../shared_files/shared-room-components.css" />
+    <link rel="stylesheet" href="../shared_files/shared-menu.css" />
     <style>
       .info-marker {
         width: 22px;
@@ -117,7 +118,11 @@
         </article>
       </section>
     </main>
+    <div id="sharedMenuMount" data-menu-page="foundation-city" data-menu-title="Foundation City Menu" data-menu-base="../"></div>
     <script src="../shared_files/shared-progress.js"></script>
+    <script src="../shared_files/shared-reset-system.js"></script>
+    <script src="../shared_files/shared-magic-key.js"></script>
+    <script src="../shared_files/shared-menu.js"></script>
     <script>
       const DEFAULT_PROGRESS = {
         buildings: {
@@ -351,6 +356,7 @@ ORDER BY age;</code></pre>
       let currentRoomIndex = 0;
       let discoveryCompleteAnimationPlayed = false;
       let progress = getProgress();
+      let suppressAutoCompletion = false;
       const roomBg = document.querySelector("#roomBg");
       const roomStage = document.querySelector(".room-stage");
       const roomCounter = document.querySelector("#roomCounter");
@@ -637,9 +643,18 @@ ORDER BY age;</code></pre>
         spot.addEventListener("blur", () => { hideMarkerTooltip(); if (currentRoomIndex === 0) renderWelcomeSidebarSummary(); });
       });
       function showReward() { rewardTitle.textContent = REWARD_TITLE; rewardMessage.textContent = REWARD_MESSAGE; rewardModal.hidden = false; }
-      function completeIfFinalRoom() { if (currentRoomIndex !== rooms.length - 1) return; const building = buildingProgress(); if (building.completed) return; building.highestRoomUnlocked = Math.max(building.highestRoomUnlocked, currentRoomIndex); if (completeBuilding(BUILDING_ID)) { if (window.SQLKingdomProgress) window.SQLKingdomProgress.markFoundationComplete(progress, { queueMessage: true }); else progress.badges.sqlFoundations = true; saveProgress(progress); showReward(); } }
+      function completeIfFinalRoom() { if (currentRoomIndex !== rooms.length - 1) return; if (suppressAutoCompletion) return; const building = buildingProgress(); if (building.completed) return; building.highestRoomUnlocked = Math.max(building.highestRoomUnlocked, currentRoomIndex); if (completeBuilding(BUILDING_ID)) { if (window.SQLKingdomProgress) window.SQLKingdomProgress.markFoundationComplete(progress, { queueMessage: true }); else progress.badges.sqlFoundations = true; saveProgress(progress); showReward(); } }
       rewardContinue.addEventListener("click", () => { rewardModal.hidden = true; });
       if (!buildingProgress().unlocked) { window.location.href = "index_city_1.html"; } else { markBuildingEntered(BUILDING_ID); normalizeWelcomeDiscovery(); renderRoom(); }
+      window.addEventListener("sqlKingdom:unlockAll", () => {
+        progress = getProgress();
+        suppressAutoCompletion = true;
+        try {
+          renderRoom();
+        } finally {
+          suppressAutoCompletion = false;
+        }
+      });
     </script>
   </body>
 </html>

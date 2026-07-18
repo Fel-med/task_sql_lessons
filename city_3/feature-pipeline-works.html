@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Feature Pipeline Works | Dataworks Citadel</title>
+  <link rel="shortcut icon" href="../res/favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="../shared_files/shared-room-layout.css" />
+  <link rel="stylesheet" href="../shared_files/shared-room-components.css" />
+  <link rel="stylesheet" href="../shared_files/shared-menu.css" />
+  <style>
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .side-panel h1 {
+      flex: 0 0 auto;
+      font-size: 27px;
+    }
+
+    .room-counter,
+    .path-title,
+    .lesson-card {
+      flex: 0 0 auto;
+    }
+
+    .lesson-list {
+      flex: 1 1 auto;
+      min-height: 0;
+      padding: 2px 6px 6px 2px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-color: var(--cyan) rgba(2, 6, 23, 0.72);
+      scrollbar-width: thin;
+    }
+
+    .lesson-card {
+      max-height: 28vh;
+      overflow-y: auto;
+    }
+
+    .marker-raw-data {
+      left: 8.5%;
+      top: 38%;
+    }
+
+    .marker-processing-engine {
+      left: 30%;
+      top: 47%;
+    }
+
+    .marker-feature-output {
+      left: 76%;
+      top: 42%;
+    }
+
+    .marker-label-output {
+      left: 85%;
+      top: 59%;
+    }
+
+    .concept-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    .concept-grid .pixel-box {
+      margin: 0;
+      min-width: 0;
+    }
+
+    .formula-line {
+      margin: 10px 0;
+      padding: 9px 12px;
+      border-left: 5px solid var(--yellow);
+      background: rgba(255, 215, 106, 0.08);
+      color: var(--cream);
+      font-weight: 900;
+    }
+
+    .reward-modal {
+      z-index: 140;
+    }
+
+    @media (max-width: 900px) {
+      .concept-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .side-panel h1 {
+        font-size: 22px;
+      }
+
+      .lesson-list {
+        max-height: 120px;
+      }
+
+      .lesson-card {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="room-layout">
+    <aside class="side-panel">
+      <h1>Feature Pipeline Works</h1>
+      <p class="room-counter" id="roomCounter">Current Room: 0 / 8</p>
+      <p class="path-title">Learning Path</p>
+      <div class="lesson-list" id="roomList"></div>
+      <article class="lesson-card" id="lessonCard">
+        <h2 id="lessonTitle">Welcoming Room</h2>
+        <div class="room-summary" id="lessonText"></div>
+      </article>
+    </aside>
+
+    <section class="room-stage" aria-label="Feature Pipeline Works rooms">
+      <img class="room-bg" id="roomBg" src="../res/city_3/rooms_background/feature-pipeline-works-welcome.webp"
+        alt="" />
+      <a class="return-city-btn" id="topReturn" href="index_city_3.html">Back to Dataworks Citadel</a>
+
+
+      <div class="hotspots" id="hotspots">
+        <button class="info-marker marker-raw-data" type="button" data-marker-id="rawData"
+          aria-label="Raw data input information"></button>
+        <button class="info-marker marker-processing-engine" type="button" data-marker-id="processingEngine"
+          aria-label="Feature processing engine information"></button>
+        <button class="info-marker marker-feature-output" type="button" data-marker-id="featureOutput"
+          aria-label="Feature output information"></button>
+        <button class="info-marker marker-label-output" type="button" data-marker-id="labelOutput"
+          aria-label="Label output information"></button>
+      </div>
+
+      <div class="marker-tooltip" id="markerTooltip" aria-hidden="true">
+        <h3 id="markerTooltipTitle"></h3>
+        <p id="markerTooltipText"></p>
+      </div>
+
+      <div class="room-nav">
+        <button class="pixel-btn" id="prevRoom" type="button">Previous</button>
+        <button class="pixel-btn" id="nextRoom" type="button">Next</button>
+        <a class="pixel-btn" id="finalReturn" href="index_city_3.html" hidden>Back to Dataworks Citadel</a>
+      </div>
+
+      <article class="info-card" id="infoCard" aria-live="polite">
+        <div id="mainLessonContent"></div>
+      </article>
+
+      <article class="reward-modal" id="rewardModal" hidden>
+        <div class="reward-card">
+          <img src="../res/city_3/item/regular-key.webp" class="reward-key-img" alt="SQLAlchemy Engine Room Key" />
+          <h2 id="rewardTitle">SQLAlchemy Engine Room Key</h2>
+          <p id="rewardMessage">You received the SQLAlchemy Engine Room Key.</p>
+          <button class="pixel-btn" id="rewardContinue" type="button">Continue</button>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <div id="sharedMenuMount" data-menu-page="dataworks-citadel" data-menu-title="Dataworks Citadel Menu" data-menu-base="../"></div>
+  <script src="../shared_files/shared-progress.js"></script>
+  <script src="../shared_files/shared-reset-system.js"></script>
+  <script src="../shared_files/shared-magic-key.js"></script>
+  <script src="../shared_files/shared-menu.js"></script>
+  <script>
+    const canOpenFeaturePipelineWorks =
+      window.SQLKingdomResetSystem?.guardDataworksCitadelBuildingAccess?.(
+        "featurePipelineWorks",
+        "index_city_3.html",
+        "Complete Schema Architect Hall first.",
+        "../index.html"
+      ) ?? true;
+
+    const QUIZ_ADVANCE_DELAY_MS = 420;
+    const TEMPLATE_KEY = "featurePipelineWorks";
+    const BUILDING_ID = "featurePipelineWorks";
+    const REWARD_NAME = "SQLAlchemy Engine Room Key";
+
+
+    const rooms = [
+      {
+        title: "Welcoming Room",
+        image: "../res/city_3/rooms_background/feature-pipeline-works-welcome.webp",
+        type: "welcome",
+        summary: "SQL transforms operational data into features, labels, and a training-ready dataset.",
+        points: ["Raw Data Input", "Processing Engine", "Feature Output", "Label Output"],
+        contentHtml: `
+            <h2>Welcome to Feature Pipeline Works</h2>
+            <p>This factory turns raw relational data into structured inputs for machine learning.</p>
+            <p>Explore every glowing marker before starting the pipeline rooms.</p>
+            <ul>
+              <li>Extract useful feature columns with SQL.</li>
+              <li>Create aggregated feature tables.</li>
+              <li>Generate labels that represent the outcome to predict.</li>
+              <li>Combine features and labels into a training dataset.</li>
+            </ul>
+          `
+      },
+      {
+        title: "SQL in an ML Pipeline",
+        image: "../res/city_3/rooms_background/feature-pipeline-works-empty.webp",
+        type: "lesson",
+        summary: "SQL prepares model inputs before Python trains or evaluates a machine-learning model.",
+        points: ["Read source tables", "Transform data", "Produce one training table"],
+        contentHtml: `
+            <h2>SQL in an ML Pipeline</h2>
+            <p>Production data usually lives in several relational tables. A model cannot train directly on a collection of unrelated rows.</p>
+            <p>SQL is commonly used to select the correct records, calculate useful values, aggregate history, and assemble a clean dataset.</p>
+            <div class="flow-line">Source tables → SQL transformations → Feature table + Label table → Training dataset → Python model</div>
+            <div class="concept-grid">
+              <div class="pixel-box"><strong>Features</strong><br>Input values used by the model.</div>
+              <div class="pixel-box"><strong>Label</strong><br>The outcome the model should learn to predict.</div>
+              <div class="pixel-box"><strong>Sample</strong><br>One training row, such as one customer at one snapshot date.</div>
+            </div>
+            <p>The SQL stage should produce a repeatable dataset with clearly defined rows and columns.</p>
+          `
+      },
+      {
+        title: "Feature Extraction with SQL",
+        image: "../res/city_3/rooms_background/feature-pipeline-works-empty.webp",
+        type: "lesson",
+        summary: "Feature extraction converts stored columns into values that describe each training sample.",
+        points: ["Select useful attributes", "Create derived columns", "Encode clear business signals"],
+        contentHtml: `
+            <h2>Feature Extraction with SQL</h2>
+            <p>A feature is an input value that may help a model recognize a pattern.</p>
+            <pre class="sql-code"><code>SELECT
+  customer_id,
+  EXTRACT(YEAR FROM signup_date) AS signup_year,
+  CASE
+    WHEN country = 'Canada' THEN 1
+    ELSE 0
+  END AS is_canada,
+  account_balance
+FROM customers;</code></pre>
+            <p>This query keeps useful source attributes and creates derived features.</p>
+            <table class="result-table">
+              <thead>
+                <tr><th>customer_id</th><th>signup_year</th><th>is_canada</th><th>account_balance</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>101</td><td>2024</td><td>1</td><td>820.00</td></tr>
+                <tr><td>102</td><td>2025</td><td>0</td><td>310.00</td></tr>
+              </tbody>
+            </table>
+            <div class="pixel-box">Good features have a clear meaning and use only data available at prediction time.</div>
+          `
+      },
+      {
+        title: "Aggregated Feature Tables",
+        image: "../res/city_3/rooms_background/feature-pipeline-works-empty.webp",
+        type: "lesson",
+        summary: "Aggregations summarize many historical rows into one feature row per entity.",
+        points: ["GROUP BY the entity", "Summarize behavior", "Keep one row per sample"],
+        contentHtml: `
+            <h2>Aggregated Feature Tables</h2>
+            <p>Transaction tables often contain many rows per customer. A customer-level model usually needs one row per customer.</p>
+            <pre class="sql-code"><code>CREATE VIEW customer_features AS
+SELECT
+  customer_id,
+  COUNT(*) AS order_count,
+  SUM(order_amount) AS total_spend,
+  AVG(order_amount) AS average_order_value,
+  MAX(order_date) AS latest_order_date
+FROM orders
+GROUP BY customer_id;</code></pre>
+            <p><code>GROUP BY customer_id</code> compresses each customer's order history into reusable features.</p>
+            <table class="result-table">
+              <thead>
+                <tr><th>customer_id</th><th>order_count</th><th>total_spend</th><th>average_order_value</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>101</td><td>8</td><td>640.00</td><td>80.00</td></tr>
+                <tr><td>102</td><td>3</td><td>225.00</td><td>75.00</td></tr>
+              </tbody>
+            </table>
+            <div class="formula-line">Many event rows → GROUP BY → One feature row per customer</div>
+          `
+      },
+      {
+        title: "Label Generation",
+        image: "../res/city_3/rooms_background/feature-pipeline-works-empty.webp",
+        type: "lesson",
+        summary: "A label represents the future outcome or category that the model should predict.",
+        points: ["Define the target clearly", "Use consistent rules", "Keep labels separate from features"],
+        contentHtml: `
+            <h2>Label Generation</h2>
+            <p>The label is the answer used during supervised learning. For example, a purchase model may predict whether a customer orders during the next 30 days.</p>
+            <pre class="sql-code"><code>CREATE VIEW customer_labels AS
+SELECT
+  customer_id,
+  CASE
+    WHEN ordered_in_next_30_days = TRUE THEN 1
+    ELSE 0
+  END AS purchase_label
+FROM customer_outcomes;</code></pre>
+            <table class="result-table">
+              <thead><tr><th>customer_id</th><th>purchase_label</th></tr></thead>
+              <tbody>
+                <tr><td>101</td><td>1</td></tr>
+                <tr><td>102</td><td>0</td></tr>
+              </tbody>
+            </table>
+            <p>The rule must remain stable so that every training row uses the same definition.</p>
+            <div class="pixel-box">Features describe what was known before prediction. The label describes what happened afterward.</div>
+          `
+      },
+      {
+        title: "Joining Features and Labels",
+        image: "../res/city_3/rooms_background/feature-pipeline-works-empty.webp",
+        type: "lesson",
+        summary: "The final training table joins each sample's feature row to its correct label.",
+        points: ["Use a stable sample key", "Avoid duplicate rows", "Keep feature and label meaning clear"],
+        contentHtml: `
+            <h2>Joining Features and Labels</h2>
+            <p>After features and labels are prepared, SQL combines them using the entity key.</p>
+            <pre class="sql-code"><code>SELECT
+  f.customer_id,
+  f.order_count,
+  f.total_spend,
+  f.average_order_value,
+  l.purchase_label
+FROM customer_features AS f
+JOIN customer_labels AS l
+  ON l.customer_id = f.customer_id;</code></pre>
+            <p>The result contains one row per customer, feature columns, and one target column.</p>
+            <table class="result-table">
+              <thead>
+                <tr><th>customer_id</th><th>order_count</th><th>total_spend</th><th>average_order_value</th><th>purchase_label</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>101</td><td>8</td><td>640.00</td><td>80.00</td><td>1</td></tr>
+                <tr><td>102</td><td>3</td><td>225.00</td><td>75.00</td><td>0</td></tr>
+              </tbody>
+            </table>
+          `
+      },
+      {
+        title: "Preparing the Training Dataset",
+        image: "../res/city_3/rooms_background/feature-pipeline-works-empty.webp",
+        type: "lesson",
+        summary: "A training dataset must be consistent, complete, and limited to information available before the outcome.",
+        points: ["Handle missing values", "Prevent duplicate samples", "Avoid future-information leakage"],
+        contentHtml: `
+            <h2>Preparing the Training Dataset</h2>
+            <p>The final SQL query should make the dataset safe and predictable for Python code.</p>
+            <pre class="sql-code"><code>SELECT
+  f.customer_id,
+  COALESCE(f.order_count, 0) AS order_count,
+  COALESCE(f.total_spend, 0) AS total_spend,
+  COALESCE(f.average_order_value, 0) AS average_order_value,
+  l.purchase_label
+FROM customer_features AS f
+JOIN customer_labels AS l
+  ON l.customer_id = f.customer_id
+WHERE l.purchase_label IS NOT NULL;</code></pre>
+            <div class="concept-grid">
+              <div class="pixel-box"><strong>One row</strong><br>Each customer appears once for the chosen snapshot.</div>
+              <div class="pixel-box"><strong>No missing target</strong><br>Every training sample has a known label.</div>
+              <div class="pixel-box"><strong>No leakage</strong><br>Feature columns do not use information from after prediction time.</div>
+            </div>
+            <ul>
+              <li>Use stable data types and column names.</li>
+              <li>Handle null values intentionally.</li>
+              <li>Check that joins do not multiply rows.</li>
+              <li>Store or reproduce the SQL used to build the dataset.</li>
+            </ul>
+          `
+      },
+      {
+        title: "Quiz Room",
+        image: "../res/city_3/rooms_background/feature-pipeline-works-empty.webp",
+        type: "quiz",
+        summary: "Test how SQL creates features, labels, and training-ready datasets.",
+        points: ["Six questions", "Randomized answer order", "Correct answers unlock the recap"],
+        contentHtml: `
+            <h2>Quiz Room</h2>
+            <p>Answer every question correctly to unlock the recap room.</p>
+            <div class="quiz-box">
+              <article class="quiz-question" data-question-id="feature">
+                <h3>Question 1</h3>
+                <p>What is a feature in a supervised machine-learning dataset?</p>
+                <button class="quiz-option" type="button" data-correct="true">An input value used by the model</button>
+                <button class="quiz-option" type="button">The final trained model file</button>
+                <button class="quiz-option" type="button">A database password</button>
+                <button class="quiz-option" type="button">A random table name</button>
+              </article>
+              <article class="quiz-question" data-question-id="aggregation">
+                <h3>Question 2</h3>
+                <p>Which SQL operation can summarize many orders into one row per customer?</p>
+                <button class="quiz-option" type="button" data-correct="true">GROUP BY customer_id with aggregate functions</button>
+                <button class="quiz-option" type="button">ORDER BY order_id only</button>
+                <button class="quiz-option" type="button">DROP TABLE orders</button>
+                <button class="quiz-option" type="button">SELECT every order without grouping</button>
+              </article>
+              <article class="quiz-question" data-question-id="label">
+                <h3>Question 3</h3>
+                <p>What does a label represent?</p>
+                <button class="quiz-option" type="button" data-correct="true">The outcome the model should learn to predict</button>
+                <button class="quiz-option" type="button">A decorative column heading</button>
+                <button class="quiz-option" type="button">The database server address</button>
+                <button class="quiz-option" type="button">An SQL comment with no data</button>
+              </article>
+              <article class="quiz-question" data-question-id="sample-row">
+                <h3>Question 4</h3>
+                <p>For a customer-level model, what should one training row normally represent?</p>
+                <button class="quiz-option" type="button" data-correct="true">One customer at the defined prediction snapshot</button>
+                <button class="quiz-option" type="button">Every database table combined without rules</button>
+                <button class="quiz-option" type="button">One SQL keyword</button>
+                <button class="quiz-option" type="button">One random cell from the database</button>
+              </article>
+              <article class="quiz-question" data-question-id="join">
+                <h3>Question 5</h3>
+                <p>Which key should connect customer features to customer labels?</p>
+                <button class="quiz-option" type="button" data-correct="true">customer_id</button>
+                <button class="quiz-option" type="button">An unrelated product name</button>
+                <button class="quiz-option" type="button">A random row number</button>
+                <button class="quiz-option" type="button">The SQL file name</button>
+              </article>
+              <article class="quiz-question" data-question-id="leakage">
+                <h3>Question 6</h3>
+                <p>Which rule helps prevent target leakage?</p>
+                <button class="quiz-option" type="button" data-correct="true">Build features only from information available before prediction time</button>
+                <button class="quiz-option" type="button">Add the future label directly as an input feature</button>
+                <button class="quiz-option" type="button">Duplicate every row several times</button>
+                <button class="quiz-option" type="button">Remove the entity key before joining</button>
+              </article>
+            </div>
+            <p class="quiz-feedback"></p>
+          `
+      },
+      {
+        title: "Recap Room",
+        image: "../res/city_3/rooms_background/feature-pipeline-works-empty.webp",
+        type: "lesson",
+        summary: "You can now use SQL to build a structured dataset before Python modeling begins.",
+        points: ["Feature extraction", "Label generation", "Aggregated feature tables", "Training dataset preparation"],
+        contentHtml: `
+            <h2>Recap Room</h2>
+            <p>You finished Feature Pipeline Works and assembled the major pieces of an ML training dataset.</p>
+            <ul>
+              <li>SQL extracts and derives useful feature columns.</li>
+              <li>Aggregations summarize history into one row per training sample.</li>
+              <li>Labels represent the outcome the model should predict.</li>
+              <li>Features and labels join through a stable sample key.</li>
+              <li>Training data needs consistent rows, handled nulls, and no future-information leakage.</li>
+            </ul>
+            <p class="reward-note">Reward unlocked: SQLAlchemy Engine Room Key.</p>
+          `
+      }
+    ];
+
+
+    const welcomeMarkers = [
+      {
+        id: "rawData",
+        title: "Raw Data Input",
+        text: "Operational tables enter the pipeline as the source for feature and label preparation."
+      },
+      {
+        id: "processingEngine",
+        title: "Processing Engine",
+        text: "SQL filters, joins, calculations, and aggregations transform raw records into model-ready values."
+      },
+      {
+        id: "featureOutput",
+        title: "Feature Output",
+        text: "Feature rows describe each training sample using information available before prediction time."
+      },
+      {
+        id: "labelOutput",
+        title: "Label Output",
+        text: "Labels store the known outcomes that supervised learning will try to predict."
+      }
+    ];
+
+    let currentRoomIndex = 0;
+    let currentQuizIndex = 0;
+    let discoveryCompleteAnimationPlayed = false;
+    let progress = getProgress();
+    let suppressAutoCompletion = false;
+
+    const roomBg = document.querySelector("#roomBg");
+    const roomStage = document.querySelector(".room-stage");
+    const roomCounter = document.querySelector("#roomCounter");
+    const hotspots = document.querySelector("#hotspots");
+    const prevRoom = document.querySelector("#prevRoom");
+    const nextRoom = document.querySelector("#nextRoom");
+    const topReturn = document.querySelector("#topReturn");
+    const finalReturn = document.querySelector("#finalReturn");
+    const roomList = document.querySelector("#roomList");
+    const lessonTitle = document.querySelector("#lessonTitle");
+    const lessonText = document.querySelector("#lessonText");
+    const mainLessonContent = document.querySelector("#mainLessonContent");
+    const rewardModal = document.querySelector("#rewardModal");
+    const rewardContinue = document.querySelector("#rewardContinue");
+    const markerTooltip = document.querySelector("#markerTooltip");
+    const markerTooltipTitle = document.querySelector("#markerTooltipTitle");
+    const markerTooltipText = document.querySelector("#markerTooltipText");
+
+    function getProgress() {
+      return window.SQLKingdomProgress.getGameProgress();
+    }
+
+    function saveProgress(progressToSave) {
+      return window.SQLKingdomProgress.saveGameProgress(progressToSave);
+    }
+
+    function templateProgress() {
+      progress.cities = progress.cities || {};
+      progress.cities.dataworksCitadel = progress.cities.dataworksCitadel || {};
+      progress.cities.dataworksCitadel[TEMPLATE_KEY] = progress.cities.dataworksCitadel[TEMPLATE_KEY] || {
+        discoveredMarkers: [],
+        highestRoomUnlocked: 0,
+        quizPassed: false,
+        completed: false,
+        correctQuizAnswers: [],
+        reward: ""
+      };
+
+      const template = progress.cities.dataworksCitadel[TEMPLATE_KEY];
+      if (!Array.isArray(template.discoveredMarkers)) template.discoveredMarkers = [];
+      if (!Array.isArray(template.correctQuizAnswers)) template.correctQuizAnswers = [];
+      if (!Number.isInteger(template.highestRoomUnlocked) || template.highestRoomUnlocked < 0) {
+        template.highestRoomUnlocked = 0;
+      }
+      template.quizPassed = Boolean(template.quizPassed);
+      template.completed = Boolean(template.completed);
+      return template;
+    }
+
+    function markerIds() {
+      return welcomeMarkers.map((marker) => marker.id);
+    }
+
+    function discoveredMarkers() {
+      return templateProgress().discoveredMarkers;
+    }
+
+    function discoveryCount() {
+      const validMarkerIds = markerIds();
+      return discoveredMarkers().filter((id) => validMarkerIds.includes(id)).length;
+    }
+
+    function allWelcomeMarkersDiscovered() {
+      const discovered = discoveredMarkers();
+      return welcomeMarkers.every((marker) => discovered.includes(marker.id));
+    }
+
+    function getWelcomeMarker(markerId) {
+      return welcomeMarkers.find((marker) => marker.id === markerId);
+    }
+
+    function renderMainContent(contentHtml) {
+      mainLessonContent.innerHTML = contentHtml;
+    }
+
+    function renderWelcomeContent(message = "", animateComplete = false) {
+      const complete = allWelcomeMarkersDiscovered();
+      const shouldAnimate = complete && animateComplete && !discoveryCompleteAnimationPlayed;
+      const statusClass = complete
+        ? `discovery-complete${shouldAnimate ? " animate-complete" : ""}`
+        : "discovery-status";
+      const statusText = complete
+        ? "All pipeline stations discovered! You can enter the next room."
+        : `Objects discovered: ${discoveryCount()} / ${welcomeMarkers.length}`;
+      const warning = message ? `<p class="discovery-warning">${message}</p>` : "";
+
+      return `
+          <h2>Welcome to Feature Pipeline Works</h2>
+          <p>Explore every glowing pipeline station before starting the feature-building path.</p>
+          <p class="${statusClass}">${statusText}</p>
+          ${complete ? "" : `<p class="discovery-hint">Hover, focus, or click each marker to discover it.</p>`}
+          ${warning}
+        `;
+    }
+
+    function renderWelcomeSidebarSummary() {
+      const complete = allWelcomeMarkersDiscovered();
+      lessonTitle.textContent = rooms[0].title;
+      lessonText.innerHTML = `
+          <p>${rooms[0].summary}</p>
+          <ul>
+            <li>Objects discovered: ${discoveryCount()} / ${welcomeMarkers.length}</li>
+            <li>${complete ? "Room 1 unlocked." : "Discover all pipeline stations to unlock Room 1."}</li>
+          </ul>
+        `;
+    }
+
+    function updateMarkerStates() {
+      const discovered = discoveredMarkers();
+      document.querySelectorAll(".info-marker").forEach((markerElement) => {
+        const markerData = getWelcomeMarker(markerElement.dataset.markerId);
+        const isDiscovered = discovered.includes(markerElement.dataset.markerId);
+        markerElement.classList.toggle("is-discovered", isDiscovered);
+        if (markerData) {
+          markerElement.setAttribute(
+            "aria-label",
+            `${markerData.title} ${isDiscovered ? "discovered" : "not discovered"}`
+          );
+        }
+      });
+    }
+
+    function unlockFirstLessonIfReady() {
+      if (!allWelcomeMarkersDiscovered()) return false;
+      const template = templateProgress();
+      const unlockedNow = template.highestRoomUnlocked < 1;
+      template.highestRoomUnlocked = Math.max(template.highestRoomUnlocked, 1);
+      saveProgress(progress);
+      return unlockedNow;
+    }
+
+    function markWelcomeMarkerDiscovered(markerId) {
+      const markerData = getWelcomeMarker(markerId);
+      if (!markerData) return;
+
+      const wasComplete = allWelcomeMarkersDiscovered();
+      const discovered = discoveredMarkers();
+      if (!discovered.includes(markerId)) {
+        discovered.push(markerId);
+        saveProgress(progress);
+      }
+
+      const isComplete = allWelcomeMarkersDiscovered();
+      if (isComplete) unlockFirstLessonIfReady();
+      updateMarkerStates();
+
+      if (currentRoomIndex === 0) {
+        const shouldAnimateComplete = isComplete && !wasComplete && !discoveryCompleteAnimationPlayed;
+        renderWelcomeSidebarSummary();
+        renderMainContent(renderWelcomeContent("", shouldAnimateComplete));
+        if (shouldAnimateComplete) discoveryCompleteAnimationPlayed = true;
+        renderRoomList();
+        updateNextButtonState();
+      }
+    }
+
+    function showMarkerTooltip(markerElement, markerData) {
+      markerTooltipTitle.textContent = markerData.title;
+      markerTooltipText.textContent = markerData.text;
+      markerTooltip.classList.add("is-visible");
+      markerTooltip.setAttribute("aria-hidden", "false");
+
+      const stageRect = roomStage.getBoundingClientRect();
+      const markerRect = markerElement.getBoundingClientRect();
+      const tooltipRect = markerTooltip.getBoundingClientRect();
+      let left = markerRect.left - stageRect.left + markerRect.width / 2 - tooltipRect.width / 2;
+      let top = markerRect.top - stageRect.top - tooltipRect.height - 14;
+
+      if (top < 10) top = markerRect.bottom - stageRect.top + 14;
+      left = Math.max(10, Math.min(left, stageRect.width - tooltipRect.width - 10));
+      top = Math.max(10, Math.min(top, stageRect.height - tooltipRect.height - 10));
+      markerTooltip.style.left = `${left}px`;
+      markerTooltip.style.top = `${top}px`;
+    }
+
+    function hideMarkerTooltip() {
+      markerTooltip.classList.remove("is-visible");
+      markerTooltip.setAttribute("aria-hidden", "true");
+    }
+
+    function handleMarkerEnter(markerElement) {
+      if (currentRoomIndex !== 0) return;
+      const markerData = getWelcomeMarker(markerElement.dataset.markerId);
+      if (!markerData) return;
+      markWelcomeMarkerDiscovered(markerData.id);
+      showMarkerTooltip(markerElement, markerData);
+    }
+
+    function updateNextButtonState() {
+      const locked = currentRoomIndex === 0 && !allWelcomeMarkersDiscovered();
+      nextRoom.classList.toggle("is-disabled", locked);
+      nextRoom.setAttribute("aria-disabled", locked ? "true" : "false");
+    }
+
+    function updateCounter() {
+      roomCounter.textContent = `Current Room: ${currentRoomIndex} / ${rooms.length - 1}`;
+    }
+
+    function formatRoomTitle(room, index) {
+      return index === 0 ? "0. Welcoming Room" : `${String(index).padStart(2, "0")}. ${room.title}`;
+    }
+
+    function isRecapRoom(index) {
+      return index === rooms.length - 1;
+    }
+
+    function canEnterRoom(index) {
+      const template = templateProgress();
+      if (index === 1 && !allWelcomeMarkersDiscovered()) return false;
+      if (isRecapRoom(index) && !template.quizPassed) return false;
+      return index <= template.highestRoomUnlocked;
+    }
+
+    function roomLockedMessage(index) {
+      if (index === 1 && !allWelcomeMarkersDiscovered()) {
+        return "Discover all welcome-room pipeline stations first.";
+      }
+      if (isRecapRoom(index) && !templateProgress().quizPassed) {
+        return "Complete the quiz first to unlock the recap room.";
+      }
+      return "Explore the previous rooms first to unlock this room.";
+    }
+
+    function renderRoomList() {
+      roomList.innerHTML = "";
+      rooms.forEach((room, index) => {
+        const tab = document.createElement("button");
+        tab.type = "button";
+        tab.className = "room-tab";
+        tab.textContent = formatRoomTitle(room, index);
+        const isUnlocked = canEnterRoom(index);
+        if (!isUnlocked) tab.classList.add("locked");
+        if (index === currentRoomIndex) tab.classList.add("active");
+
+        tab.addEventListener("click", () => {
+          if (!canEnterRoom(index)) {
+            const message = roomLockedMessage(index);
+            lessonTitle.textContent = "Room locked";
+            lessonText.innerHTML = `<p>${message}</p>`;
+            renderMainContent(`<h2>Room locked</h2><p>${message}</p>`);
+            return;
+          }
+          currentRoomIndex = index;
+          renderRoom();
+        });
+        roomList.appendChild(tab);
+      });
+    }
+
+    function renderSidebarSummary(room) {
+      lessonTitle.textContent = room.title;
+      lessonText.innerHTML = `
+          <p>${room.summary}</p>
+          <ul>${room.points.map((point) => `<li>${point}</li>`).join("")}</ul>
+        `;
+    }
+
+    function setQuizFeedback(message) {
+      const feedback = mainLessonContent.querySelector(".quiz-feedback");
+      if (feedback) feedback.textContent = message;
+    }
+
+    function shuffleArray(array) {
+      const copy = [...array];
+      for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function optionTextWithoutLetter(text) {
+      return text.replace(/^[A-D]\.\s*/, "");
+    }
+
+    function quizQuestions() {
+      return Array.from(mainLessonContent.querySelectorAll(".quiz-question"));
+    }
+
+    function quizQuestionIds() {
+      return quizQuestions().map((question) => question.dataset.questionId);
+    }
+
+    function completedQuizQuestionCount() {
+      const template = templateProgress();
+      return quizQuestionIds().filter((id) => template.correctQuizAnswers.includes(id)).length;
+    }
+
+    function renderQuizTabs() {
+      const quizBox = mainLessonContent.querySelector(".quiz-box");
+      const questions = quizQuestions();
+      if (!quizBox || questions.length <= 1) return;
+
+      let tabs = mainLessonContent.querySelector(".quiz-tabs");
+      if (!tabs) {
+        tabs = document.createElement("div");
+        tabs.className = "quiz-tabs";
+        tabs.setAttribute("role", "tablist");
+        tabs.setAttribute("aria-label", "Quiz questions");
+        quizBox.insertBefore(tabs, quizBox.firstElementChild);
+      }
+
+      const template = templateProgress();
+      currentQuizIndex = Math.max(0, Math.min(currentQuizIndex, questions.length - 1));
+      tabs.innerHTML = "";
+
+      questions.forEach((question, index) => {
+        const questionId = question.dataset.questionId;
+        const isActive = index === currentQuizIndex;
+        const isComplete = template.correctQuizAnswers.includes(questionId);
+        question.classList.add("quiz-question-panel");
+        question.hidden = !isActive;
+        question.classList.toggle("is-active", isActive);
+
+        const tab = document.createElement("button");
+        tab.type = "button";
+        tab.className = "quiz-tab";
+        tab.textContent = `Quiz ${index + 1}`;
+        tab.setAttribute("role", "tab");
+        tab.setAttribute("aria-selected", isActive ? "true" : "false");
+        tab.classList.toggle("is-active", isActive);
+        tab.classList.toggle("is-complete", isComplete);
+        tab.addEventListener("click", () => {
+          currentQuizIndex = index;
+          renderQuizTabs();
+          updateQuizFeedback();
+        });
+        tabs.appendChild(tab);
+      });
+    }
+
+    function goToNextUnansweredQuizQuestion() {
+      const template = templateProgress();
+      const questions = quizQuestions();
+      const nextIndex = questions.findIndex(
+        (question) => !template.correctQuizAnswers.includes(question.dataset.questionId)
+      );
+      if (nextIndex !== -1) currentQuizIndex = nextIndex;
+    }
+
+    function shuffleQuizOptions() {
+      quizQuestions().forEach((question) => {
+        if (question.dataset.shuffled === "true") return;
+        const options = Array.from(question.querySelectorAll(".quiz-option"));
+        const optionData = options.map((option) => ({
+          text: optionTextWithoutLetter(option.textContent),
+          correct: option.dataset.correct === "true"
+        }));
+
+        shuffleArray(optionData).forEach((data, index) => {
+          const option = options[index];
+          option.textContent = `${String.fromCharCode(65 + index)}. ${data.text}`;
+          if (data.correct) option.dataset.correct = "true";
+          else delete option.dataset.correct;
+          question.appendChild(option);
+        });
+        question.dataset.shuffled = "true";
+      });
+    }
+
+    function updateQuizFeedback() {
+      const template = templateProgress();
+      const total = quizQuestionIds().length;
+      const correct = completedQuizQuestionCount();
+      if (template.quizPassed) {
+        setQuizFeedback("Correct! The recap room is unlocked.");
+        return;
+      }
+      setQuizFeedback(`Answer all quiz questions correctly to continue. Progress: ${correct} / ${total}.`);
+    }
+
+    function bindQuizOptions() {
+      if (rooms[currentRoomIndex].type !== "quiz") return;
+      shuffleQuizOptions();
+      const template = templateProgress();
+      renderQuizTabs();
+
+      const allQuestionsAlreadyCorrect = quizQuestionIds().every((id) =>
+        template.correctQuizAnswers.includes(id)
+      );
+      if (allQuestionsAlreadyCorrect && !template.quizPassed) {
+        template.quizPassed = true;
+        template.highestRoomUnlocked = Math.max(template.highestRoomUnlocked, currentRoomIndex + 1);
+        saveProgress(progress);
+      }
+
+      quizQuestions().forEach((question) => {
+        const questionId = question.dataset.questionId;
+        const isComplete = template.correctQuizAnswers.includes(questionId);
+        question.classList.toggle("is-complete", isComplete);
+        question.querySelectorAll(".quiz-option").forEach((option) => {
+          const isCorrect = option.dataset.correct === "true";
+          option.classList.toggle("correct", isComplete && isCorrect);
+          option.disabled = isComplete || template.quizPassed;
+          option.addEventListener("click", () => handleQuizAnswer(option));
+        });
+      });
+
+      updateQuizFeedback();
+    }
+
+    function handleQuizAnswer(option) {
+      if (option.disabled) return;
+      const question = option.closest(".quiz-question");
+      if (!question) return;
+
+      const questionId = question.dataset.questionId;
+      const questionOptions = question.querySelectorAll(".quiz-option");
+      questionOptions.forEach((item) => item.classList.remove("wrong"));
+      question.classList.remove("is-transitioning");
+
+      if (option.dataset.correct !== "true") {
+        option.classList.add("wrong");
+        setQuizFeedback("Not yet. Review the concept and try that question again.");
+        return;
+      }
+
+      const template = templateProgress();
+      if (!template.correctQuizAnswers.includes(questionId)) {
+        template.correctQuizAnswers.push(questionId);
+      }
+
+      question.classList.add("is-complete", "is-transitioning");
+      option.classList.add("correct");
+      questionOptions.forEach((item) => {
+        item.disabled = true;
+      });
+
+      const allCorrect = quizQuestionIds().every((id) =>
+        template.correctQuizAnswers.includes(id)
+      );
+
+      if (allCorrect) {
+        template.quizPassed = true;
+        template.highestRoomUnlocked = Math.max(template.highestRoomUnlocked, currentRoomIndex + 1);
+        setQuizFeedback("Correct! The recap room is unlocked.");
+        saveProgress(progress);
+        window.setTimeout(() => {
+          question.classList.remove("is-transitioning");
+          nextRoom.hidden = false;
+          renderQuizTabs();
+          renderRoomList();
+        }, QUIZ_ADVANCE_DELAY_MS);
+        return;
+      }
+
+      setQuizFeedback("Correct! Loading the next question...");
+      saveProgress(progress);
+      window.setTimeout(() => {
+        question.classList.remove("is-transitioning");
+        goToNextUnansweredQuizQuestion();
+        renderQuizTabs();
+        updateQuizFeedback();
+      }, QUIZ_ADVANCE_DELAY_MS);
+    }
+
+    function renderRoom() {
+      const room = rooms[currentRoomIndex];
+      const template = templateProgress();
+      const isFinalRoom = currentRoomIndex === rooms.length - 1;
+
+      roomBg.src = room.image;
+      roomStage.classList.toggle("is-welcome-room", currentRoomIndex === 0);
+      hotspots.hidden = currentRoomIndex !== 0;
+      prevRoom.hidden = currentRoomIndex === 0;
+      nextRoom.hidden = isFinalRoom || (room.type === "quiz" && !template.quizPassed);
+      topReturn.hidden = isFinalRoom;
+      finalReturn.hidden = !isFinalRoom;
+      hideMarkerTooltip();
+
+      if (currentRoomIndex === 0) {
+        renderWelcomeSidebarSummary();
+        renderMainContent(renderWelcomeContent());
+      } else {
+        renderSidebarSummary(room);
+        renderMainContent(room.contentHtml);
+      }
+
+      bindQuizOptions();
+      updateMarkerStates();
+      updateNextButtonState();
+      renderRoomList();
+      updateCounter();
+      completeIfFinalRoom();
+    }
+
+    prevRoom.addEventListener("click", () => {
+      currentRoomIndex = Math.max(0, currentRoomIndex - 1);
+      renderRoom();
+    });
+
+    nextRoom.addEventListener("click", () => {
+      if (currentRoomIndex === 0 && !allWelcomeMarkersDiscovered()) {
+        renderMainContent(renderWelcomeContent("Discover all pipeline stations first."));
+        updateNextButtonState();
+        return;
+      }
+
+      const room = rooms[currentRoomIndex];
+      if (room.type === "quiz" && !templateProgress().quizPassed) {
+        setQuizFeedback("Answer every quiz question correctly to continue.");
+        return;
+      }
+
+      if (currentRoomIndex < rooms.length - 1) {
+        currentRoomIndex += 1;
+        const template = templateProgress();
+        if (currentRoomIndex > template.highestRoomUnlocked) {
+          template.highestRoomUnlocked = currentRoomIndex;
+          saveProgress(progress);
+        }
+      }
+      renderRoom();
+    });
+
+    document.querySelectorAll(".info-marker").forEach((spot) => {
+      spot.addEventListener("mouseenter", () => handleMarkerEnter(spot));
+      spot.addEventListener("focus", () => handleMarkerEnter(spot));
+      spot.addEventListener("click", (event) => {
+        event.preventDefault();
+        handleMarkerEnter(spot);
+      });
+      spot.addEventListener("mouseleave", () => {
+        hideMarkerTooltip();
+        if (currentRoomIndex === 0) renderWelcomeSidebarSummary();
+      });
+      spot.addEventListener("blur", () => {
+        hideMarkerTooltip();
+        if (currentRoomIndex === 0) renderWelcomeSidebarSummary();
+      });
+    });
+
+    function completeIfFinalRoom() {
+      if (currentRoomIndex !== rooms.length - 1) return;
+      if (suppressAutoCompletion) return;
+      const template = templateProgress();
+      if (template.completed) return;
+
+      template.completed = true;
+      template.reward = REWARD_NAME;
+      window.SQLKingdomProgress?.markDataworksCitadelBuildingComplete?.(
+        progress,
+        BUILDING_ID,
+        REWARD_NAME
+      );
+      progress = saveProgress(progress);
+      rewardModal.hidden = false;
+    }
+
+    finalReturn.addEventListener("click", () => {
+      completeIfFinalRoom();
+    });
+
+    rewardContinue.addEventListener("click", () => {
+      rewardModal.hidden = true;
+    });
+
+    window.addEventListener("sqlKingdom:reset", (event) => {
+      if (event.detail.resetMode !== "local" || event.detail.cityId !== "dataworks-citadel") return;
+      progress = getProgress();
+      currentRoomIndex = 0;
+      currentQuizIndex = 0;
+      discoveryCompleteAnimationPlayed = false;
+      rewardModal.hidden = true;
+      renderRoom();
+    });
+
+    window.addEventListener("sqlKingdom:unlockAll", () => {
+      progress = getProgress();
+      suppressAutoCompletion = true;
+      try {
+        renderRoom();
+      } finally {
+        suppressAutoCompletion = false;
+      }
+    });
+
+    if (canOpenFeaturePipelineWorks) {
+      templateProgress();
+      progress = saveProgress(progress);
+      renderRoom();
+    }
+  </script>
+</body>
+
+</html>

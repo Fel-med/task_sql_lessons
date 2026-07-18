@@ -71,6 +71,8 @@ body {
 
 .lesson-list {
   display: grid;
+  grid-auto-rows: max-content;
+  align-content: start;
   gap: 6px;
 }
 
@@ -85,13 +87,20 @@ body {
 }
 
 .room-tab {
+  display: block;
   width: 100%;
-  min-height: 34px;
-  padding: 8px;
+  max-width: 100%;
+  height: auto;
+  min-height: 40px;
+  padding: 8px 10px;
   cursor: pointer;
   text-align: left;
   font-size: 12px;
-  line-height: 1.2;
+  line-height: 1.35;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  hyphens: auto;
 }
 
 .room-tab:not(.locked):hover,
