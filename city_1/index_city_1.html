@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../shared_files/shared-menu.css" />
     <link rel="stylesheet" href="../shared_files/shared-building-boards.css" />
     <link rel="stylesheet" href="../shared_files/shared-building-effects.css" />
+    <link rel="stylesheet" href="../shared_files/shared-lively-elements.css" />
     <style>
       :root {
         --cream: #fff4c2;
@@ -107,9 +108,11 @@
       .traffic-layer {
         position: absolute;
         inset: 0;
-        z-index: 14;
+        z-index: 24;
         overflow: hidden;
         pointer-events: none;
+        contain: layout paint;
+        isolation: isolate;
       }
 
       .car {
@@ -193,6 +196,34 @@
         top: 2%;
         width: 26%;
         height: 83%;
+      }
+
+      .glow-data-vault {
+        left: 1%;
+        top: 24%;
+        width: 20%;
+        height: 45%;
+      }
+
+      .glow-table-department {
+        left: 20%;
+        top: 32%;
+        width: 22%;
+        height: 36%;
+      }
+
+      .glow-key-bridge-hall {
+        left: 53%;
+        top: 18%;
+        width: 23%;
+        height: 53%;
+      }
+
+      .glow-query-lab {
+        left: 75%;
+        top: 8%;
+        width: 24%;
+        height: 68%;
       }
 
       .building-lock {
@@ -557,7 +588,7 @@
   <body>
     <main class="game-home">
       <section class="game-screen" aria-labelledby="page-title">
-        <div class="city-scene" id="cityScene">
+        <div class="city-scene uses-cheap-building-hover" id="cityScene">
           <!-- City layers stay stacked exactly on the same fullscreen canvas. -->
           <img src="../res/city_1/city_elements/bg.webp" class="city-layer layer-bg" alt="" />
           <img src="../res/city_1/city_elements/red2.webp" class="city-layer city-building-layer layer-red2" data-building-layer="dataVault" alt="" />
@@ -565,7 +596,12 @@
           <img src="../res/city_1/city_elements/yellow.webp" class="city-layer city-building-layer layer-yellow" data-building-layer="keyBridgeHall" alt="" />
           <img src="../res/city_1/city_elements/green.webp" class="city-layer city-building-layer layer-green" data-building-layer="queryLab" alt="" />
 
-          <div class="traffic-layer" id="trafficLayer" aria-hidden="true"></div>
+          <div class="city-building-glow glow-data-vault" data-building-glow="dataVault"></div>
+          <div class="city-building-glow glow-table-department" data-building-glow="tableDepartment"></div>
+          <div class="city-building-glow glow-key-bridge-hall" data-building-glow="keyBridgeHall"></div>
+          <div class="city-building-glow glow-query-lab" data-building-glow="queryLab"></div>
+
+          <div class="traffic-layer city-lively-layer" id="trafficLayer" aria-hidden="true"></div>
 
           <img src="../res/city_1/item/lock.webp" class="building-lock lock-dataVault" data-lock="dataVault" alt="Locked" hidden />
           <img src="../res/city_1/item/lock.webp" class="building-lock lock-tableDepartment" data-lock="tableDepartment" alt="Locked" hidden />

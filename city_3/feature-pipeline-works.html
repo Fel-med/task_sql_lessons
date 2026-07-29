@@ -270,11 +270,11 @@ GROUP BY customer_id;</code></pre>
             <p><code>GROUP BY customer_id</code> compresses each customer's order history into reusable features.</p>
             <table class="result-table">
               <thead>
-                <tr><th>customer_id</th><th>order_count</th><th>total_spend</th><th>average_order_value</th></tr>
+                <tr><th>customer_id</th><th>order_count</th><th>total_spend</th><th>average_order_value</th><th>latest_order_date</th></tr>
               </thead>
               <tbody>
-                <tr><td>101</td><td>8</td><td>640.00</td><td>80.00</td></tr>
-                <tr><td>102</td><td>3</td><td>225.00</td><td>75.00</td></tr>
+                <tr><td>101</td><td>8</td><td>640.00</td><td>80.00</td><td>2026-06-18</td></tr>
+                <tr><td>102</td><td>3</td><td>225.00</td><td>75.00</td><td>2026-05-27</td></tr>
               </tbody>
             </table>
             <div class="formula-line">Many event rows → GROUP BY → One feature row per customer</div>

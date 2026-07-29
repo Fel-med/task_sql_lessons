@@ -27,6 +27,10 @@
   transform: translate3d(0, -3px, 0) !important;
 }
 
+.city-scene.uses-cheap-building-hover .city-building-layer {
+  transition: transform 0.18s ease;
+}
+
 .city-building-glow {
   position: absolute;
   z-index: 23;
