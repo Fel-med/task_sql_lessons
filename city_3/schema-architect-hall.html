@@ -265,30 +265,32 @@ CREATE TABLE orders (
         points: ["Start from 1NF", "Remove partial dependencies", "Separate reusable entity data"],
         contentHtml: `
             <h2>Second Normal Form (2NF)</h2>
-            <p><strong>2NF</strong> applies when a table has a composite key. Every non-key column must depend on the whole key.</p>
+            <p><strong>2NF</strong> checks whether a column depends on only part of a composite primary key. A composite key is a key made from two or more columns.</p>
             <h3>Problem table</h3>
-            <pre class="sql-code"><code>order_items(
-  order_id,
-  product_id,
-  product_name,
-  quantity,
-  PRIMARY KEY (order_id, product_id)
+            <pre class="sql-code"><code>enrolments(
+  student_id,
+  course_id,
+  student_name,
+  course_name,
+  grade,
+  PRIMARY KEY (student_id, course_id)
 )</code></pre>
-            <p><code>quantity</code> depends on the complete pair: order_id and product_id. However, <code>product_name</code> depends only on product_id. That is a partial dependency.</p>
+            <p>The key is the pair <code>(student_id, course_id)</code>. It identifies one student's enrolment in one course.</p>
+            <table class="result-table">
+              <thead><tr><th>Column</th><th>What it depends on</th><th>Why it matters</th></tr></thead>
+              <tbody>
+                <tr><td>grade</td><td>student_id + course_id</td><td>It belongs to this student's result in this course.</td></tr>
+                <tr><td>student_name</td><td>student_id only</td><td>Partial dependency: the course does not change the student's name.</td></tr>
+                <tr><td>course_name</td><td>course_id only</td><td>Partial dependency: the student does not change the course name.</td></tr>
+              </tbody>
+            </table>
+            <p><code>student_name</code> and <code>course_name</code> depend on only half of the composite key, so they should be moved out of <code>enrolments</code>.</p>
             <h3>2NF design</h3>
-            <pre class="sql-code"><code>CREATE TABLE products (
-  product_id INTEGER PRIMARY KEY,
-  product_name VARCHAR(120) NOT NULL
-);
-
-CREATE TABLE order_items (
-  order_id INTEGER NOT NULL,
-  product_id INTEGER NOT NULL,
-  quantity INTEGER NOT NULL,
-  PRIMARY KEY (order_id, product_id),
-  FOREIGN KEY (product_id) REFERENCES products(product_id)
-);</code></pre>
-            <div class="formula-line">2NF: every non-key attribute depends on the complete primary key.</div>
+            <pre class="sql-code"><code>students(student_id, student_name)
+courses(course_id, course_name)
+enrolments(student_id, course_id, grade)</code></pre>
+            <div class="formula-line">Memory rule: 2NF means no column should depend on only half of a composite key.</div>
+            <div class="pixel-box"><strong>Simple analogy:</strong> A borrowing record uses Child + Toy. The child's name belongs only to the child, and the toy colour belongs only to the toy.</div>
           `
       },
       {
@@ -299,7 +301,7 @@ CREATE TABLE order_items (
         points: ["Start from 2NF", "Remove indirect dependencies", "Store each fact once"],
         contentHtml: `
             <h2>Third Normal Form (3NF)</h2>
-            <p>In <strong>3NF</strong>, non-key columns depend on the key and not on other non-key columns.</p>
+            <p><strong>3NF</strong> checks whether a non-key column depends on another non-key column. Each fact should depend directly on the key of its own table.</p>
             <h3>Problem table</h3>
             <pre class="sql-code"><code>employees(
   employee_id PRIMARY KEY,
@@ -307,7 +309,7 @@ CREATE TABLE order_items (
   department_id,
   department_name
 )</code></pre>
-            <p>department_name depends on department_id, not directly on employee_id. Repeating it for every employee can create update inconsistencies.</p>
+            <p><code>employee_id</code> determines <code>department_id</code>. Then <code>department_id</code> determines <code>department_name</code>. That means <code>department_name</code> depends indirectly on <code>employee_id</code>, through another non-key column.</p>
             <h3>3NF design</h3>
             <pre class="sql-code"><code>CREATE TABLE departments (
   department_id INTEGER PRIMARY KEY,
@@ -320,8 +322,20 @@ CREATE TABLE employees (
   department_id INTEGER NOT NULL,
   FOREIGN KEY (department_id) REFERENCES departments(department_id)
 );</code></pre>
-            <p>Department facts now have one authoritative location.</p>
-            <div class="formula-line">3NF: non-key columns should not describe other non-key columns.</div>
+            <p>Department facts now have one authoritative location: the <code>departments</code> table.</p>
+            <div class="formula-line">Memory rule: 3NF means non-key columns should not depend on other non-key columns.</div>
+            <h3>2NF and 3NF at a glance</h3>
+            <table class="result-table">
+              <thead><tr><th>2NF</th><th>3NF</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Key = A + B</strong><br>A &rarr; X<br>B &rarr; Y<br><br>Problem: X or Y depends on only part of the key.</td><td><strong>Key = A</strong><br>A &rarr; B<br>B &rarr; C<br><br>Problem: C depends on another non-key column.</td></tr>
+              </tbody>
+            </table>
+            <ul>
+              <li><strong>2NF</strong> removes partial dependency.</li>
+              <li><strong>3NF</strong> removes indirect or transitive dependency.</li>
+            </ul>
+            <div class="pixel-box"><strong>Simple analogy:</strong> A child belongs to a classroom. The teacher belongs to the classroom, not directly to every child.</div>
           `
       },
       {
